@@ -11,6 +11,11 @@ import Notificacao from '../Notificacao/Notificacao';
 import PerfilCliente from '../Perfil/PerfilCliente';
 
 import consertoTV from '../../../../assets/Conserto-de-televisor.jpg';
+import assistencia_tecnica from '../../../../assets/assistencia_tecnica.png';
+import geladeira from '../../../../assets/geladeira.png';
+import encanador from '../../../../assets/encanador.png';
+import eletricista from '../../../../assets/eletricista.png';
+import pintor from '../../../../assets/pintor.png';
 
 const Tab = createBottomTabNavigator();
 const { width } = Dimensions.get('window');
@@ -66,6 +71,7 @@ const TelaInicio = () => {
       </View>
       <View style={styles.categoryContainer}>
         <TouchableOpacity style={styles.categoryCard}>
+         <Image source={assistencia_tecnica} style={styles.categoryImage} />
           <Text>Aparelhos Eletrônicos</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.categoryCard}>
@@ -73,9 +79,9 @@ const TelaInicio = () => {
           <Text>Televisão</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.categoryCard}>
+          <Image source={geladeira} style={styles.categoryImage}/>
           <Text>Geladeira e Freezer</Text>
         </TouchableOpacity>
-        
       </View>
 
       <View style={styles.sectionHeader}>
@@ -86,12 +92,36 @@ const TelaInicio = () => {
       </View>
       <View style={styles.categoryContainer}>
         <TouchableOpacity style={styles.categoryCard}>
+        <Image source={encanador} style={styles.categoryimgencanador}/>
           <Text>Encanador</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.categoryCard}>
+        <Image source={eletricista} style={styles.categoryimgencanador}/>
           <Text>Eletricista</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.categoryCard}>
+        <Image source={pintor} style={styles.categoryimgencanador}/>
+          <Text>Pintor</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Reformas e Reparos</Text>
+        <TouchableOpacity onPress={() => alert('Ver todos Reformas e Reparos')}>
+          <Text style={styles.viewAllLink}>Ver todos</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.categoryContainer}>
+        <TouchableOpacity style={styles.categoryCard}>
+        <Image source={encanador} style={styles.categoryimgencanador}/>
+          <Text>Encanador</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.categoryCard}>
+        <Image source={eletricista} style={styles.categoryimgencanador}/>
+          <Text>Eletricista</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.categoryCard}>
+        <Image source={pintor} style={styles.categoryimgencanador}/>
           <Text>Pintor</Text>
         </TouchableOpacity>
       </View>
@@ -291,8 +321,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     resizeMode: 'cover', // Para a imagem preencher melhor
   },
-  profileContainer: {
-    marginBottom: 20,
+  categoryimgencanador:{
+    width: 80,
+    height: 80,
+    borderRadius: 10,
+    marginBottom: 10,
+    resizeMode: 'cover',
   },
   profileCard: {
     backgroundColor: '#FFF',
@@ -371,5 +405,4 @@ const styles = StyleSheet.create({
     marginTop:-25,
     
   },
-  
 });
