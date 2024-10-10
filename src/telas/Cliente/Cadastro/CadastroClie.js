@@ -35,7 +35,7 @@ export default function CadastroClie({ navigation }) {
 
     const [nome, setNome] = useState('');
     const [sobrenome, setSobrenome] = useState('');
-    const [email, setEmail] = useState('');
+    const [emailLogin, setEmailLogin] = useState('');
     const [telefone, setTelefone] = useState('');
     const [cpf, setCpf] = useState('');
     const [senha, setSenha] = useState('');
@@ -43,7 +43,7 @@ export default function CadastroClie({ navigation }) {
     const [cep, setCep] = useState('');
     const [bairro, setBairro] = useState('');
     const [endereco, setEndereco] = useState('');
-    const [numResidencial, setNumResidencial] = useState('');
+    const [nResidencial, setN_Residencial] = useState('');
     const [complementoResi, setComplementoResi] = useState('');
     const [genero,setGenero] = useState('');
     const [generoFocus, setGeneroFocus] = useState(false);
@@ -77,7 +77,7 @@ export default function CadastroClie({ navigation }) {
         let userData = {
             nome,
             sobrenome,
-            email,
+            emailLogin,
             telefone,
             dataNascimento,
             senha,
@@ -85,7 +85,7 @@ export default function CadastroClie({ navigation }) {
             cep: cep.replace(/\D/g, ''), 
             bairro,
             endereco,
-            numResidencial: Number(numResidencial),
+            nResidencial,
             complementoResi,
             cidade: cidadeValue,
             estado: estadoValue, 
@@ -97,11 +97,14 @@ export default function CadastroClie({ navigation }) {
         console.log('Dados que serão enviados:', JSON.stringify(userData, null, 2));
     
         try {
-            const response = await axios.post('http://192.168.0.7:8080/usuarios/cliente', userData, {
+            const response = await axios.post('http://192.168.0.6:8080/usuarios/cliente', userData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
+            const selectResponse = await axios.get('http://192.168.0.6:8080/usuarios/cliente'); 
+            console.log('Dados cadastrados:', selectResponse.data);
+
             console.log('Cadastro realizado com sucesso:', response.data);
             navigation.navigate('ConfiClie');
         } catch (error) {
@@ -207,8 +210,8 @@ export default function CadastroClie({ navigation }) {
                                 style={styles.campos}
                                 placeholder="E-mail"
                                 placeholderTextColor="#282828"
-                                value={email}
-                                onChangeText={setEmail}
+                                value={emailLogin}
+                                onChangeText={setEmailLogin}
                             />
                              <TextInput 
                                 style={styles.campos}
@@ -368,8 +371,8 @@ export default function CadastroClie({ navigation }) {
                                 placeholder="Nº Residencial"
                                 placeholderTextColor="#282828"
                                 keyboardType="numeric"
-                                value={numResidencial}
-                                onChangeText={setNumResidencial}
+                                value={nResidencial}
+                                onChangeText={setN_Residencial}
                             />
                             <TextInput 
                                 style={styles.campos}
