@@ -29,7 +29,7 @@ export default function CadastroClie({ navigation }) {
     }
 
     
-    const [dataNascimento, setDataNascimento] = useState('');
+    const [dataNascimento, setDataDeNascimento] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
 
 
@@ -58,7 +58,7 @@ export default function CadastroClie({ navigation }) {
     const onChangeDate = (event, selectedDate) => {
         setShowDatePicker(false);  
         if (event.type === 'set' && selectedDate) {  
-            setDataNascimento(selectedDate.toLocaleDateString('pt-BR'));
+            setDataDeNascimento(selectedDate.toLocaleDateString('pt-BR'));
         }
     };
 
@@ -74,6 +74,7 @@ export default function CadastroClie({ navigation }) {
     };
 
     const handleSubmit = async () => {
+        console.log('nResidencial:', nResidencial);  
         let userData = {
             nome,
             sobrenome,
@@ -85,7 +86,7 @@ export default function CadastroClie({ navigation }) {
             cep: cep.replace(/\D/g, ''), 
             bairro,
             endereco,
-            nResidencial,
+            nResidencial: nResidencial ? Number(nResidencial) : 0, 
             complementoResi,
             cidade: cidadeValue,
             estado: estadoValue, 
@@ -97,12 +98,12 @@ export default function CadastroClie({ navigation }) {
         console.log('Dados que serão enviados:', JSON.stringify(userData, null, 2));
     
         try {
-            const response = await axios.post('http://192.168.0.6:8080/usuarios/cliente', userData, {
+            const response = await axios.post('http://192.168.0.7:8080/usuarios/cliente', userData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
-            const selectResponse = await axios.get('http://192.168.0.6:8080/usuarios/cliente'); 
+            const selectResponse = await axios.get('http://192.168.0.7:8080/usuarios'); 
             console.log('Dados cadastrados:', selectResponse.data);
 
             console.log('Cadastro realizado com sucesso:', response.data);
@@ -371,9 +372,10 @@ export default function CadastroClie({ navigation }) {
                                 placeholder="Nº Residencial"
                                 placeholderTextColor="#282828"
                                 keyboardType="numeric"
-                                value={nResidencial}
-                                onChangeText={setN_Residencial}
+                                value={nResidencial.toString()} 
+                                onChangeText={text => setN_Residencial(text ? Number(text) : 0)} 
                             />
+
                             <TextInput 
                                 style={styles.campos}
                                 placeholder="Complemento"

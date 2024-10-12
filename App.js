@@ -19,6 +19,10 @@ import PerfilPrestador from './src/telas/Prestador/MeuPerfil/PerfilPrestador';
 import Pedidos from './src/telas/Prestador/MeusPedidos/Pedidos';
 import Agenda from './src/telas/Prestador/MinhaAgenda/Agenda';
 import TelaServicos from './src/telas/Cliente/TelaServicos/TelaServicos'
+import Chat from './src/telas/Prestador/Chat/Chat';
+import NotificacaoPrest from './src/telas/Prestador/NotificacaoPrestador/NotificacaoPrest';
+
+
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
@@ -28,6 +32,8 @@ function DrawerNavigator() {
       <Drawer.Screen name="Início" component={PerfilPrestador}  options={{ headerShown: false }} />
       <Drawer.Screen name="Meus Pedidos" component={Pedidos}  options={{ headerShown: false }} />
       <Drawer.Screen name="Minha Agenda" component={Agenda}  options={{ headerShown: false }} />
+      <Drawer.Screen name="Notificações" component={NotificacaoPrest}  options={{ headerShown: false }} />
+
     </Drawer.Navigator>
   );
 }
@@ -53,6 +59,8 @@ export default function App() {
         
         
         <Stack.Screen name="Drawer" component={DrawerNavigator} options={{ headerShown: false }} />
+        <Stack.Screen name="Conversas" component={Chat} options={{ headerShown: false }} />
+
 
 
       </Stack.Navigator>

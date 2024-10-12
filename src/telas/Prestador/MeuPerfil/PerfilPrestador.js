@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from "react-native";
 import { launchImageLibrary } from 'react-native-image-picker';
 import Icones from 'react-native-vector-icons/Feather'; 
+import Icons from 'react-native-vector-icons/FontAwesome5'
 
 export default function PerfilPrestador({ navigation }) {
     const [imageUri, setImageUri] = useState(null);
@@ -30,7 +31,7 @@ export default function PerfilPrestador({ navigation }) {
                     <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
                         <Icones name="menu" size={30} color="#fff" />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => alert('Notificações!')}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Notificações')}>
                         <Icones
                             style={styles.notificacao}
                             name="bell"
@@ -62,6 +63,7 @@ export default function PerfilPrestador({ navigation }) {
                             size={18} 
                             color="#fff"
                         />
+
                     </View>
                     <Text style={styles.profissao}>Profissão</Text>
                 </View>
@@ -80,6 +82,16 @@ export default function PerfilPrestador({ navigation }) {
                     <View style={styles.anuncioContainer}>
                         <Text style={styles.adTitle}>Meu anúncio</Text>
                         <Text style={styles.adDescription}>Descrição do anúncio aqui</Text>
+                        <Text style={styles.conquista}>Minhas conquistas</Text>
+                        <Icons
+                            style={styles.medalha}
+                            name="medal"
+                            size={18} 
+                            color="black"
+                        />
+                        <Text style={styles.catalogo}>Catálogo</Text>
+
+
                     </View>
                 </View>
             </View>
@@ -173,6 +185,22 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 10,
+        marginRight:150
+    },
+    conquista:{
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        marginRight:150,
+        marginTop:200
+
+    },
+    catalogo:{
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        marginRight:150,
+        marginTop:90
     },
     adDescription: {
         fontSize: 14,

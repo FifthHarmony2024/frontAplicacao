@@ -99,7 +99,6 @@ const styles = StyleSheet.create({
     seta:{
         width: 350,
         fontSize: 30,
-        color: '#FFFFFF',
         marginBottom: 30,
         marginTop: 40,
     },
