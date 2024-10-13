@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from "react-native";
 import { launchImageLibrary } from 'react-native-image-picker';
 import Icones from 'react-native-vector-icons/Feather'; 
-import Icons from 'react-native-vector-icons/FontAwesome5'
+import Icons from 'react-native-vector-icons/Ionicons'
 
 export default function PerfilPrestador({ navigation }) {
     const [imageUri, setImageUri] = useState(null);
+    const [catalogImages, setCatalogImages] = useState([]);
 
     const openGallery = () => {
         const options = {
@@ -19,6 +20,22 @@ export default function PerfilPrestador({ navigation }) {
                 console.log('Erro ao selecionar imagem: ', response.errorMessage);
             } else if (response.assets && response.assets.length > 0) {
                 setImageUri(response.assets[0].uri);
+            }
+        });
+    };
+
+    const addCatalogImage = () => {
+        const options = {
+            mediaType: 'photo',
+        };
+
+        launchImageLibrary(options, (response) => {
+            if (response.didCancel) {
+                console.log('Usuário cancelou a seleção de imagem');
+            } else if (response.errorCode) {
+                console.log('Erro ao selecionar imagem: ', response.errorMessage);
+            } else if (response.assets && response.assets.length > 0) {
+                setCatalogImages([...catalogImages, response.assets[0].uri]);
             }
         });
     };
@@ -63,7 +80,6 @@ export default function PerfilPrestador({ navigation }) {
                             size={18} 
                             color="#fff"
                         />
-
                     </View>
                     <Text style={styles.profissao}>Profissão</Text>
                 </View>
@@ -80,19 +96,45 @@ export default function PerfilPrestador({ navigation }) {
                     </TouchableOpacity>
 
                     <View style={styles.anuncioContainer}>
+
                         <Text style={styles.adTitle}>Meu anúncio</Text>
                         <Text style={styles.adDescription}>Descrição do anúncio aqui</Text>
-                        <Text style={styles.conquista}>Minhas conquistas</Text>
-                        <Icons
-                            style={styles.medalha}
-                            name="medal"
-                            size={18} 
-                            color="black"
-                        />
+                        
+                        <View style={styles.conquistaContainer}>
+                            <Icons
+                                style={styles.medalha}
+                                name="medal-outline"
+                                size={25} 
+                                color="black"
+                            />
+                            <Text style={styles.conquista}>Minhas conquistas</Text>
+                        </View>
+
                         <Text style={styles.catalogo}>Catálogo</Text>
 
+                        <View style={styles.catalogContainer}>
+                            {catalogImages.length === 0 ? (
+                                <Text>Sem imagens no catálogo</Text>
+                            ) : (
+                                <View style={styles.catalogImagesContainer}>
+                                    {catalogImages.map((uri, index) => (
+                                        <Image
+                                            key={index}
+                                            source={{ uri }}
+                                            style={styles.catalogImage}
+                                        />
+                                    ))}
+                                </View>
+                            )}
+                        </View>
+
+                        <TouchableOpacity style={styles.addButton} onPress={addCatalogImage}>
+                            <Text style={styles.addButtonText}>+</Text>
+                        </TouchableOpacity>
 
                     </View>
+                    <View style={styles.separator} />
+
                 </View>
             </View>
         </ScrollView>
@@ -187,20 +229,22 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         marginRight:150
     },
-    conquista:{
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 10,
-        marginRight:150,
-        marginTop:200
-
+    conquistaContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 20,
     },
-    catalogo:{
+    conquista: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginLeft: 10,
+    },
+    catalogo: {
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 10,
-        marginRight:150,
-        marginTop:90
+        marginRight: 150,
+        marginTop:55
     },
     adDescription: {
         fontSize: 14,
@@ -213,6 +257,12 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: '#4E40A2',
         marginTop: -90,
+    },
+    separator: {
+        marginTop: 10,
+        width: '100%',
+        height: 3,
+        backgroundColor: '#FE914E',
     },
     defaultImage: {
         width: 150, 
@@ -237,5 +287,33 @@ const styles = StyleSheet.create({
     editar: {
         marginLeft: 10, 
     },
-    
+    catalogContainer: {
+        marginTop: 15,
+    },
+    catalogImagesContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+    },
+    catalogImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 10,
+        margin: 5,
+    },
+    addButton: {
+        backgroundColor: '#4E40A2',
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 10,
+        marginLeft:110
+    },
+    addButtonText: {
+        color: '#fff',
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
 });

@@ -21,7 +21,7 @@ export default function Agenda({ navigation }) {
     const [modalVisible, setModalVisible] = useState(false);
 
     const marcarDia = (day) => {
-        setSelectedDay(day);
+        setSelectedDay(day.dateString); 
         setModalVisible(true);  
     };
 
@@ -46,10 +46,10 @@ export default function Agenda({ navigation }) {
         }
 
         const dayMarked = markedDays[selectedDay];
-        if (dayMarked && dayMarked.workDay) {
-            return <Text style={styles.noServiceText}>Dia de Trabalho: Agende os serviços pelo Back-end.</Text>;
-        } else if (dayMarked && !dayMarked.workDay) {
-            return <Text style={styles.noServiceText}>Dia de Folga.</Text>;
+        if (dayMarked) {
+            return dayMarked.workDay 
+                ? <Text style={styles.noServiceText}>Dia de Trabalho: Agende os serviços pelo Back-end.</Text>
+                : <Text style={styles.noServiceText}>Dia de Folga.</Text>;
         }
 
         return <Text style={styles.noServiceText}>Nenhum serviço ou status para este dia.</Text>;
@@ -90,10 +90,11 @@ export default function Agenda({ navigation }) {
                     </TouchableOpacity>
                 </View>
             )}
+
             <View style={styles.calendarContainer}>
                 <Calendar
                     onDayPress={day => {
-                        marcarDia(day.dateString);
+                        marcarDia(day);
                     }}
                     markedDates={markedDays}
                     minDate={new Date().toISOString().split('T')[0]}
@@ -114,7 +115,7 @@ export default function Agenda({ navigation }) {
 
             <View style={styles.servicosContainer}>
                 <Text style={styles.servicoTitulo}>
-                    {selectedDay ? `Status para o dia ${new Date(selectedDay).toLocaleDateString('pt-BR')}` : 'Selecione um dia para ver os serviços'}
+                    {selectedDay ? `Status para o dia ${selectedDay.split('-').reverse().join('/')}` : 'Selecione um dia para ver os serviços'}
                 </Text>
                 <ScrollView>{renderServicos()}</ScrollView>
             </View>
@@ -197,12 +198,12 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 30,
+        marginBottom: 10,  // Ajuste aqui para dar espaço em baixo
         height: 400,
     },
     servicosContainer: {
         paddingHorizontal: 20,
-        paddingVertical: 60,
+        paddingVertical: 30, // Reduzido de 60 para 30
         backgroundColor: '#FFFFFF',
         marginBottom: 10,
         marginHorizontal: 10,
@@ -212,49 +213,46 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
-        shadowRadius: 3,
-        elevation: 5,
-        minHeight: 150, 
+        shadowRadius: 2,
+        elevation: 2,
     },
     servicoTitulo: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
         color: '#4E40A2',
-        marginBottom: 10,
-        textAlign: 'center',
-        marginTop:-20
+        marginBottom: 15,
     },
     noServiceText: {
         fontSize: 16,
-        color: '#777',
-        textAlign: 'center',
+        color: '#999',
     },
     notification: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
         backgroundColor: '#EEEEEE',
-        padding: 12,
-        margin: 10,
+        padding: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         borderRadius: 10,
-        marginTop:2
+        margin: 20,
+        marginBottom: 10,
     },
     notificationText: {
+        fontSize: 14,
+        color: '#282828',
         flex: 1,
         marginLeft: 10,
-        color: '#333333',
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
     },
     modalContainer: {
-        width: 300,
-        padding: 20,
         backgroundColor: 'white',
         borderRadius: 10,
+        padding: 20,
+        width: '80%',
         alignItems: 'center',
     },
     modalTitle: {
@@ -273,7 +271,7 @@ const styles = StyleSheet.create({
     },
     modalCancel: {
         fontSize: 16,
+        color: '#FE914E',
         marginTop: 20,
-        color: '#FF0000',
     },
 });

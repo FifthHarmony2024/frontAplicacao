@@ -1,7 +1,11 @@
+import React from 'react';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
+import Icon from 'react-native-vector-icons/Feather';
+import Icones from 'react-native-vector-icons/Ionicons';
 
 import Home from './src/telas/Home';
 import Login from './src/telas/Prestador/Login/Login';
@@ -18,22 +22,93 @@ import TermoUsoCliente from './src/telas/Cliente/TermoClie/TermoUsoCliente';
 import PerfilPrestador from './src/telas/Prestador/MeuPerfil/PerfilPrestador';
 import Pedidos from './src/telas/Prestador/MeusPedidos/Pedidos';
 import Agenda from './src/telas/Prestador/MinhaAgenda/Agenda';
-import TelaServicos from './src/telas/Cliente/TelaServicos/TelaServicos'
+import TelaServicos from './src/telas/Cliente/TelaServicos/TelaServicos';
 import Chat from './src/telas/Prestador/Chat/Chat';
 import NotificacaoPrest from './src/telas/Prestador/NotificacaoPrestador/NotificacaoPrest';
-
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
+function CustomDrawerContent(props) {
+  return (
+    <DrawerContentScrollView {...props}>
+      <View style={styles.profileContainer}>
+        {/* Colocar uma função para a imagem do perfil */}
+        <Image
+          source={require('./assets/logoPerfil.png')} 
+          style={styles.profileImage}
+        />
+        <Text style={styles.profileName}>Nome Completo</Text>
+        <Text style={styles.profileSubtitle}>Nome Comercial</Text>
+      </View>
+
+      <DrawerItemList {...props} />
+    </DrawerContentScrollView>
+  );
+}
+
 function DrawerNavigator() {
   return (
-    <Drawer.Navigator >
-      <Drawer.Screen name="Início" component={PerfilPrestador}  options={{ headerShown: false }} />
-      <Drawer.Screen name="Meus Pedidos" component={Pedidos}  options={{ headerShown: false }} />
-      <Drawer.Screen name="Minha Agenda" component={Agenda}  options={{ headerShown: false }} />
-      <Drawer.Screen name="Notificações" component={NotificacaoPrest}  options={{ headerShown: false }} />
-
+    <Drawer.Navigator
+      drawerContent={props => <CustomDrawerContent {...props} />}
+      screenOptions={{
+        drawerStyle: {
+          backgroundColor: '#4E40A2', 
+        },
+        drawerActiveTintColor: '#fff', 
+        drawerInactiveTintColor: '#d1d1d1', 
+      }}
+    >
+      <Drawer.Screen
+        name="Início"
+        component={PerfilPrestador}
+        options={{
+          drawerIcon: ({ color }) => (
+            <Icon name="home" size={20} color={color} />
+          ),
+          headerShown: false,
+        }}
+      />
+      <Drawer.Screen
+        name="Meus Pedidos"
+        component={Pedidos}
+        options={{
+          drawerIcon: ({ color }) => (
+            <Icon name="clipboard" size={20} color={color} />
+          ),
+          headerShown: false,
+        }}
+      />
+      <Drawer.Screen
+        name="Minha Agenda"
+        component={Agenda}
+        options={{
+          drawerIcon: ({ color }) => (
+            <Icones name="calendar-outline" size={20} color={color} />
+          ),
+          headerShown: false,
+        }}
+      />
+      <Drawer.Screen
+        name="Notificações"
+        component={NotificacaoPrest}
+        options={{
+          drawerIcon: ({ color }) => (
+            <Icones name="notifications-outline" size={20} color={color} />
+          ),
+          headerShown: false,
+        }}
+      />
+       <Drawer.Screen
+        name="Sair"
+        component={Home}
+        options={{
+          drawerIcon: ({ color }) => (
+            <Icon name="log-out" size={20} color={color} />
+          ),
+          headerShown: false,
+        }}
+      />
     </Drawer.Navigator>
   );
 }
@@ -56,14 +131,35 @@ export default function App() {
         <Stack.Screen name="TermoPrestador" component={TermoUsoPrest} options={{ headerShown: false }} />
         <Stack.Screen name="TermoCliente" component={TermoUsoCliente} options={{ headerShown: false }} />
         <Stack.Screen name="TelaServ" component={TelaServicos} options={{ headerShown: false }} />
-        
-        
         <Stack.Screen name="Drawer" component={DrawerNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="Conversas" component={Chat} options={{ headerShown: false }} />
-
-
-
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  profileContainer: {
+    padding: 34,
+    marginTop:-5,
+    backgroundColor: '#F5F5F5', 
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  profileImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40, 
+    marginBottom: 10,
+  },
+  profileName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  profileSubtitle: {
+    fontSize: 14,
+    color: '#777',
+  },
+});
