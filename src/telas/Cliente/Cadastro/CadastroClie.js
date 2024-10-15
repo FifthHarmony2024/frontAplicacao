@@ -8,11 +8,10 @@ import axios from 'axios';
 import styles from "../../EstilosCliente/estilosCli";
 import { buscarEstados, buscarCidades, buscarTodasCidades} from '../../../Validacoes/apiIBGE'; 
 
-
-const generoOpcao = [
-    { label: 'Feminino', value: 'Feminino' },
-    { label: 'Masculino', value: 'Masculino' },
-    { label: 'Prefiro não declarar', value: 'Prefiro não declarar' },
+const sexoOpcao = [
+    { label: 'FEMININO', value: 'FEMININO' },
+    { label: 'MASCULINO', value: 'MASCULINO' },
+    { label: 'PREFIRO NÃO DECLARAR', value: 'PREFIRO NÃO DECLARAR' },
 ];
 
 export default function CadastroClie({ navigation }) {
@@ -29,7 +28,7 @@ export default function CadastroClie({ navigation }) {
     }
 
     
-    const [dataNascimento, setDataDeNascimento] = useState('');
+    const [dataDeNascimento, setDataDeNascimento] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
 
 
@@ -43,11 +42,9 @@ export default function CadastroClie({ navigation }) {
     const [cep, setCep] = useState('');
     const [bairro, setBairro] = useState('');
     const [endereco, setEndereco] = useState('');
-    const [nResidencial, setN_Residencial] = useState('');
+    const [numResidencial, setN_Residencial] = useState('');
     const [complementoResi, setComplementoResi] = useState('');
-    const [genero,setGenero] = useState('');
-    const [generoFocus, setGeneroFocus] = useState(false);
-
+  
     const [estados, setEstados] = useState([]);
     const [cidades, setCidades] = useState([]);
     const [estadoValue, setEstadoValue] = useState(null);
@@ -56,16 +53,20 @@ export default function CadastroClie({ navigation }) {
     const [cidadeFocus, setCidadeFocus] = useState(false);
 
     const onChangeDate = (event, selectedDate) => {
-        setShowDatePicker(false);  
-        if (event.type === 'set' && selectedDate) {  
-            setDataDeNascimento(selectedDate.toLocaleDateString('pt-BR'));
-        }
+        setShowDatePicker(false);
+        if (event.type === 'set' && selectedDate) {
+        const formattedDate = selectedDate.toISOString().split('T')[0];
+        setDataDeNascimento(formattedDate);
+    }
     };
 
-    const renderLabelGenero = () => {
-        if (genero || generoFocus) {
+    const [sexoOpcaoValue, setSexoOpcao] = useState('');
+    const [sexoOpcaoFocus, setSexoOpcaoFocus] = useState(false);
+
+    const renderLabelSexoOpcao = () => {
+        if (sexoOpcaoValue || sexoOpcaoFocus) {
             return (
-                <Text style={[styles.label, { top: -10, left: 15, fontSize: 12, color: generoFocus ? 'blue' : '#4E40A2' }]}>
+                <Text style={[styles.label, { top: -10, left: 15, fontSize: 12, color: sexoOpcaoFocus ? 'blue' : '#4E40A2' }]}>
                     Gênero
                 </Text>
             );
@@ -74,23 +75,23 @@ export default function CadastroClie({ navigation }) {
     };
 
     const handleSubmit = async () => {
-        console.log('nResidencial:', nResidencial);  
         let userData = {
             nome,
             sobrenome,
             emailLogin,
             telefone,
-            dataNascimento,
+            dataDeNascimento,
             senha,
             confSenha,
+            cpf,
             cep: cep.replace(/\D/g, ''), 
             bairro,
             endereco,
-            nResidencial: nResidencial ? Number(nResidencial) : 0, 
+            numResidencial: numResidencial ? Number(numResidencial) : 0, 
             complementoResi,
             cidade: cidadeValue,
             estado: estadoValue, 
-            genero
+            sexoOpcao: sexoOpcaoValue,
  
         };
 
@@ -98,13 +99,11 @@ export default function CadastroClie({ navigation }) {
         console.log('Dados que serão enviados:', JSON.stringify(userData, null, 2));
     
         try {
-            const response = await axios.post('http://192.168.0.7:8080/usuarios/cliente', userData, {
+            const response = await axios.post('http://192.168.0.6:8080/usuarios/cliente', userData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
-            const selectResponse = await axios.get('http://192.168.0.7:8080/usuarios'); 
-            console.log('Dados cadastrados:', selectResponse.data);
 
             console.log('Cadastro realizado com sucesso:', response.data);
             navigation.navigate('ConfiClie');
@@ -222,37 +221,38 @@ export default function CadastroClie({ navigation }) {
                                 value={telefone}
                                 onChangeText={setTelefone}
                             />
-                            <View style={styles.dropdownContainer}>
-                                    {renderLabelGenero()}
-                                    <Dropdown
-                                        style={[styles.dropdown, generoFocus && { borderColor: 'blue' }]}
-                                        placeholderStyle={styles.placeholderStyle}
-                                        selectedTextStyle={styles.selectedTextStyle}
-                                        inputSearchStyle={styles.inputSearchStyle}
-                                        iconStyle={styles.iconStyle}
-                                        data={generoOpcao}
-                                        search={false}
-                                        maxHeight={300}
-                                        labelField="label"
-                                        valueField="value"
-                                        placeholder={!generoFocus ? 'Selecione um gênero' : '...'}
-                                        value={genero}
-                                        onFocus={() => setGeneroFocus(true)}
-                                        onBlur={() => setGeneroFocus(false)}
-                                        onChange={item => {
-                                            setGenero(item.value);
-                                            setGeneroFocus(false);
-                                        }}
-                                        renderLeftIcon={() => (
-                                            <AntDesign
-                                                style={styles.icon}
-                                                color={generoFocus ? '#4E40A2' : '#8A8A8A'}
-                                                name="Safety"
-                                                size={20}
-                                            />
-                                        )}
-                                    />
+                           <View style={styles.dropdownContainer}>
+                                {renderLabelSexoOpcao()}
+                                <Dropdown
+                                    style={[styles.dropdown, sexoOpcaoFocus && { borderColor: 'blue' }]}
+                                    placeholderStyle={styles.placeholderStyle}
+                                    selectedTextStyle={styles.selectedTextStyle}
+                                    inputSearchStyle={styles.inputSearchStyle}
+                                    iconStyle={styles.iconStyle}
+                                    data={sexoOpcao}
+                                    search={false}
+                                    maxHeight={300}
+                                    labelField="label"
+                                    valueField="value"
+                                    placeholder={!sexoOpcaoFocus ? 'Selecione um gênero' : '...'}
+                                    value={sexoOpcaoValue}
+                                    onFocus={() => setSexoOpcaoFocus(true)}
+                                    onBlur={() => setSexoOpcaoFocus(false)}
+                                    onChange={item => {
+                                        setSexoOpcao(item.value);
+                                        setSexoOpcaoFocus(false);
+                                    }}
+                                    renderLeftIcon={() => (
+                                        <AntDesign
+                                            style={styles.icon}
+                                            color={sexoOpcaoFocus ? '#4E40A2' : '#8A8A8A'}
+                                            name="Safety"
+                                            size={20}
+                                        />
+                                    )}
+                                />
                             </View>
+
                             <TextInput 
                                 style={styles.campos}
                                 placeholder="CPF"
@@ -263,11 +263,11 @@ export default function CadastroClie({ navigation }) {
                             />
                            
                             <TouchableOpacity 
-                                style={[styles.campos, styles.dataNascimento]}  
+                                style={[styles.campos, styles.dataDeNascimento]}  
                                 onPress={() => setShowDatePicker(true)}
                             >
-                                <Text style={[styles.textoDataNascimento, !dataNascimento && { color: '#282828' }]}>
-                                    {dataNascimento || "Data de Nascimento"}
+                                <Text style={[styles.textoDataDeNascimento, !dataDeNascimento && { color: '#282828' }]}>
+                                    {dataDeNascimento || "Data de Nascimento"}
                                 </Text>
                             </TouchableOpacity>
 
@@ -372,7 +372,7 @@ export default function CadastroClie({ navigation }) {
                                 placeholder="Nº Residencial"
                                 placeholderTextColor="#282828"
                                 keyboardType="numeric"
-                                value={nResidencial.toString()} 
+                                value={numResidencial.toString()} 
                                 onChangeText={text => setN_Residencial(text ? Number(text) : 0)} 
                             />
 
