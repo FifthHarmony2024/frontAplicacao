@@ -100,10 +100,10 @@ const styles = StyleSheet.create({
         top: 55,
         left: -40, 
     },
-    dataNascimento: {
+    dataDeNascimento: {
         justifyContent: 'center',  
     },
-    textoDataNascimento: {
+    textoDataDeNascimento: {
         fontSize: 15,             
         color: '#282828',      
         textAlign: 'left',         
@@ -132,5 +132,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         fontSize: 15,
     },
+    
+    
+   
 });
 export default styles;

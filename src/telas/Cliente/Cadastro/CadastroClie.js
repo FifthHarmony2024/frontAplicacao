@@ -74,6 +74,7 @@ export default function CadastroClie({ navigation }) {
         return null;
     };
 
+    
     const handleSubmit = async () => {
         let userData = {
             nome,
@@ -261,9 +262,9 @@ export default function CadastroClie({ navigation }) {
                                 value={cpf}
                                 onChangeText={setCpf}
                             />
-                           
+                                                    
                             <TouchableOpacity 
-                                style={[styles.campos, styles.dataDeNascimento]}  
+                                style={[styles.campos, styles.dataDeNascimento, !dataDeNascimento && { backgroundColor: '#f0f0f0' }]}  
                                 onPress={() => setShowDatePicker(true)}
                             >
                                 <Text style={[styles.textoDataDeNascimento, !dataDeNascimento && { color: '#282828' }]}>
@@ -277,18 +278,10 @@ export default function CadastroClie({ navigation }) {
                                     mode="date"
                                     display="default"
                                     onChange={onChangeDate}
-                                    maximumDate={new Date(2006,11,31)} 
+                                    maximumDate={new Date(2006, 11, 31)} 
                                     minimumDate={new Date(1940, 0, 1)}
                                 />
                             )}
-                             <TextInput 
-                                style={styles.campos}
-                                placeholder="CEP"
-                                placeholderTextColor="#282828"
-                                keyboardType="numeric"
-                                value={cep}
-                                onChangeText={setCep}
-                            />
                             <View style={styles.dropdownContainer}>
                                 {renderLabelEstado()}
                                 <Dropdown

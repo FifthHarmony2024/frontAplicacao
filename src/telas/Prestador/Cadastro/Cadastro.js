@@ -10,15 +10,16 @@ import styles from "../../EstiloPrestador/estilos";
 import CategoriaServicoDropdown from "./CategoriaServicoDropdown";
 
 
+
 const perfil = [
     { label: 'Microempreendedor Individual', value: 'MICROEMPREENDEDOR' },
     { label: 'Autônomo', value: 'AUTONOMO' }
 ];
 
-const generoOpcao = [
-    { label: 'Feminino', value: 'Feminino' },
-    { label: 'Masculino', value: 'Masculino' },
-    { label: 'Prefiro não declarar', value: 'Prefiro não declarar' },
+const sexoOpcao = [
+    { label: 'FEMININO', value: 'FEMININO' },
+    { label: 'MASCULINO', value: 'MASCULINO' },
+    { label: 'PREFIRO NÃO DECLARAR', value: 'PREFIRO NÃO DECLARAR' },
 ];
 
 export default function Cadastro({ navigation }) {
@@ -26,9 +27,9 @@ export default function Cadastro({ navigation }) {
     const [viewConfirmPass, setViewConfirmPass] = useState(true);
     const [nome, setNome] = useState('');
     const [sobrenome, setSobrenome] = useState('');
-    const [email, setEmail] = useState('');
+    const [emailLogin, setEmailLogin] = useState('');
     const [telefone, setTelefone] = useState('');
-    const [dataNascimento, setDataNascimento] = useState('');
+    const [dataDeNascimento, setDataDeNascimento] = useState('');
     const [documento, setDocumento] = useState('');
     const [nomeComercial, setNomeComercial] = useState('');
     const [senha, setSenha] = useState('');
@@ -38,8 +39,8 @@ export default function Cadastro({ navigation }) {
     const [endereco, setEndereco] = useState('');
     const [numResidencial, setNumResidencial] = useState('');
     const [complementoResi, setComplementoResi] = useState('');
-    const [genero,setGenero] = useState('');
-
+    const [categorias, setCategorias] = useState([]);
+    const [selectedCategoria, setSelectedCategoria] = useState(null);
     
     const [estados, setEstados] = useState([]);
     const [cidades, setCidades] = useState([]);
@@ -52,15 +53,31 @@ export default function Cadastro({ navigation }) {
     const [perfilFocus, setPerfilFocus] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
 
-    const [generoFocus, setGeneroFocus] = useState(false);
 
-    
+    const [sexoOpcaoValue, setSexoOpcao] = useState('');
+    const [sexoOpcaoFocus, setSexoOpcaoFocus] = useState(false);
+
+    const renderLabelSexoOpcao = () => {
+        if (sexoOpcaoValue || sexoOpcaoFocus) {
+            return (
+                <Text style={[styles.label, { top: -10, left: 15, fontSize: 12, color: sexoOpcaoFocus ? 'blue' : '#4E40A2' }]}>
+                    Gênero
+                </Text>
+            );
+        }
+        return null;
+    };
+  
+
+    const handleCategoriaChange = (categoriaId) => {
+      setSelectedCategoria(categoriaId);
+    };
     const onChangeDate = (event, selectedDate) => {
         setShowDatePicker(false);
         if (event.type === 'set' && selectedDate) {
-            const formattedDate = selectedDate.toLocaleDateString('pt-BR'); 
-            setDataNascimento(formattedDate);
-        }
+        const formattedDate = selectedDate.toISOString().split('T')[0];
+        setDataDeNascimento(formattedDate);
+         }
     };
     
     const togglePasswordVisibility = () => {
@@ -70,27 +87,26 @@ export default function Cadastro({ navigation }) {
     const toggleConfirmPasswordVisibility = () => {
         setViewConfirmPass(!viewConfirmPass);
     };
-
     const handleSubmit = async () => {
         let userData = {
             nome,
             sobrenome,
-            email,
+            emailLogin,
             telefone,
-            dataNascimento,
+            dataDeNascimento,
             senha,
             cep: cep.replace(/\D/g, ''), 
             bairro,
             endereco,
-            numResidencial: Number(numResidencial),
+            numResidencial:numResidencial ? Number(numResidencial) : 0,
             complementoResi,
-            categoriaServico: categoriaValue, 
+            categoriaServico: selectedCategoria, 
             servicos: servicoValue,
             nomeComercial,
             tipoPrestador: perfilValue, 
             cidade: cidadeValue,
             estado: estadoValue, 
-            genero,
+            sexoOpcao: sexoOpcaoValue,
             confSenha
         };
     
@@ -103,7 +119,7 @@ export default function Cadastro({ navigation }) {
         console.log('Dados que serão enviados:', JSON.stringify(userData, null, 2));
     
         try {
-            const response = await axios.post('http://192.168.0.7:8080/usuarios/prestador', userData, {
+            const response = await axios.post('http://192.168.0.6:8080/usuarios/prestador', userData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -115,36 +131,8 @@ export default function Cadastro({ navigation }) {
             alert('Erro ao cadastrar: ' + (error.response?.data?.message || error.message));
         }
     };
+  
     
-    const getServicosPorCategorias = () => {
-        if (!categoriaValue) return [];
-        
-        const servicosSelecionados = servicosCategorias[categoriaValue] || [];
-        return servicosSelecionados;
-    };
-
- 
-    const renderLabelCategoria = () => {
-        if (categoriaValue || categoriaFocus) {
-            return (
-                <Text style={[styles.label, { top: -10, left: 15, fontSize: 12, color: categoriaFocus ? 'blue' : '#4E40A2' }]}>
-                    Categoria
-                </Text>
-            );
-        }
-        return null;
-    };
-
-    const renderLabelServicos = () => {
-        if (servicoValue || servicoFocus) {
-            return (
-                <Text style={[styles.label, { top: -10, left: 15, fontSize: 12, color: servicoFocus ? 'blue' : '#4E40A2' }]}>
-                    Serviços
-                </Text>
-            );
-        }
-        return null;
-    };
     const renderLabelPerfil = () => {
         if (perfilValue || perfilFocus) {
             return (
@@ -155,17 +143,7 @@ export default function Cadastro({ navigation }) {
         }
         return null;
     };
-    const renderLabelGenero = () => {
-        if (genero || generoFocus) {
-            return (
-                <Text style={[styles.label, { top: -10, left: 15, fontSize: 12, color: generoFocus ? 'blue' : '#4E40A2' }]}>
-                    Gênero
-                </Text>
-            );
-        }
-        return null;
-    };
-
+    
     const renderLabelEstado = () => {
         if (estadoValue || estadoFocus) {
             return (
@@ -254,8 +232,8 @@ export default function Cadastro({ navigation }) {
                                 style={styles.campos}
                                 placeholder="E-mail"
                                 placeholderTextColor="#282828"
-                                value={email}
-                                onChangeText={setEmail}
+                                value={emailLogin}
+                                onChangeText={setEmailLogin}
                             />
                             <TextInput
                                 style={styles.campos}
@@ -267,11 +245,11 @@ export default function Cadastro({ navigation }) {
                             />
 
                             <TouchableOpacity
-                                style={[styles.campos, styles.dataNascimento]}
+                                style={[styles.campos, styles.dataDeNascimento]}
                                 onPress={() => setShowDatePicker(true)}
                             >
-                                <Text style={[styles.textoDataNascimento, !dataNascimento && { color: '#282828' }]}>
-                                    {dataNascimento || "Data de Nascimento"}
+                                <Text style={[styles.textoDataDeNascimento, !dataDeNascimento && { color: '#282828' }]}>
+                                    {dataDeNascimento || "Data de Nascimento"}
                                 </Text>
                             </TouchableOpacity>
 
@@ -287,37 +265,41 @@ export default function Cadastro({ navigation }) {
                             )}
 
                             <View style={styles.dropdownContainer}>
-                                    {renderLabelGenero()}
-                                    <Dropdown
-                                        style={[styles.dropdown, generoFocus && { borderColor: 'blue' }]}
-                                        placeholderStyle={styles.placeholderStyle}
-                                        selectedTextStyle={styles.selectedTextStyle}
-                                        inputSearchStyle={styles.inputSearchStyle}
-                                        iconStyle={styles.iconStyle}
-                                        data={generoOpcao}
-                                        search={false}
-                                        maxHeight={300}
-                                        labelField="label"
-                                        valueField="value"
-                                        placeholder={!generoFocus ? 'Selecione um gênero' : '...'}
-                                        value={genero}
-                                        onFocus={() => setGeneroFocus(true)}
-                                        onBlur={() => setGeneroFocus(false)}
-                                        onChange={item => {
-                                            setGenero(item.value);
-                                            setGeneroFocus(false);
-                                        }}
-                                        renderLeftIcon={() => (
-                                            <AntDesign
-                                                style={styles.icon}
-                                                color={generoFocus ? '#4E40A2' : '#8A8A8A'}
-                                                name="Safety"
-                                                size={20}
-                                            />
-                                        )}
-                                    />
+                                {renderLabelSexoOpcao()}
+                                <Dropdown
+                                    style={[styles.dropdown, sexoOpcaoFocus && { borderColor: 'blue' }]}
+                                    placeholderStyle={styles.placeholderStyle}
+                                    selectedTextStyle={styles.selectedTextStyle}
+                                    inputSearchStyle={styles.inputSearchStyle}
+                                    iconStyle={styles.iconStyle}
+                                    data={sexoOpcao}
+                                    search={false}
+                                    maxHeight={300}
+                                    labelField="label"
+                                    valueField="value"
+                                    placeholder={!sexoOpcaoFocus ? 'Selecione um gênero' : '...'}
+                                    value={sexoOpcaoValue}
+                                    onFocus={() => setSexoOpcaoFocus(true)}
+                                    onBlur={() => setSexoOpcaoFocus(false)}
+                                    onChange={item => {
+                                        setSexoOpcao(item.value);
+                                        setSexoOpcaoFocus(false);
+                                    }}
+                                    renderLeftIcon={() => (
+                                        <AntDesign
+                                            style={styles.icon}
+                                            color={sexoOpcaoFocus ? '#4E40A2' : '#8A8A8A'}
+                                            name="Safety"
+                                            size={20}
+                                        />
+                                    )}
+                                />
                             </View>
-                            <CategoriaServicoDropdown/>
+                            <CategoriaServicoDropdown 
+                                selectedValue={selectedCategoria} 
+                                onValueChange={handleCategoriaChange} 
+                            />
+
                             <View style={styles.dropdownContainer}>
                                 {renderLabelPerfil()}
                                 <Dropdown
@@ -369,7 +351,7 @@ export default function Cadastro({ navigation }) {
                                     onChangeText={setDocumento}
                                 />
                             ) : null}
-
+                        
                             <TextInput
                                 style={styles.campos}
                                 placeholder="Nome Comercial"
@@ -377,7 +359,8 @@ export default function Cadastro({ navigation }) {
                                 value={nomeComercial}
                                 onChangeText={setNomeComercial}
                             />
-                            
+
+  
                             <TextInput
                                 style={styles.campos}
                                 placeholder="CEP"
