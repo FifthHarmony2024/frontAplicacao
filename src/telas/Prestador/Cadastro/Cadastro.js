@@ -8,8 +8,7 @@ import axios from 'axios';
 import { buscarEstados, buscarCidades, buscarTodasCidades} from '../../../Validacoes/apiIBGE'; 
 import styles from "../../EstiloPrestador/estilos";
 import CategoriaServicoDropdown from "./CategoriaServicoDropdown";
-
-
+import ServicoCategoriaDropdown from "./ServicoCategoriaDropdown";
 
 const perfil = [
     { label: 'Microempreendedor Individual', value: 'MICROEMPREENDEDOR' },
@@ -29,8 +28,8 @@ export default function Cadastro({ navigation }) {
     const [sobrenome, setSobrenome] = useState('');
     const [emailLogin, setEmailLogin] = useState('');
     const [telefone, setTelefone] = useState('');
-    const [dataDeNascimento, setDataDeNascimento] = useState('');
-    const [documento, setDocumento] = useState('');
+    const [cpf, setCpf] = useState('');
+    const [cnpj, setCnpj] = useState('');
     const [nomeComercial, setNomeComercial] = useState('');
     const [senha, setSenha] = useState('');
     const [confSenha, setConfSenha] = useState('');
@@ -39,7 +38,7 @@ export default function Cadastro({ navigation }) {
     const [endereco, setEndereco] = useState('');
     const [numResidencial, setNumResidencial] = useState('');
     const [complementoResi, setComplementoResi] = useState('');
-    const [categorias, setCategorias] = useState([]);
+    const [selectedServico, setSelectedServico] = useState(null);
     const [selectedCategoria, setSelectedCategoria] = useState(null);
     
     const [estados, setEstados] = useState([]);
@@ -51,6 +50,11 @@ export default function Cadastro({ navigation }) {
 
     const [perfilValue, setPerfilValue] = useState(null);
     const [perfilFocus, setPerfilFocus] = useState(false);
+
+
+
+    
+    const [dataDeNascimento, setDataDeNascimento] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
 
 
@@ -70,14 +74,18 @@ export default function Cadastro({ navigation }) {
   
 
     const handleCategoriaChange = (categoriaId) => {
-      setSelectedCategoria(categoriaId);
-    };
+        setSelectedCategoria(categoriaId);
+        setSelectedServico(null); 
+      };
+
+
+    
     const onChangeDate = (event, selectedDate) => {
         setShowDatePicker(false);
         if (event.type === 'set' && selectedDate) {
         const formattedDate = selectedDate.toISOString().split('T')[0];
         setDataDeNascimento(formattedDate);
-         }
+    }
     };
     
     const togglePasswordVisibility = () => {
@@ -95,26 +103,33 @@ export default function Cadastro({ navigation }) {
             telefone,
             dataDeNascimento,
             senha,
+            confSenha,
+            cpf: perfilValue === 'AUTONOMO' ? cpf : null, 
+            cnpj: perfilValue === 'MICROEMPREENDEDOR' ? cnpj : null,
             cep: cep.replace(/\D/g, ''), 
             bairro,
             endereco,
-            numResidencial:numResidencial ? Number(numResidencial) : 0,
+            numResidencial: numResidencial ? Number(numResidencial) : 0, 
             complementoResi,
-            categoriaServico: selectedCategoria, 
-            servicos: servicoValue,
-            nomeComercial,
-            tipoPrestador: perfilValue, 
             cidade: cidadeValue,
             estado: estadoValue, 
             sexoOpcao: sexoOpcaoValue,
-            confSenha
+            categoriaServico: selectedCategoria, 
+            servicos: selectedServico,
+            nomeComercial,
+            tipoPrestador: perfilValue, 
         };
     
         if (perfilValue === 'AUTONOMO') {
-            userData.cpf = documento.replace(/\D/g, ''); 
+            userData.cpf = cpf.replace(/\D/g, ''); 
+            userData.cnpj = null; // Garantir que cnpj não esteja definido
         } else if (perfilValue === 'MICROEMPREENDEDOR') {
-            userData.cnpj = documento.replace(/\D/g, ''); 
+            userData.cnpj = cnpj.replace(/\D/g, ''); 
+            userData.cpf = null; // Garantir que cpf não esteja definido
         }
+    
+        // Adicionar logs para depuração
+        console.log("userData:", userData);
     
         console.log('Dados que serão enviados:', JSON.stringify(userData, null, 2));
     
@@ -130,8 +145,11 @@ export default function Cadastro({ navigation }) {
             console.error('Erro ao cadastrar:', error.message);
             alert('Erro ao cadastrar: ' + (error.response?.data?.message || error.message));
         }
+    
     };
-  
+
+   
+    
     
     const renderLabelPerfil = () => {
         if (perfilValue || perfilFocus) {
@@ -244,8 +262,8 @@ export default function Cadastro({ navigation }) {
                                 onChangeText={setTelefone}
                             />
 
-                            <TouchableOpacity
-                                style={[styles.campos, styles.dataDeNascimento]}
+                            <TouchableOpacity 
+                                style={[styles.campos, styles.dataDeNascimento, !dataDeNascimento && { backgroundColor: '#f0f0f0' }]}  
                                 onPress={() => setShowDatePicker(true)}
                             >
                                 <Text style={[styles.textoDataDeNascimento, !dataDeNascimento && { color: '#282828' }]}>
@@ -255,11 +273,11 @@ export default function Cadastro({ navigation }) {
 
                             {showDatePicker && (
                                 <DateTimePicker
-                                    value={new Date()}
+                                    value={new Date()} 
                                     mode="date"
                                     display="default"
                                     onChange={onChangeDate}
-                                    maximumDate={new Date(2006, 11, 31)}
+                                    maximumDate={new Date(2006, 11, 31)} 
                                     minimumDate={new Date(1940, 0, 1)}
                                 />
                             )}
@@ -299,6 +317,13 @@ export default function Cadastro({ navigation }) {
                                 selectedValue={selectedCategoria} 
                                 onValueChange={handleCategoriaChange} 
                             />
+                             {selectedCategoria && (
+                                <ServicoCategoriaDropdown
+                                selectedCategoria={selectedCategoria}
+                                selectedServico={selectedServico}
+                                onServicoChange={setSelectedServico} 
+                                />
+                            )}
 
                             <View style={styles.dropdownContainer}>
                                 {renderLabelPerfil()}
@@ -338,8 +363,8 @@ export default function Cadastro({ navigation }) {
                                     placeholder="CNPJ"
                                     placeholderTextColor="#282828"
                                     keyboardType="numeric"
-                                    value={documento}
-                                    onChangeText={setDocumento}
+                                    value={cnpj}
+                                    onChangeText={setCnpj}
                                 />
                             ) : perfilValue === 'AUTONOMO' ? (
                                 <TextInput
@@ -347,8 +372,8 @@ export default function Cadastro({ navigation }) {
                                     placeholder="CPF"
                                     placeholderTextColor="#282828"
                                     keyboardType="numeric"
-                                    value={documento}
-                                    onChangeText={setDocumento}
+                                    value={cpf}
+                                    onChangeText={setCpf}
                                 />
                             ) : null}
                         
