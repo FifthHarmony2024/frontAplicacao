@@ -1,38 +1,47 @@
 import React from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { Feather, Ionicons, FontAwesome, FontAwesome5 } from '@expo/vector-icons';
 
 export default function PesquisaClie({ navigation }) {
   const categorias = [
-    { id: 1, nome: 'Informática e Telefonia' },
-    { id: 2, nome: 'Assistência Técnica' },
-    { id: 3, nome: 'Eletrodomésticos' },
-    { id: 4, nome: 'Beleza' },
-    { id: 5, nome: 'Reforma e Reparos' },
-    { id: 6, nome: 'Serviços Domésticos' },
-    { id: 7, nome: 'Para a família' },
-    { id: 8, nome: 'Esportes' },
+    { label: 'Assistência Técnica', icon: { type: FontAwesome, name: 'gears' } },
+    { label: 'Aulas', icon: { type: FontAwesome5, name: 'book' } },
+    { label: 'Eventos', icon: { type: FontAwesome5, name: 'glass-cheers' } },
+    { label: 'Saúde', icon: { type: FontAwesome5, name: 'heart' } },
+    { label: 'Reformas e Reparos', icon: { type: Ionicons, name: 'construct-outline' } },
+    { label: 'Serviços Gerais', icon: { type: FontAwesome5, name: 'briefcase' } },
+    { label: 'Serviços Domésticos', icon: { type: Ionicons, name: 'home' } },
+    { label: 'Transporte', icon: { type: FontAwesome5, name: 'car' } },
+    { label: 'Moda e Beleza', icon: { type: FontAwesome5, name: 'cut' } },
   ];
+
+  const handleSearchPress = () => {
+    navigation.navigate('PesquisaBusca'); 
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.buscar}>Buscar</Text>
-      <View style={styles.searchContainer}>
+      <TouchableOpacity style={styles.searchContainer} onPress={handleSearchPress}>
         <Feather name="search" size={24} color="black" style={styles.iconLeft} />
         <TextInput
           style={styles.input}
           placeholder="O que você precisa?"
           placeholderTextColor="#999"
+          editable={false} // Não permite edição
         />
         <Ionicons name="options-outline" size={24} color="black" style={styles.iconRight} />
+      </TouchableOpacity>
+
+      <View style={styles.buscartitulo}>
+        <Text style={styles.titulo}>Todas as Categorias</Text>
       </View>
 
-      <Text style={styles.titulo}>Todas Categorias</Text>
-
       <ScrollView contentContainerStyle={styles.categoriasContainer}>
-        {categorias.map((categoria) => (
-          <TouchableOpacity key={categoria.id} style={styles.categoria}>
-            <Text style={styles.categoriaTexto}>{categoria.nome}</Text>
+        {categorias.map((categoria, index) => (
+          <TouchableOpacity key={index} style={styles.categoria}>
+            <categoria.icon.type name={categoria.icon.name} size={24} color="#7B68EE" />
+            <Text style={styles.categoriaTexto}>{categoria.label}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -60,7 +69,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 5,
     marginBottom: 20,
-    marginTop:60
+    marginTop: 20,
   },
   iconLeft: {
     marginRight: 10,
@@ -75,16 +84,21 @@ const styles = StyleSheet.create({
   },
   titulo: {
     fontSize: 18,
-    fontWeight: 'bold',
     marginBottom: 10,
+    marginRight: 120,
     color: '#333',
+    textAlign: 'right',
   },
-  buscar:{
-    fontSize: 18,
+  buscar: {
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333', 
-    marginTop:100
+    color: '#4E40A2',
+    textAlign: 'right',
+    marginRight: 290,
+    marginTop: 30,
+  },
+  buscartitulo: {
+    marginRight: -20,
   },
   categoriasContainer: {
     flexDirection: 'row',
@@ -107,7 +121,8 @@ const styles = StyleSheet.create({
   },
   categoriaTexto: {
     fontSize: 14,
-    color: '#7B68EE',
+    color: '#89958F',
     textAlign: 'center',
+    marginTop: 5,
   },
 });

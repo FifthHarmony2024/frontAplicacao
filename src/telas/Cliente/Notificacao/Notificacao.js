@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
         padding: 30,
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 50,
+        marginTop: 40,
       },
       titleContainer: {
         flexDirection: 'row',
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
       },
       nenhumaconverva: {
-        fontSize: 20,
+        fontSize: 18,
         color: "#C0C0C0",
         textAlign: 'center', 
         marginLeft:15

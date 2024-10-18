@@ -17,6 +17,7 @@ import encanador from '../../../../assets/encanador.png';
 import eletricista from '../../../../assets/eletricista.png';
 import pintor from '../../../../assets/pintor.png';
 
+
 const Tab = createBottomTabNavigator();
 const { width } = Dimensions.get('window');
 
@@ -29,8 +30,10 @@ const TelaInicio = () => {
     { label: 'Reformas e Reparos', icon: { type: Ionicons, name: 'construct-outline' } },                                        
     { label: 'Serviços Gerais', icon: { type: FontAwesome5, name: 'briefcase' } },            
     { label: 'Serviços Domésticos', icon: { type: Ionicons, name: 'home' } },                 
-    { label: 'Transporte', icon: { type: FontAwesome5, name: 'car' } },                    
-];
+    { label: 'Transporte', icon: { type: FontAwesome5, name: 'car' } },      
+    { label: 'Moda e Beleza', icon: { type: FontAwesome5, name: 'cut' } },
+              
+  ];
 
 
   
@@ -72,15 +75,7 @@ const TelaInicio = () => {
       <View style={styles.categoryContainer}>
         <TouchableOpacity style={styles.categoryCard}>
          <Image source={assistencia_tecnica} style={styles.categoryImage} />
-          <Text>Aparelhos Eletrônicos</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.categoryCard}>
-          <Image source={consertoTV} style={styles.categoryImage} />
-          <Text>Televisão</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.categoryCard}>
-          <Image source={geladeira} style={styles.categoryImage}/>
-          <Text>Geladeira e Freezer</Text>
+          <Text>Ar Condicionado</Text>
         </TouchableOpacity>
       </View>
 
@@ -106,7 +101,28 @@ const TelaInicio = () => {
       </View>
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Reformas e Reparos</Text>
+        <Text style={styles.sectionTitle}>Serviços Gerais</Text>
+        <TouchableOpacity onPress={() => alert('Ver todos Reformas e Reparos')}>
+          <Text style={styles.viewAllLink}>Ver todos</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.categoryContainer}>
+        <TouchableOpacity style={styles.categoryCard}>
+        <Image source={encanador} style={styles.categoryimgencanador}/>
+          <Text>Encanador</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.categoryCard}>
+        <Image source={eletricista} style={styles.categoryimgencanador}/>
+          <Text>Eletricista</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.categoryCard}>
+        <Image source={pintor} style={styles.categoryimgencanador}/>
+          <Text>Pintor</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Moda e Beleza</Text>
         <TouchableOpacity onPress={() => alert('Ver todos Reformas e Reparos')}>
           <Text style={styles.viewAllLink}>Ver todos</Text>
         </TouchableOpacity>
