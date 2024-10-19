@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, TouchableOpacity, StyleSheet, Dimensions, Text, Image, ScrollView } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons, SimpleLineIcons, Octicons, Feather , FontAwesome5, FontAwesome} from '@expo/vector-icons';
+import { Ionicons, SimpleLineIcons, Octicons, Feather, FontAwesome5, FontAwesome } from '@expo/vector-icons';
 import * as Animatable from 'react-native-animatable';
 
 import BarraPesquisa from '../../Estilos/BarraPesquisa';
@@ -9,13 +9,25 @@ import PedidosCliente from '../Pedidos/PedidosCliente';
 import Pesquisa from '../Pesquisa/PesquisaClie';
 import Notificacao from '../Notificacao/Notificacao';
 import PerfilCliente from '../Perfil/PerfilCliente';
-
-import consertoTV from '../../../../assets/Conserto-de-televisor.jpg';
-import assistencia_tecnica from '../../../../assets/assistencia_tecnica.png';
-import geladeira from '../../../../assets/geladeira.png';
-import encanador from '../../../../assets/encanador.png';
+import pedreiros from './../../../../assets/pedreiro.jpeg';
+import gesso from '../../../../assets/gesso.jpg';
 import eletricista from '../../../../assets/eletricista.png';
-import pintor from '../../../../assets/pintor.png';
+import pintor from '../../../../assets/pintor.jpg';
+import dedetizador from '../../../../assets/dedetizador.png';
+import desentupidor from '../../../../assets/desentupidor.jpg';
+import chaveiro from '../../../../assets/chaveiro.jpg';
+import cabeleireiros from '../../../../assets/cabelereiro.jpg';
+import manicure from '../../../../assets/manicure.jpg';
+import trancista from '../../../../assets/trancista.jpg';
+import design from '../../../../assets/design.jpg';
+import maquiadores from '../../../../assets/maquiadores.jpg';
+import televisao from '../../../../assets/televisao.jpg';
+import ar from '../../../../assets/ar.jpg';
+import camera from '../../../../assets/camera.jpg';
+import redes from '../../../../assets/redes.jpg';
+import geladeira from '../../../../assets/geladeira.jpg';
+
+
 
 
 const Tab = createBottomTabNavigator();
@@ -23,143 +35,150 @@ const { width } = Dimensions.get('window');
 
 const TelaInicio = () => {
   const services = [
-    { label: 'Assistência Técnica', icon: { type: FontAwesome, name: 'gears' } }, 
-    { label: 'Aulas', icon: { type: FontAwesome5, name: 'book' } },                          
-    { label: 'Eventos', icon: { type: FontAwesome5, name: 'glass-cheers' } },                 
-    { label: 'Saúde', icon: { type: FontAwesome5, name: 'heart' } },          
-    { label: 'Reformas e Reparos', icon: { type: Ionicons, name: 'construct-outline' } },                                        
-    { label: 'Serviços Gerais', icon: { type: FontAwesome5, name: 'briefcase' } },            
-    { label: 'Serviços Domésticos', icon: { type: Ionicons, name: 'home' } },                 
-    { label: 'Transporte', icon: { type: FontAwesome5, name: 'car' } },      
+    { label: 'Assistência Técnica', icon: { type: FontAwesome, name: 'gears' } },
+    { label: 'Aulas', icon: { type: FontAwesome5, name: 'book' } },
+    { label: 'Eventos', icon: { type: FontAwesome5, name: 'glass-cheers' } },
+    { label: 'Saúde', icon: { type: FontAwesome5, name: 'heart' } },
+    { label: 'Reformas e Reparos', icon: { type: Ionicons, name: 'construct-outline' } },
+    { label: 'Serviços Gerais', icon: { type: FontAwesome5, name: 'briefcase' } },
+    { label: 'Serviços Domésticos', icon: { type: Ionicons, name: 'home' } },
+    { label: 'Transporte', icon: { type: FontAwesome5, name: 'car' } },
     { label: 'Moda e Beleza', icon: { type: FontAwesome5, name: 'cut' } },
-              
   ];
 
-
-  
   return (
-    <ScrollView style={styles.screenContainer}>
-      <TouchableOpacity style={styles.addressContainer} onPress={() => alert('Selecione o endereço')}>
-        <Text style={styles.addressText}>Adicionar endereço</Text>
-      </TouchableOpacity>
+    <ScrollView>
+        <View style={styles.screenContainer}>
+                <TouchableOpacity style={styles.addressContainer} onPress={() => alert('Selecione o endereço')}>
+                  <Text style={styles.addressText}>Adicionar endereço</Text>
+                </TouchableOpacity>
 
-      <View style={styles.headerContainer}>
-        <Image source={require('../../../../assets/nomepreto.png')} style={styles.logo} />
-        <FontAwesome5 name="user-circle" size={45} color="#89958F" style={styles.userIcon} />
+                <View style={styles.headerContainer}>
+                  <Image source={require('../../../../assets/nomepreto.png')} style={styles.logo} />
+                  <FontAwesome5 name="user-circle" size={45} color="#89958F" style={styles.userIcon} />
+                </View>
 
-      </View>
+                <Text style={styles.welcomeText}>Olá, nome da pessoa</Text>
 
+                <BarraPesquisa />
 
-      <Text style={styles.welcomeText}>Olá, nome da pessoa</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.serviceScroll}>
+                  {services.map((service, index) => (
+                    <TouchableOpacity key={index} style={styles.serviceButton} onPress={() => alert(service.label)}>
+                      <View style={styles.iconCircle}>
+                        <service.icon.type name={service.icon.name} size={24} color="#7B68EE" />
+                      </View>
+                      <Text style={styles.serviceLabel}>{service.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
 
-      <BarraPesquisa />
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.categorias}>Reformas e Reparos</Text>
+                  <TouchableOpacity style={styles.verTodosButton} onPress={() => alert('Ver todos os serviços')}>
+                    <Text style={styles.verTodosText}>Ver Todos</Text>
+                  </TouchableOpacity>
+                </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.serviceScroll}>
-          {services.map((service, index) => (
-              <TouchableOpacity key={index} style={styles.serviceButton} onPress={() => alert(service.label)}>
-                  <View style={styles.iconCircle}>
-                      <service.icon.type name={service.icon.name} size={24} color="#7B68EE" />
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <View style={styles.row}>
+                    <TouchableOpacity style={styles.card}>
+                      <Image source={pedreiros} style={styles.pedreiro} resizeMode="cover" />
+                      <Text style={styles.cardTitle}>Pedreiro</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.card}>
+                      <Image source={gesso} style={styles.pedreiro} resizeMode="cover" />
+                      <Text style={styles.cardTitle}>Gesso e DryWall</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.card}>
+                      <Image source={eletricista} style={styles.pedreiro} resizeMode="cover" />
+                      <Text style={styles.cardTitle}>Eletricista</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.card}>
+                      <Image source={pintor} style={styles.pedreiro} resizeMode="cover" />
+                      <Text style={styles.cardTitle}>Pintor</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.card}>
+                      <Image source={dedetizador} style={styles.pedreiro} resizeMode="cover" />
+                      <Text style={styles.cardTitle}>Dedetizador</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.card}>
+                      <Image source={desentupidor} style={styles.pedreiro} resizeMode="cover" />
+                      <Text style={styles.cardTitle}>Desentupidor</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.card}>
+                      <Image source={chaveiro} style={styles.pedreiro} resizeMode="cover" />
+                      <Text style={styles.cardTitle}>Chaveiro</Text>
+                    </TouchableOpacity>
                   </View>
-                  <Text style={styles.serviceLabel}>{service.label}</Text>
-              </TouchableOpacity>
-          ))}
-     </ScrollView>
+                </ScrollView>
 
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.categoriaModa}>Moda e Beleza</Text>
+                  <TouchableOpacity style={styles.verTodosButton} onPress={() => alert('Ver todos os serviços')}>
+                    <Text style={styles.verTodosText}>Ver Todos</Text>
+                  </TouchableOpacity>
+                </View>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <View style={styles.row}>
+                    <TouchableOpacity style={styles.card}>
+                      <Image source={cabeleireiros} style={styles.pedreiro} resizeMode="cover" />
+                      <Text style={styles.cardTitle}>Cabeleireiros</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.card}>
+                      <Image source={maquiadores} style={styles.pedreiro} resizeMode="cover" />
+                      <Text style={styles.cardTitle}>Maquiadores</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.card}>
+                      <Image source={design} style={styles.pedreiro} resizeMode="cover" />
+                      <Text style={styles.cardTitle}>Design de Sobrancelhas</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.card}>
+                      <Image source={manicure} style={styles.pedreiro} resizeMode="cover" />
+                      <Text style={styles.cardTitle}>Manicure e Pedicure</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.card}>
+                      <Image source={trancista} style={styles.pedreiro} resizeMode="cover" />
+                      <Text style={styles.cardTitle}>Trancistas</Text>
+                    </TouchableOpacity>
+                  </View>
+                </ScrollView>
 
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Assistência Técnica</Text>
-        <TouchableOpacity onPress={() => alert('Ver todos Assistência Técnica')}>
-          <Text style={styles.viewAllLink}>Ver todos</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.categoryContainer}>
-        <TouchableOpacity style={styles.categoryCard}>
-         <Image source={assistencia_tecnica} style={styles.categoryImage} />
-          <Text>Ar Condicionado</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Reformas e Reparos</Text>
-        <TouchableOpacity onPress={() => alert('Ver todos Reformas e Reparos')}>
-          <Text style={styles.viewAllLink}>Ver todos</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.categoryContainer}>
-        <TouchableOpacity style={styles.categoryCard}>
-        <Image source={encanador} style={styles.categoryimgencanador}/>
-          <Text>Encanador</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.categoryCard}>
-        <Image source={eletricista} style={styles.categoryimgencanador}/>
-          <Text>Eletricista</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.categoryCard}>
-        <Image source={pintor} style={styles.categoryimgencanador}/>
-          <Text>Pintor</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Serviços Gerais</Text>
-        <TouchableOpacity onPress={() => alert('Ver todos Reformas e Reparos')}>
-          <Text style={styles.viewAllLink}>Ver todos</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.categoryContainer}>
-        <TouchableOpacity style={styles.categoryCard}>
-        <Image source={encanador} style={styles.categoryimgencanador}/>
-          <Text>Encanador</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.categoryCard}>
-        <Image source={eletricista} style={styles.categoryimgencanador}/>
-          <Text>Eletricista</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.categoryCard}>
-        <Image source={pintor} style={styles.categoryimgencanador}/>
-          <Text>Pintor</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Moda e Beleza</Text>
-        <TouchableOpacity onPress={() => alert('Ver todos Reformas e Reparos')}>
-          <Text style={styles.viewAllLink}>Ver todos</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.categoryContainer}>
-        <TouchableOpacity style={styles.categoryCard}>
-        <Image source={encanador} style={styles.categoryimgencanador}/>
-          <Text>Encanador</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.categoryCard}>
-        <Image source={eletricista} style={styles.categoryimgencanador}/>
-          <Text>Eletricista</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.categoryCard}>
-        <Image source={pintor} style={styles.categoryimgencanador}/>
-          <Text>Pintor</Text>
-        </TouchableOpacity>
-      </View>
-
-      <Text style={styles.sectionTitle}>Conheça alguns perfis</Text>
-      <View style={styles.profileContainer}>
-        <View style={styles.profileCard}>
-          <Text style={styles.profileName}>Nome - Profissão</Text>
-          <Text style={styles.profileSnippet}>Um trecho do anúncio</Text>
-          <TouchableOpacity style={styles.catalogButton}>
-            <Text style={styles.catalogButtonText}>Ver catálogo</Text>
-          </TouchableOpacity>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.categorias}>Assistência Técnica</Text>
+                  <TouchableOpacity style={styles.verTodosButton} onPress={() => alert('Ver todos os serviços')}>
+                    <Text style={styles.verTodosText}>Ver Todos</Text>
+                  </TouchableOpacity>
+                </View>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <View style={styles.row}>
+                    <TouchableOpacity style={styles.card}>
+                      <Image source={televisao} style={styles.pedreiro} resizeMode="cover" />
+                      <Text style={styles.cardTitle}>Televisão</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.card}>
+                      <Image source={ar} style={styles.pedreiro} resizeMode="cover" />
+                      <Text style={styles.cardTitle}>Ar Condicionado</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.card}>
+                      <Image source={camera} style={styles.pedreiro} resizeMode="cover" />
+                      <Text style={styles.cardTitle}>Câmera</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.card}>
+                      <Image source={geladeira} style={styles.pedreiro} resizeMode="cover" />
+                      <Text style={styles.cardTitle}>Geladeira e Freezer</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.card}>
+                      <Image source={redes} style={styles.pedreiro} resizeMode="cover" />
+                      <Text style={styles.cardTitle}>Cabeamento de Redes</Text>
+                    </TouchableOpacity>
+                  </View>
+                </ScrollView>
+                
         </View>
-        <View style={styles.profileCard}>
-          <Text style={styles.profileName}>Nome - Profissão</Text>
-          <Text style={styles.profileSnippet}>Um trecho do anúncio</Text>
-          <TouchableOpacity style={styles.catalogButton}>
-            <Text style={styles.catalogButtonText}>Ver catálogo</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ScrollView>
+        
+  </ScrollView>
+
   );
 };
 
@@ -195,38 +214,6 @@ const TabButton = (props) => {
     </TouchableOpacity>
   );
 };
-
-export default function AppNavigator() {
-  const tabs = [
-    { name: 'Início', label: 'Início', iconType: Ionicons, iconName: 'home', component: TelaInicio },
-    { name: 'Pesquisa', label: 'Pesquisa', iconType: Feather, iconName: 'search', component: Pesquisa },
-    { name: 'Pedidos', label: 'Pedidos', iconType: SimpleLineIcons, iconName: 'handbag', component: PedidosCliente },
-    { name: 'Notificações', label: 'Notificações', iconType: Ionicons, iconName: 'notifications', component: Notificacao },
-    { name: 'Perfil', label: 'Perfil', iconType: Octicons, iconName: 'person', component: PerfilCliente },
-  ];
-
-  return (
-    <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: styles.tabBar,
-      }}
-    >
-      {tabs.map((item, index) => (
-        <Tab.Screen
-          key={index}
-          name={item.name}
-          component={item.component}
-          options={{
-            tabBarShowLabel: false,
-            tabBarButton: (props) => <TabButton {...props} item={item} />,
-          }}
-        />
-      ))}
-    </Tab.Navigator>
-  );
-}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -270,8 +257,27 @@ const styles = StyleSheet.create({
     marginTop: -55,
     marginLeft: 8,
   },
-  servicesContainer: {
-    marginVertical: 20,
+  tabBar: {
+    height: 65,
+    backgroundColor: '#7B68EE',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 10 },
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  screenContainer: {
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    marginBottom: 65,
   },
   servicesTitle: {
     fontSize: 16,
@@ -303,90 +309,7 @@ const styles = StyleSheet.create({
     maxWidth: 100,
     flexWrap: 'wrap',
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  categoryContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  categoryCard: {
-    backgroundColor: '#FFF',
-    paddingVertical: 15,
-    paddingHorizontal: 10,
-    borderRadius: 15,
-    width: 120,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    elevation: 4, 
-    marginHorizontal: 8, 
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  categoryImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 10,
-    marginBottom: 10,
-    resizeMode: 'cover', // Para a imagem preencher melhor
-  },
-  categoryimgencanador:{
-    width: 80,
-    height: 80,
-    borderRadius: 10,
-    marginBottom: 10,
-    resizeMode: 'cover',
-  },
-  profileCard: {
-    backgroundColor: '#FFF',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 15,
-    elevation: 2,
-  },
-  profileName: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  profileSnippet: {
-    fontSize: 12,
-    color: '#333',
-    marginBottom: 10,
-  },
-  catalogButton: {
-    backgroundColor: '#4E40A2',
-    paddingVertical: 10,
-    borderRadius: 5,
-  },
-  catalogButtonText: {
-    color: '#FFF',
-    textAlign: 'center',
-    fontSize: 14,
-  },
-  tabBar: {
-    height: 65,
-    backgroundColor: '#7B68EE',
-    borderRadius: 15,
-    position: 'absolute',
-    bottom: 16,
-    left: 16,
-    right: 16,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 10 },
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-  },
+
   tabButton: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -402,15 +325,17 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginTop: 5,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
+  categoriaModa:{
+    fontSize:18,
+    fontWeight:'bold',
+    marginTop:18,
+    marginRight:10
   },
-  viewAllLink: {
-    fontSize: 14,
-    color: '#7B68EE',
+  categorias:{
+    fontSize:18,
+    fontWeight:'bold',
+    marginTop:18,
+    marginRight:10
   },
   arrowIcon: {
     alignSelf: 'center',
@@ -421,4 +346,88 @@ const styles = StyleSheet.create({
     marginTop:-25,
     
   },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  card: {
+    width: 143,  
+    backgroundColor: '#fff',
+    borderRadius: 12,  
+    alignItems: 'center',
+    elevation: 4,  
+    shadowColor: '#000',  
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    marginRight: 10, 
+  },
+
+  pedreiro: {
+    width: '100%', 
+    height: 110, 
+    borderTopLeftRadius: 12,  
+    borderTopRightRadius: 12,  
+
+  },
+  cardTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginTop: 18,
+  },
+  categoriasContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  verTodosButton: {
+    flexDirection: 'row',
+    marginTop:20
+  },
+  verTodosText: {
+    fontSize: 14,
+    color: '#4E40A2',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+
 });
+
+
+export default function AppNavigator() {
+  const tabs = [
+    { name: 'Início', label: 'Início', iconType: Ionicons, iconName: 'home', component: TelaInicio },
+    { name: 'Pesquisa', label: 'Pesquisa', iconType: Feather, iconName: 'search', component: Pesquisa },
+    { name: 'Pedidos', label: 'Pedidos', iconType: SimpleLineIcons, iconName: 'handbag', component: PedidosCliente },
+    { name: 'Notificações', label: 'Notificações', iconType: Ionicons, iconName: 'notifications', component: Notificacao },
+    { name: 'Perfil', label: 'Perfil', iconType: Octicons, iconName: 'person', component: PerfilCliente },
+  ];
+
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: styles.tabBar,
+      }}
+    >
+      {tabs.map((item, index) => (
+        <Tab.Screen
+          key={index}
+          name={item.name}
+          component={item.component}
+          options={{
+            tabBarShowLabel: false,
+            tabBarButton: (props) => <TabButton {...props} item={item} />,
+          }}
+        />
+      ))}
+    </Tab.Navigator>
+  );
+}
