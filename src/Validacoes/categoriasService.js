@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_CATEGORIAS_URL = 'http://192.168.0.6:8080/categorias'; 
+const API_CATEGORIAS_URL = 'http://192.168.0.7:8080/categorias'; 
 
 export const buscarCategorias = async () => {
   try {

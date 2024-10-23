@@ -7,13 +7,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
 import { buscarEstados, buscarCidades, buscarTodasCidades} from '../../../Validacoes/apiIBGE'; 
 import styles from "../../EstiloPrestador/estilos";
-import CategoriaServicoDropdown from "./CategoriaServicoDropdown";
-import ServicoCategoriaDropdown from "./ServicoCategoriaDropdown";
 
-const perfil = [
-    { label: 'Microempreendedor Individual', value: 'MICROEMPREENDEDOR' },
-    { label: 'Autônomo', value: 'AUTONOMO' }
-];
 
 const sexoOpcao = [
     { label: 'FEMININO', value: 'FEMININO' },
@@ -28,9 +22,6 @@ export default function Cadastro({ navigation }) {
     const [sobrenome, setSobrenome] = useState('');
     const [emailLogin, setEmailLogin] = useState('');
     const [telefone, setTelefone] = useState('');
-    const [cpf, setCpf] = useState('');
-    const [cnpj, setCnpj] = useState('');
-    const [nomeComercial, setNomeComercial] = useState('');
     const [senha, setSenha] = useState('');
     const [confSenha, setConfSenha] = useState('');
     const [cep, setCep] = useState('');
@@ -38,8 +29,6 @@ export default function Cadastro({ navigation }) {
     const [endereco, setEndereco] = useState('');
     const [numResidencial, setNumResidencial] = useState('');
     const [complementoResi, setComplementoResi] = useState('');
-    const [selectedServico, setSelectedServico] = useState(null);
-    const [selectedCategoria, setSelectedCategoria] = useState(null);
     
     const [estados, setEstados] = useState([]);
     const [cidades, setCidades] = useState([]);
@@ -47,12 +36,6 @@ export default function Cadastro({ navigation }) {
     const [cidadeValue, setCidadeValue] = useState(null);
     const [estadoFocus, setEstadoFocus] = useState(false);
     const [cidadeFocus, setCidadeFocus] = useState(false);
-
-    const [perfilValue, setPerfilValue] = useState(null);
-    const [perfilFocus, setPerfilFocus] = useState(false);
-
-
-
     
     const [dataDeNascimento, setDataDeNascimento] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -72,12 +55,6 @@ export default function Cadastro({ navigation }) {
         return null;
     };
   
-
-    const handleCategoriaChange = (categoriaId) => {
-        setSelectedCategoria(categoriaId);
-        setSelectedServico(null); 
-      };
-
 
     
     const onChangeDate = (event, selectedDate) => {
@@ -104,8 +81,6 @@ export default function Cadastro({ navigation }) {
             dataDeNascimento,
             senha,
             confSenha,
-            cpf: perfilValue === 'AUTONOMO' ? cpf : null, 
-            cnpj: perfilValue === 'MICROEMPREENDEDOR' ? cnpj : null,
             cep: cep.replace(/\D/g, ''), 
             bairro,
             endereco,
@@ -114,21 +89,8 @@ export default function Cadastro({ navigation }) {
             cidade: cidadeValue,
             estado: estadoValue, 
             sexoOpcao: sexoOpcaoValue,
-            categoriaServico: selectedCategoria, 
-            servicos: selectedServico,
-            nomeComercial,
-            tipoPrestador: perfilValue, 
         };
     
-        if (perfilValue === 'AUTONOMO') {
-            userData.cpf = cpf.replace(/\D/g, ''); 
-            userData.cnpj = null; // Garantir que cnpj não esteja definido
-        } else if (perfilValue === 'MICROEMPREENDEDOR') {
-            userData.cnpj = cnpj.replace(/\D/g, ''); 
-            userData.cpf = null; // Garantir que cpf não esteja definido
-        }
-    
-        // Adicionar logs para depuração
         console.log("userData:", userData);
     
         console.log('Dados que serão enviados:', JSON.stringify(userData, null, 2));
@@ -140,28 +102,14 @@ export default function Cadastro({ navigation }) {
                 },
             });
             console.log('Cadastro realizado com sucesso:', response.data);
-            navigation.navigate('ConfirPrestador');
+            navigation.navigate('CadastroPres2');
         } catch (error) {
             console.error('Erro ao cadastrar:', error.message);
             alert('Erro ao cadastrar: ' + (error.response?.data?.message || error.message));
         }
-    
     };
 
-   
-    
-    
-    const renderLabelPerfil = () => {
-        if (perfilValue || perfilFocus) {
-            return (
-                <Text style={[styles.label, { top: -10, left: 15, fontSize: 12, color: perfilFocus ? 'blue' : '#4E40A2' }]}>
-                    Perfil
-                </Text>
-            );
-        }
-        return null;
-    };
-    
+
     const renderLabelEstado = () => {
         if (estadoValue || estadoFocus) {
             return (
@@ -313,79 +261,7 @@ export default function Cadastro({ navigation }) {
                                     )}
                                 />
                             </View>
-                            <CategoriaServicoDropdown 
-                                selectedValue={selectedCategoria} 
-                                onValueChange={handleCategoriaChange} 
-                            />
-                             {selectedCategoria && (
-                                <ServicoCategoriaDropdown
-                                selectedCategoria={selectedCategoria}
-                                selectedServico={selectedServico}
-                                onServicoChange={setSelectedServico} 
-                                />
-                            )}
-
-                            <View style={styles.dropdownContainer}>
-                                {renderLabelPerfil()}
-                                <Dropdown
-                                    style={[styles.dropdown, perfilFocus && { borderColor: 'blue' }]}
-                                    placeholderStyle={styles.placeholderStyle}
-                                    selectedTextStyle={styles.selectedTextStyle}
-                                    inputSearchStyle={styles.inputSearchStyle}
-                                    iconStyle={styles.iconStyle}
-                                    data={perfil}
-                                    search={false}
-                                    maxHeight={300}
-                                    labelField="label"
-                                    valueField="value"
-                                    placeholder={!perfilFocus ? 'Selecione um perfil' : '...'}
-                                    value={perfilValue}
-                                    onFocus={() => setPerfilFocus(true)}
-                                    onBlur={() => setPerfilFocus(false)}
-                                    onChange={item => {
-                                        setPerfilValue(item.value);
-                                        setPerfilFocus(false);
-                                    }}
-                                    renderLeftIcon={() => (
-                                        <AntDesign
-                                          style={styles.icon}
-                                          color={perfilFocus ? '#4E40A2' : '#8A8A8A'}
-                                          name="Safety"
-                                          size={20}
-                                        />
-                                    )}
-                                />
-                            </View>
-
-                            {perfilValue === 'MICROEMPREENDEDOR' ? (
-                                <TextInput
-                                    style={styles.campos}
-                                    placeholder="CNPJ"
-                                    placeholderTextColor="#282828"
-                                    keyboardType="numeric"
-                                    value={cnpj}
-                                    onChangeText={setCnpj}
-                                />
-                            ) : perfilValue === 'AUTONOMO' ? (
-                                <TextInput
-                                    style={styles.campos}
-                                    placeholder="CPF"
-                                    placeholderTextColor="#282828"
-                                    keyboardType="numeric"
-                                    value={cpf}
-                                    onChangeText={setCpf}
-                                />
-                            ) : null}
-                        
-                            <TextInput
-                                style={styles.campos}
-                                placeholder="Nome Comercial"
-                                placeholderTextColor="#282828"
-                                value={nomeComercial}
-                                onChangeText={setNomeComercial}
-                            />
-
-  
+                           
                             <TextInput
                                 style={styles.campos}
                                 placeholder="CEP"
@@ -523,8 +399,8 @@ export default function Cadastro({ navigation }) {
                             </View>
                         </View>
                         
-                        <TouchableOpacity style={styles.botao} onPress={handleSubmit}>
-                            <Text style={styles.botaoTexto}>Cadastrar</Text>
+                        <TouchableOpacity style={styles.botao} > 
+                            <Text style={styles.botaoTexto} onPress={() => navigation.navigate('CadastroPres2')}> Continuar </Text>
                         </TouchableOpacity>
 
                         <Text style={styles.cadastroTexto}>

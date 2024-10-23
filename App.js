@@ -26,6 +26,7 @@ import TelaServicos from './src/telas/Cliente/TelaServicos/TelaServicos';
 import Chat from './src/telas/Prestador/Chat/Chat';
 import NotificacaoPrest from './src/telas/Prestador/NotificacaoPrestador/NotificacaoPrest';
 import BuscaPesquisa from './src/telas/Cliente/Pesquisa/BuscaPesquisa';
+import InfoPrestador from './src/telas/Prestador/Cadastro/InfoPrestador';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -135,6 +136,8 @@ export default function App() {
         <Stack.Screen name="Drawer" component={DrawerNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="Conversas" component={Chat} options={{ headerShown: false }} />
         <Stack.Screen name="PesquisaBusca" component={BuscaPesquisa} options={{ headerShown: false }} />
+        <Stack.Screen name="CadastroPres2" component={InfoPrestador} options={{ headerShown: false }} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
