@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     padding: 30,
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 50,
+    marginTop: 40,
   },
   backIcon: {
     marginRight: 10,

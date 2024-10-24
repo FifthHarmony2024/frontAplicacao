@@ -171,71 +171,67 @@ export default function InfoPrestador({ navigation }) {
                             <Text style={styles.botaoTexto}>Cadastrar</Text>
                         </TouchableOpacity>
                     </View>
-                        <Image source={lgPerfil} style={styles.lgPerfil} resizeMode="contain" />
+                      <Image source={lgPerfil} style={styles.lgPerfil} resizeMode="contain" />
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
     );
 }
-
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
         backgroundColor: '#F0EBE0',
-        position: 'relative', 
     },
     fundo: {
+        flex: 1,
         width: '100%',
-        borderBottomLeftRadius: 0,
-        borderBottomRightRadius: 0,
         alignItems: 'center',
-        paddingVertical: 50,
         paddingHorizontal: 20,
-        position: 'relative',
+        justifyContent: 'space-between', 
     },
     headerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 50,
         width: '100%',
+        paddingTop: 80, 
     },
     titulo: {
-        fontSize: 20,
+        fontSize: 22,
         color: '#4E40A2',
         fontWeight: 'bold',
         textAlign: 'center',
-        marginLeft: 10, 
+        marginLeft: 10,
+        top:-3
     },
     seta: {
         position: 'absolute',
-        left: 10,
+        top: 75, 
+        left: -5,
     },
     inputContainer: {
         width: '90%',
-        marginBottom: 20,
+        justifyContent: 'center', 
+        flexGrow: 1,
     },
     campos: {
         backgroundColor: '#F5F5F5',
-        borderRadius: 8, 
-        height: 49, 
-        marginBottom: 10, 
-        paddingHorizontal: 15,  
-        fontSize: 15, 
+        borderRadius: 8,
+        height: 49,
+        marginBottom: 10,
+        paddingHorizontal: 15,
+        fontSize: 15,
         color: '#000000',
-        borderWidth: 0,
     },
     botao: {
         backgroundColor: '#FE914E',
-        borderRadius: 10, 
+        borderRadius: 10,
         width: '90%',
         height: 50,
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 20,
+        position: 'absolute',
+        bottom: 180, // Posiciona o botão logo acima da imagem
     },
     botaoTexto: {
         fontSize: 18,
@@ -244,15 +240,21 @@ const styles = StyleSheet.create({
     },
     dropdownContainer: {
         marginBottom: 10,
-        position: 'relative',
     },
     dropdown: {
-        height: 49, 
+        height: 49,
         borderColor: '#F5F5F5',
         borderWidth: 0.5,
         borderRadius: 8,
         backgroundColor: '#F5F5F5',
         paddingHorizontal: 15,
+    },
+    lgPerfil: {
+        width: 250,
+        height: 250,
+        position: 'absolute',
+        alignSelf: 'center',
+        marginTop:705
     },
     icon: {
         marginRight: 5,
@@ -268,7 +270,7 @@ const styles = StyleSheet.create({
     },
     placeholderStyle: {
         fontSize: 15,
-        color: '#282828', 
+        color: '#282828',
     },
     selectedTextStyle: {
         fontSize: 15,
@@ -281,8 +283,4 @@ const styles = StyleSheet.create({
         height: 40,
         fontSize: 15,
     },
-    lgPerfil: {
-        width: 250,
-        height: 250,
-    }
 });
