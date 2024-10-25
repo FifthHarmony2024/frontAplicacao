@@ -400,7 +400,7 @@ export default function Cadastro({ navigation }) {
                         </View>
                         
                         <TouchableOpacity style={styles.botao} > 
-                            <Text style={styles.botaoTexto} onPress={() => navigation.navigate('CadastroPres2')}> Continuar </Text>
+                            <Text style={styles.botaoTexto} onPress={handleSubmit}> Continuar </Text>
                         </TouchableOpacity>
 
                         <Text style={styles.cadastroTexto}>

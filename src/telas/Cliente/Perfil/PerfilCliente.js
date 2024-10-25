@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Text, StyleSheet, View, TextInput, TouchableOpacity, ScrollView, Image } from "react-native";
-import { Ionicons } from '@expo/vector-icons';
 
-export default function PerfilCliente() {
+export default function PerfilCliente({navigation}) {
     const [isEditable, setIsEditable] = useState(false);
 
     const [nome, setNome] = useState('João');
@@ -35,11 +34,13 @@ export default function PerfilCliente() {
                         source={{ uri: 'https://via.placeholder.com/100' }}
                         style={styles.profileImage}
                     />
-                    <TouchableOpacity style={styles.editIcon} onPress={toggleEditable}>
-                        <Ionicons name="pencil" size={24} color="#4E40A2" />
-                    </TouchableOpacity>
+            
                     <Text style={styles.nomeCompleto}>{`${nome} ${sobrenome}`}</Text>
                     <Text style={styles.rating}>⭐⭐⭐⭐⭐</Text>
+                    
+                    <TouchableOpacity style={styles.editProfileButton} onPress={toggleEditable}>
+                        <Text style={styles.editProfileButtonText}>Editar perfil</Text>
+                    </TouchableOpacity>
                 </View>
 
                 <View style={styles.section}>
@@ -138,27 +139,24 @@ export default function PerfilCliente() {
                     />
                 </View>
 
+                {isEditable ? (
+                    <TouchableOpacity style={styles.saveButton} onPress={salvarEdicao}>
+                        <Text style={styles.saveButtonText}>Salvar</Text>
+                    </TouchableOpacity>
+                ) : null}
+
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Configurações da conta</Text>
                     <TouchableOpacity>
                         <Text style={styles.link}>Trocar senha</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity>
-                        <Text style={styles.link}>Trocar E-mail</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={() => navigation.navigate('EntrarLoginCliente')}>
                         <Text style={[styles.link, styles.red]}>Sair</Text>
                     </TouchableOpacity>
                     <TouchableOpacity>
                         <Text style={[styles.link, styles.red]}>Excluir conta</Text>
                     </TouchableOpacity>
                 </View>
-
-                {isEditable ? (
-                    <TouchableOpacity style={styles.saveButton} onPress={salvarEdicao}>
-                        <Text style={styles.saveButtonText}>Salvar</Text>
-                    </TouchableOpacity>
-                ) : null}
             </View>
         </ScrollView>
     );
@@ -186,11 +184,7 @@ const styles = StyleSheet.create({
         borderRadius: 50,
         marginBottom: 10,
     },
-    editIcon: {
-        position: 'absolute',
-        top: 120, 
-        right: 5,
-    },
+
     nomeCompleto: {
         fontSize: 18,
         color: '#4E40A2',
@@ -199,6 +193,16 @@ const styles = StyleSheet.create({
     rating: {
         fontSize: 16,
         color: '#FFD700',
+    },
+    editProfileButton: {
+        marginTop: 10,
+        backgroundColor: '#4E40A2',
+        padding: 10,
+        borderRadius: 5,
+    },
+    editProfileButtonText: {
+        color: '#FFF',
+        fontSize: 16,
     },
     section: {
         marginBottom: 30,
@@ -228,10 +232,11 @@ const styles = StyleSheet.create({
         color: 'red',
     },
     saveButton: {
-        backgroundColor: 'green',
+        backgroundColor: '#7B68EE',
         padding: 15,
         borderRadius: 8,
         alignItems: 'center',
+        marginBottom: 20,
     },
     saveButtonText: {
         color: '#FFF',

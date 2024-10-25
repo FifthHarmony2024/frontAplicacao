@@ -9,9 +9,7 @@ const CategoriaServicoDropdown = ({ selectedValue, onValueChange }) => {
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [perfilFocus, setPerfilFocus] = useState(false);
-
-  const [categoriaValues, setCategoriaValues] = useState(selectedValue);
+  const [categoriaFocus, setCategoriaFocus] = useState(false);
 
   useEffect(() => {
     const fetchCategorias = async () => {
@@ -38,12 +36,12 @@ const CategoriaServicoDropdown = ({ selectedValue, onValueChange }) => {
   }
 
   const renderLabelCategoria = () => {
-    if (categoriaValues || perfilFocus) {
+    if (selectedValue || categoriaFocus) {
       return (
         <Text
           style={[
             styles.label,
-            { top: -10, left: 15, fontSize: 12, color: perfilFocus ? 'blue' : '#4E40A2' },
+            { top: -10, left: 15, fontSize: 12, color: categoriaFocus ? 'blue' : '#4E40A2' },
           ]}
         >
           Categoria
@@ -57,7 +55,7 @@ const CategoriaServicoDropdown = ({ selectedValue, onValueChange }) => {
     <View style={styles.dropdownContainer}>
       {renderLabelCategoria()}
       <Dropdown
-        style={[styles.dropdown, perfilFocus && { borderColor: 'blue' }]}
+        style={[styles.dropdown, categoriaFocus && { borderColor: 'blue' }]}
         placeholderStyle={styles.placeholderStyle}
         selectedTextStyle={styles.selectedTextStyle}
         inputSearchStyle={styles.inputSearchStyle}
@@ -67,19 +65,18 @@ const CategoriaServicoDropdown = ({ selectedValue, onValueChange }) => {
         maxHeight={300}
         labelField="label"
         valueField="value"
-        placeholder={!perfilFocus ? 'Selecione uma categoria' : '...'}
-        value={categoriaValues} 
-        onFocus={() => setPerfilFocus(true)}
-        onBlur={() => setPerfilFocus(false)}
+        placeholder={!categoriaFocus ? 'Selecione uma categoria' : '...'}
+        value={selectedValue} 
+        onFocus={() => setCategoriaFocus(true)}
+        onBlur={() => setCategoriaFocus(false)}
         onChange={item => {
-          setCategoriaValues(item.value);  
-          onValueChange(item.value); 
-          setPerfilFocus(false);
+          onValueChange(item.value); // Chama a função passada para atualizar o valor selecionado
+          setCategoriaFocus(false);
         }}
         renderLeftIcon={() => (
           <AntDesign
             style={styles.icon}
-            color={perfilFocus ? '#4E40A2' : '#8A8A8A'}
+            color={categoriaFocus ? '#4E40A2' : '#8A8A8A'}
             name="Safety"
             size={20}
           />

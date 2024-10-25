@@ -19,7 +19,7 @@ export default function InfoPrestador({ navigation }) {
     const [cpf, setCpf] = useState('');
     const [cnpj, setCnpj] = useState('');
     const [nomeComercial, setNomeComercial] = useState('');
-    const [selectedServico, setSelectedServico] = useState(null);
+    const [selectedServicos, setSelectedServicos] = useState([]);
     const [selectedCategoria, setSelectedCategoria] = useState(null);
     
     const [perfilValue, setPerfilValue] = useState(null);
@@ -27,7 +27,11 @@ export default function InfoPrestador({ navigation }) {
 
     const handleCategoriaChange = (categoriaId) => {
         setSelectedCategoria(categoriaId);
-        setSelectedServico(null); 
+        setSelectedServicos([]); 
+    };
+
+    const handleServicoChange = (newSelectedServicos) => {
+        setSelectedServicos(newSelectedServicos); 
     };
 
     const handleSubmit = async () => {
@@ -35,7 +39,7 @@ export default function InfoPrestador({ navigation }) {
             cpf: perfilValue === 'AUTONOMO' ? cpf : null, 
             cnpj: perfilValue === 'MICROEMPREENDEDOR' ? cnpj : null,
             categoriaServico: selectedCategoria, 
-            servicos: selectedServico,
+            servicos: selectedServicos, 
             nomeComercial,
             tipoPrestador: perfilValue, 
         };
@@ -64,7 +68,6 @@ export default function InfoPrestador({ navigation }) {
             console.error('Erro ao cadastrar:', error.message);
             alert('Erro ao cadastrar: ' + (error.response?.data?.message || error.message));
         }
-    
     };
 
     const renderLabelPerfil = () => {
@@ -100,9 +103,9 @@ export default function InfoPrestador({ navigation }) {
                             />
                              {selectedCategoria && (
                                 <ServicoCategoriaDropdown
-                                selectedCategoria={selectedCategoria}
-                                selectedServico={selectedServico}
-                                onServicoChange={setSelectedServico} 
+                                    selectedCategoria={selectedCategoria}
+                                    selectedServicos={selectedServicos}
+                                    onServicoChange={handleServicoChange} 
                                 />
                             )}
 
@@ -171,12 +174,12 @@ export default function InfoPrestador({ navigation }) {
                             <Text style={styles.botaoTexto}>Cadastrar</Text>
                         </TouchableOpacity>
                     </View>
-                      <Image source={lgPerfil} style={styles.lgPerfil} resizeMode="contain" />
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
     );
 }
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -187,14 +190,14 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         paddingHorizontal: 20,
-        justifyContent: 'space-between', 
+        paddingTop: 20, 
     },
     headerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
-        paddingTop: 80, 
+        paddingTop: 60, 
     },
     titulo: {
         fontSize: 22,
@@ -202,17 +205,18 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center',
         marginLeft: 10,
-        top:-3
+        top: -3,
     },
     seta: {
         position: 'absolute',
-        top: 75, 
+        top: 55, 
         left: -5,
     },
     inputContainer: {
         width: '90%',
-        justifyContent: 'center', 
+        justifyContent: 'flex-start',
         flexGrow: 1,
+        marginTop: 100, 
     },
     campos: {
         backgroundColor: '#F5F5F5',
@@ -230,8 +234,8 @@ const styles = StyleSheet.create({
         height: 50,
         alignItems: 'center',
         justifyContent: 'center',
-        position: 'absolute',
-        bottom: 180, // Posiciona o botão logo acima da imagem
+        marginTop: 100, 
+        marginBottom: 30, 
     },
     botaoTexto: {
         fontSize: 18,
@@ -249,13 +253,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#F5F5F5',
         paddingHorizontal: 15,
     },
-    lgPerfil: {
-        width: 250,
-        height: 250,
-        position: 'absolute',
-        alignSelf: 'center',
-        marginTop:705
-    },
+
     icon: {
         marginRight: 5,
     },
@@ -266,7 +264,7 @@ const styles = StyleSheet.create({
         top: 15,
         zIndex: 999,
         paddingHorizontal: 8,
-        fontSize: 15,
+        fontSize: 16,
     },
     placeholderStyle: {
         fontSize: 15,
@@ -274,13 +272,10 @@ const styles = StyleSheet.create({
     },
     selectedTextStyle: {
         fontSize: 15,
+        color: '#000000',
     },
     iconStyle: {
         width: 20,
         height: 20,
-    },
-    inputSearchStyle: {
-        height: 40,
-        fontSize: 15,
     },
 });
