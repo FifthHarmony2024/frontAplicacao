@@ -1,12 +1,19 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, TextInput, ScrollView } from "react-native";
 import { launchImageLibrary } from 'react-native-image-picker';
 import Icones from 'react-native-vector-icons/Feather'; 
-import Icons from 'react-native-vector-icons/Ionicons'
+import Icons from 'react-native-vector-icons/Ionicons';
+import Icom from 'react-native-vector-icons/AntDesign';
 
 export default function PerfilPrestador({ navigation }) {
     const [imageUri, setImageUri] = useState(null);
     const [catalogImages, setCatalogImages] = useState([]);
+    const [serviceDescription, setServiceDescription] = useState(""); 
+    const [additionalServiceInfo, setAdditionalServiceInfo] = useState(""); 
+
+    // Dados simulados de cadastro
+    const categoryFromCadastro = "Serviço de Limpeza"; 
+    const servicesFromCadastro = ["Limpeza de Casas", "Limpeza Comercial"]; 
 
     const openGallery = () => {
         const options = {
@@ -38,6 +45,10 @@ export default function PerfilPrestador({ navigation }) {
                 setCatalogImages([...catalogImages, response.assets[0].uri]);
             }
         });
+    };
+
+    const saveServiceDescription = () => {
+        console.log("Descrição salva:", serviceDescription);
     };
 
     return (
@@ -81,13 +92,12 @@ export default function PerfilPrestador({ navigation }) {
                             color="#fff"
                         />
                     </View>
-                    <Text style={styles.profissao}>Profissão</Text>
                 </View>
 
                 <View style={styles.adContainer}>
                     <TouchableOpacity onPress={openGallery}>
                         {imageUri ? (
-                            <Image source={{ uri: imageUri }} style={styles.profileImage} />
+                            <Image source={{ uri: imageUri }}/>
                         ) : (
                             <View style={styles.defaultImage}>
                                 <Text style={styles.addImageText}>Adicionar Imagem</Text>
@@ -95,23 +105,79 @@ export default function PerfilPrestador({ navigation }) {
                         )}
                     </TouchableOpacity>
 
-                    <View style={styles.anuncioContainer}>
-
-                        <Text style={styles.adTitle}>Meu anúncio</Text>
-                        <Text style={styles.adDescription}>Descrição do anúncio aqui</Text>
-                        
-                        <View style={styles.conquistaContainer}>
-                            <Icons
-                                style={styles.medalha}
-                                name="medal-outline"
+                    <View style={styles.sectionContainer}>
+                        <View style={styles.sectionHeader}>
+                            <Icom
+                                style={styles.icon}
+                                name="customerservice"
                                 size={25} 
-                                color="black"
+                                color="#FE914E"
                             />
-                            <Text style={styles.conquista}>Minhas conquistas</Text>
+                            <Text style={styles.sectionTitle}>Meu Anúncio</Text>
                         </View>
 
-                        <Text style={styles.catalogo}>Catálogo</Text>
+                        <Text style={styles.label}>Categoria:</Text>
+                        <Text style={styles.infoText}>{categoryFromCadastro}</Text>
 
+                        <Text style={styles.label}>Descrição do Serviço:</Text>
+                        <TextInput 
+                            style={styles.input} 
+                            value={serviceDescription} 
+                            onChangeText={setServiceDescription} 
+                            placeholder="Você ainda não adicionou uma descrição"
+                            multiline 
+                        />
+                        <TouchableOpacity style={styles.saveButton} onPress={saveServiceDescription}>
+                            <Text style={styles.saveButtonText}>Salvar Descrição</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.sectionContainer}>
+                        <View style={styles.sectionHeader}>
+                            <Icom
+                                style={styles.icon}
+                                name="folderopen"
+                                size={25} 
+                                color="#FE914E"
+                            />
+                            <Text style={styles.sectionTitle}>Serviços que Atendo</Text>
+                        </View>
+
+                        {servicesFromCadastro.map((service, index) => (
+                            <Text key={index} style={styles.infoText}>{service}</Text>
+                        ))}
+                        <TextInput 
+                            style={styles.input} 
+                            value={additionalServiceInfo} 
+                            onChangeText={setAdditionalServiceInfo} 
+                            placeholder="Adicionar mais detalhes sobre o serviço"
+                            multiline 
+                        />
+                    </View>
+
+                    <View style={styles.sectionContainer}>
+                        <View style={styles.sectionHeader}>
+                            <Icons
+                                style={styles.icon}
+                                name="medal-outline"
+                                size={25} 
+                                color="#FE914E"
+                            />
+                            <Text style={styles.sectionTitle}>Minhas Conquistas</Text>
+                        </View>
+                        <Text style={styles.infoText}>Conquistas automáticas baseadas nos pedidos finalizados.</Text>
+                    </View>
+
+                    <View style={styles.sectionContainer}>
+                        <View style={styles.sectionHeader}>
+                            <Icom
+                                style={styles.icon}
+                                name="folderopen"
+                                size={25} 
+                                color="#FE914E"
+                            />
+                            <Text style={styles.sectionTitle}>Catálogo</Text>
+                        </View>
                         <View style={styles.catalogContainer}>
                             {catalogImages.length === 0 ? (
                                 <Text>Sem imagens no catálogo</Text>
@@ -131,10 +197,7 @@ export default function PerfilPrestador({ navigation }) {
                         <TouchableOpacity style={styles.addButton} onPress={addCatalogImage}>
                             <Text style={styles.addButtonText}>+</Text>
                         </TouchableOpacity>
-
                     </View>
-                    <View style={styles.separator} />
-
                 </View>
             </View>
         </ScrollView>
@@ -200,11 +263,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#FFFFFF', 
     },
-    profissao: {
-        fontSize: 16,
-        color: '#FFFFFF', 
-        marginBottom: 10,
-    },
     adContainer: {
         backgroundColor: '#F5F5F5',
         marginHorizontal: 20,
@@ -219,73 +277,60 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 55, 
     },
-    anuncioContainer: {
-        marginTop: 20,
-        height:500
+    sectionContainer: {
+        width: '100%',
+        padding: 15,
+        marginBottom: 20,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 5,
     },
-    adTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 10,
-        marginRight:150
-    },
-    conquistaContainer: {
+    sectionHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 20,
     },
-    conquista: {
+    icon: {
+        marginRight: 10,
+    },
+    sectionTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        marginLeft: 10,
+        color: '#4E40A2',
     },
-    catalogo: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 10,
-        marginRight: 150,
-        marginTop:55
-    },
-    adDescription: {
-        fontSize: 14,
-        color: '#666',
-    },
-    profileImage: {
-        width: 150, 
-        height: 150, 
-        borderRadius: 75, 
-        borderWidth: 2,
-        borderColor: '#4E40A2',
-        marginTop: -90,
-    },
-    separator: {
+    label: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: '#4E40A2',
         marginTop: 10,
-        width: '100%',
-        height: 3,
-        backgroundColor: '#FE914E',
     },
-    defaultImage: {
-        width: 150, 
-        height: 150, 
-        borderRadius: 75, 
-        backgroundColor: '#C4C4C4',
-        justifyContent: 'center',
+    infoText: {
+        fontSize: 15,
+        color: '#666',
+        marginTop: 5,
+    },
+    input: {
+        fontSize: 15,
+        color: '#666',
+        borderBottomWidth: 1,
+        borderBottomColor: "#ccc",
+        paddingVertical: 5,
+        marginTop: 5,
+    },
+    saveButton: {
+        backgroundColor: '#4E40A2',
+        paddingVertical: 8,
+        borderRadius: 5,
+        marginTop: 10,
         alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#D4D1E4', 
-        marginTop: -90,
     },
-    addImageText: {
+    saveButtonText: {
         color: '#FFFFFF',
-        fontSize: 12,
-    },
-    nameEditContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    editar: {
-        marginLeft: 10, 
+        fontSize: 15,
+        fontWeight: '500',
     },
     catalogContainer: {
         marginTop: 15,
@@ -309,11 +354,35 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 10,
-        marginLeft:110
+        alignSelf: 'center',
     },
     addButtonText: {
         color: '#fff',
         fontSize: 24,
         fontWeight: 'bold',
+    },
+    defaultImage: {
+        width: 145, 
+        height: 145, 
+        borderRadius: 75, 
+        backgroundColor: '#C4C4C4',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: '#D4D1E4', 
+        marginTop: -70,
+        marginBottom:10
+    },
+    addImageText: {
+        color: '#FFFFFF',
+        fontSize: 12,
+    },
+    nameEditContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    editar: {
+        marginLeft: 10, 
     },
 });
