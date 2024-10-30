@@ -27,8 +27,8 @@ export default function InfoPrestador({route, navigation }) {
     const [perfilValue, setPerfilValue] = useState(null);
     const [perfilFocus, setPerfilFocus] = useState(false);
 
-    const handleCategoriaChange = (categoriaId) => {
-        setSelectedCategoria(categoriaId);
+    const handleCategoriaChange = (idCategoria) => {
+        setSelectedCategoria(idCategoria);
         setSelectedServicos([]); 
     };
 
