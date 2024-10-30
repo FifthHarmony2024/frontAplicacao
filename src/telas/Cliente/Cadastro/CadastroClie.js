@@ -100,7 +100,7 @@ export default function CadastroClie({ navigation }) {
         console.log('Dados que serão enviados:', JSON.stringify(userData, null, 2));
     
         try {
-            const response = await axios.post('http://192.168.0.7:8080/usuarios/cliente', userData, {
+            const response = await axios.post('http://192.168.0.6:8080/usuarios/cliente', userData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -262,6 +262,7 @@ export default function CadastroClie({ navigation }) {
                                 value={cpf}
                                 onChangeText={setCpf}
                             />
+
                                                     
                             <TouchableOpacity 
                                 style={[styles.campos, styles.dataDeNascimento, !dataDeNascimento && { backgroundColor: '#f0f0f0' }]}  
@@ -282,6 +283,14 @@ export default function CadastroClie({ navigation }) {
                                     minimumDate={new Date(1940, 0, 1)}
                                 />
                             )}
+                             <TextInput 
+                                style={styles.campos}
+                                placeholder="CEP"
+                                placeholderTextColor="#282828"
+                                keyboardType="numeric"
+                                value={cep}
+                                onChangeText={setCep}
+                            />
                             <View style={styles.dropdownContainer}>
                                 {renderLabelEstado()}
                                 <Dropdown
@@ -346,6 +355,7 @@ export default function CadastroClie({ navigation }) {
                                     )}
                                 />
                             </View>
+                        
                             <TextInput 
                                 style={styles.campos}
                                 placeholder="Bairro"

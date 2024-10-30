@@ -40,7 +40,6 @@ export default function Cadastro({ navigation }) {
     const [dataDeNascimento, setDataDeNascimento] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
 
-
     const [sexoOpcaoValue, setSexoOpcao] = useState('');
     const [sexoOpcaoFocus, setSexoOpcaoFocus] = useState(false);
 
@@ -95,18 +94,9 @@ export default function Cadastro({ navigation }) {
     
         console.log('Dados que serão enviados:', JSON.stringify(userData, null, 2));
     
-        try {
-            const response = await axios.post('http://192.168.0.6:8080/usuarios/prestador', userData, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            console.log('Cadastro realizado com sucesso:', response.data);
-            navigation.navigate('CadastroPres2');
-        } catch (error) {
-            console.error('Erro ao cadastrar:', error.message);
-            alert('Erro ao cadastrar: ' + (error.response?.data?.message || error.message));
-        }
+        navigation.navigate('CadastroPres2', { userData });
+
+         
     };
 
 
@@ -261,7 +251,7 @@ export default function Cadastro({ navigation }) {
                                     )}
                                 />
                             </View>
-                           
+
                             <TextInput
                                 style={styles.campos}
                                 placeholder="CEP"

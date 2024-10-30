@@ -15,12 +15,14 @@ const perfil = [
     { label: 'Autônomo', value: 'AUTONOMO' }
 ];
 
-export default function InfoPrestador({ navigation }) {
+export default function InfoPrestador({route, navigation }) {
+    const { userData } = route.params; 
     const [cpf, setCpf] = useState('');
     const [cnpj, setCnpj] = useState('');
     const [nomeComercial, setNomeComercial] = useState('');
     const [selectedServicos, setSelectedServicos] = useState([]);
     const [selectedCategoria, setSelectedCategoria] = useState(null);
+    
     
     const [perfilValue, setPerfilValue] = useState(null);
     const [perfilFocus, setPerfilFocus] = useState(false);
@@ -35,10 +37,11 @@ export default function InfoPrestador({ navigation }) {
     };
 
     const handleSubmit = async () => {
-        let userData = {
+        let finalUserData = {
+            ...userData,
             cpf: perfilValue === 'AUTONOMO' ? cpf : null, 
             cnpj: perfilValue === 'MICROEMPREENDEDOR' ? cnpj : null,
-            categoriaServico: selectedCategoria, 
+            idCategoria: selectedCategoria, 
             servicos: selectedServicos, 
             nomeComercial,
             tipoPrestador: perfilValue, 
@@ -54,10 +57,10 @@ export default function InfoPrestador({ navigation }) {
     
         console.log("userData:", userData);
     
-        console.log('Dados que serão enviados:', JSON.stringify(userData, null, 2));
+        console.log('Dados que serão enviados:', JSON.stringify(finalUserData, null, 2));
     
         try {
-            const response = await axios.post('http://192.168.0.7:8080/usuarios/prestador', userData, {
+            const response = await axios.post('http://192.168.0.6:8080/usuarios/prestador', finalUserData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },

@@ -1,6 +1,6 @@
 export const buscarServicosPorCategoria = async (idCategoria) => {
   try {
-    const response = await fetch(`http://192.168.0.7:8080/servicos/categoria/${idCategoria}`);
+    const response = await fetch(`http://192.168.0.6:8080/servicos/categoria/${idCategoria}`);
     console.log('Response:', response);
     
     if (!response.ok) {
