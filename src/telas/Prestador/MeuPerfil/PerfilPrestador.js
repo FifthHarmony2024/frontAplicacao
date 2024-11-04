@@ -10,6 +10,12 @@ export default function PerfilPrestador({ navigation }) {
     const [catalogImages, setCatalogImages] = useState([]);
     const [serviceDescription, setServiceDescription] = useState(""); 
     const [additionalServiceInfo, setAdditionalServiceInfo] = useState(""); 
+    const [isEditingDescription, setIsEditingDescription] = useState(false);
+
+    const [newService, setNewService] = useState(""); // Novo serviço a ser adicionado
+    const [customServices, setCustomServices] = useState([]); // Lista de serviços adicionados pelo usuário
+    const [editingServiceIndex, setEditingServiceIndex] = useState(null); // Índice do serviço em edição
+
 
     // Dados simulados de cadastro
     const categoryFromCadastro = "Serviço de Limpeza"; 
@@ -49,7 +55,31 @@ export default function PerfilPrestador({ navigation }) {
 
     const saveServiceDescription = () => {
         console.log("Descrição salva:", serviceDescription);
+        setIsEditingDescription(false); 
     };
+
+    const addNewService = () => {
+        if (newService.trim() !== "") {
+            setCustomServices([...customServices, newService]);
+            setNewService("");
+        }
+    };
+
+    const editService = (index) => {
+        setEditingServiceIndex(index);
+        setNewService(customServices[index]);
+    };
+
+    const saveEditedService = () => {
+        if (editingServiceIndex !== null && newService.trim() !== "") {
+            const updatedServices = [...customServices];
+            updatedServices[editingServiceIndex] = newService;
+            setCustomServices(updatedServices);
+            setEditingServiceIndex(null);
+            setNewService("");
+        }
+    };
+
 
     return (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -120,40 +150,84 @@ export default function PerfilPrestador({ navigation }) {
                         <Text style={styles.infoText}>{categoryFromCadastro}</Text>
 
                         <Text style={styles.label}>Descrição do Serviço:</Text>
-                        <TextInput 
-                            style={styles.input} 
-                            value={serviceDescription} 
-                            onChangeText={setServiceDescription} 
-                            placeholder="Você ainda não adicionou uma descrição"
-                            multiline 
-                        />
-                        <TouchableOpacity style={styles.saveButton} onPress={saveServiceDescription}>
-                            <Text style={styles.saveButtonText}>Salvar Descrição</Text>
-                        </TouchableOpacity>
+                    {isEditingDescription ? (
+                        <View>
+                            <TextInput 
+                                style={styles.input} 
+                                value={serviceDescription} 
+                                onChangeText={setServiceDescription} 
+                                placeholder="Digite a descrição do serviço"
+                                multiline 
+                            />
+                            <TouchableOpacity style={styles.saveButton} onPress={saveServiceDescription}>
+                                <Text style={styles.saveButtonText}>Salvar Descrição</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <View style={styles.editDescriptionContainer}>
+                            <Text style={styles.infoText}>
+                                {serviceDescription || "Você ainda não adicionou uma descrição"}
+                            </Text>
+                            <TouchableOpacity onPress={() => setIsEditingDescription(true)}>
+                                <Icones name="edit-3" size={20} color="#4E40A2" style={styles.editIcon} />
+                            </TouchableOpacity>
+                        </View>
+
+                    )}
                     </View>
 
                     <View style={styles.sectionContainer}>
-                        <View style={styles.sectionHeader}>
-                            <Icom
-                                style={styles.icon}
-                                name="folderopen"
-                                size={25} 
-                                color="#FE914E"
-                            />
-                            <Text style={styles.sectionTitle}>Serviços que Atendo</Text>
-                        </View>
-
-                        {servicesFromCadastro.map((service, index) => (
-                            <Text key={index} style={styles.infoText}>{service}</Text>
-                        ))}
-                        <TextInput 
-                            style={styles.input} 
-                            value={additionalServiceInfo} 
-                            onChangeText={setAdditionalServiceInfo} 
-                            placeholder="Adicionar mais detalhes sobre o serviço"
-                            multiline 
+                    <View style={styles.sectionHeader}>
+                        <Icom
+                            style={styles.icon}
+                            name="folderopen"
+                            size={25} 
+                            color="#FE914E"
                         />
+                        <Text style={styles.sectionTitle}>Serviços que Atendo</Text>
                     </View>
+
+                    {servicesFromCadastro.map((service, index) => (
+                        <Text key={index} style={styles.infoText}>{service}</Text>
+                    ))}
+
+                    {customServices.map((service, index) => (
+                        <View key={index} style={styles.editDescriptionContainer}>
+                            <Text style={styles.infoText}>{service}</Text>
+                            <TouchableOpacity onPress={() => editService(index)}>
+                                <Icones name="edit-3" size={20} color="#4E40A2" style={styles.editIcon} />
+                            </TouchableOpacity>
+                        </View>
+                    ))}
+
+                    {editingServiceIndex !== null ? (
+                        <View>
+                            <TextInput 
+                                style={styles.input} 
+                                value={newService} 
+                                onChangeText={setNewService} 
+                                placeholder="Edite o serviço"
+                                multiline 
+                            />
+                            <TouchableOpacity style={styles.saveButton} onPress={saveEditedService}>
+                                <Text style={styles.saveButtonText}>Salvar Serviço</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <View>
+                            <TextInput 
+                                style={styles.input} 
+                                value={newService} 
+                                onChangeText={setNewService} 
+                                placeholder="Adicionar mais serviços"
+                                multiline 
+                            />
+                            <TouchableOpacity style={styles.saveButton} onPress={addNewService}>
+                                <Text style={styles.saveButtonText}>Adicionar Serviço</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                </View>
 
                     <View style={styles.sectionContainer}>
                         <View style={styles.sectionHeader}>
@@ -223,7 +297,7 @@ const styles = StyleSheet.create({
     },
     notificacao: {
         marginRight: 10,
-        paddingTop:12
+        paddingTop: 12
     },
     navbar: {
         flexDirection: 'row',
@@ -236,7 +310,7 @@ const styles = StyleSheet.create({
     },
     navButton: {
         alignItems: 'center',
-        marginTop:-680
+        marginTop: -680
     },
     navText: {
         color: '#FFFFFF',
@@ -256,7 +330,7 @@ const styles = StyleSheet.create({
     userInfoContainer: {
         alignItems: 'center',
         marginTop: -310, 
-        paddingLeft:12
+        paddingLeft: 12
     },
     headerText: {
         fontSize: 20,
@@ -371,7 +445,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: '#D4D1E4', 
         marginTop: -70,
-        marginBottom:10
+        marginBottom: 10
     },
     addImageText: {
         color: '#FFFFFF',
@@ -384,5 +458,20 @@ const styles = StyleSheet.create({
     },
     editar: {
         marginLeft: 10, 
+    },
+    editDescriptionContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start', 
+        marginTop: 5,
+    },
+    infoText: {
+        fontSize: 15,
+        color: '#666',
+        marginRight: 30, 
+        flex: 1,
+    },
+    editIcon: {
+        marginLeft: 10,
     },
 });

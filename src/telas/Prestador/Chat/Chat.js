@@ -68,6 +68,10 @@ export default function Chat({ navigation }) {
           <Text style={styles.noConversationsText}>
             Você ainda não possui contatos
           </Text>
+
+          <Text style={styles.cadastroTexto}>
+                        Ver contatos <Text style={styles.cadastroLink} onPress={() => navigation.navigate('ChatDentro')}>Contatos</Text>
+             </Text>
         </View>
       )}
     </View>
@@ -84,7 +88,7 @@ const styles = StyleSheet.create({
     padding: 30,
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 50,
+    marginTop: 40,
   },
   backIcon: {
     marginRight: 10,
