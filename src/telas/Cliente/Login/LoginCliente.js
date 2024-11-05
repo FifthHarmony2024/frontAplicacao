@@ -1,27 +1,58 @@
 import React, { useState } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, Pressable } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, Pressable, Alert } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Para armazenar o token
 import Icones from 'react-native-vector-icons/Feather';
 import Icone from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon from "react-native-vector-icons/EvilIcons";
 
 export default function LoginCliente({ navigation }) {
-
     const [viewPass, setViewPass] = useState(true);
+    const [emailLogin, setEmailLogin] = useState('');
+    const [senha, setSenha] = useState('');
     
-    function togglePasswordVisibility(){
+    function togglePasswordVisibility() {
         setViewPass(!viewPass);
     }
 
+    async function handleLogin() {
+        try {
+            const response = await fetch('http://192.168.0.6:8080/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    emailLogin: emailLogin,
+                    senha: senha
+                })
+            });
+    
+            if (!response.ok) {
+                throw new Error(`Erro ${response.status}: ${response.statusText}`);
+            }
+    
+            const data = response.headers.get("content-length") !== "0" ? await response.json() : null;
+    
+            if (data && data.token) {
+                const token = data.token;
+                await AsyncStorage.setItem('userToken', token);
+                navigation.navigate('TelaServ');
+            } else {
+                Alert.alert("Erro de Login", "Token não encontrado na resposta.");
+            }
+        } catch (error) {
+            console.error("Erro de conexão:", error);
+            Alert.alert("Erro", error.message || "Ocorreu um erro ao tentar fazer login.");
+        }
+    }
+    
     return (
-        <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === "ios" ? "padding" : "height"} >
-
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
             <ScrollView contentContainerStyle={{ flexGrow: 1 }} bounces={false}>
                 <View style={styles.container}>
-                 <View style={styles.circleBackground} />
+                    <View style={styles.circleBackground} />
                     <View style={styles.fundoLaran}>
-                    <Icones 
+                        <Icones 
                             style={styles.seta} 
                             name="chevron-left" 
                             size={40} 
@@ -33,11 +64,15 @@ export default function LoginCliente({ navigation }) {
                         <View style={styles.inputContainer}>
                             <View style={styles.visualizar}>
                                 <Icone name="email-outline" size={20} color="#8A8A8A" style={styles.iconeEmail} />
-
                                 <TextInput 
                                     style={styles.campos}
                                     placeholder="E-mail"
-                                    placeholderTextColor="#8A8A8A" />
+                                    placeholderTextColor="#8A8A8A"
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    value={emailLogin}
+                                    onChangeText={setEmailLogin}
+                                />
                             </View>
 
                             <View style={styles.visualizar}>
@@ -47,6 +82,8 @@ export default function LoginCliente({ navigation }) {
                                     placeholder="Senha"
                                     placeholderTextColor="#8A8A8A"
                                     secureTextEntry={viewPass}
+                                    value={senha}
+                                    onChangeText={setSenha}
                                 />
                                 <Pressable onPress={togglePasswordVisibility} style={styles.iconeOlho}> 
                                     {viewPass ? 
@@ -58,7 +95,7 @@ export default function LoginCliente({ navigation }) {
 
                         <Text style={styles.linkTexto}>Esqueci minha senha</Text>
 
-                        <TouchableOpacity style={styles.botao} onPress={() => navigation.navigate('TelaServ')}>
+                        <TouchableOpacity style={styles.botao}  onPress={() => navigation.navigate('TelaServ')}>
                             <Text style={styles.botaoTexto}>Entrar</Text>
                         </TouchableOpacity>
                         
@@ -72,6 +109,7 @@ export default function LoginCliente({ navigation }) {
         </KeyboardAvoidingView>
     );
 }
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,

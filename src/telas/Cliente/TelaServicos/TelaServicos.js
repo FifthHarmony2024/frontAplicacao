@@ -50,7 +50,7 @@ const TelaInicio = () => {
     <ScrollView>
         <View style={styles.screenContainer}>
                 <TouchableOpacity style={styles.addressContainer} onPress={() => alert('Selecione o endereço')}>
-                  <Text style={styles.addressText}>Adicionar endereço</Text>
+                  <Text style={styles.addressText}>Rua Exemplo, 100</Text>
                 </TouchableOpacity>
 
                 <View style={styles.headerContainer}>
@@ -58,7 +58,7 @@ const TelaInicio = () => {
                   <FontAwesome5 name="user-circle" size={45} color="#89958F" style={styles.userIcon} />
                 </View>
 
-                <Text style={styles.welcomeText}>Olá, nome da pessoa</Text>
+                <Text style={styles.welcomeText}>Olá, Renata Silva</Text>
 
                 <BarraPesquisa />
 

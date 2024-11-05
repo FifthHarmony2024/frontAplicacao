@@ -93,6 +93,7 @@ export default function CadastroClie({ navigation }) {
             cidade: cidadeValue,
             estado: estadoValue, 
             sexoOpcao: sexoOpcaoValue,
+            role: "CLIENTE"
  
         };
 
