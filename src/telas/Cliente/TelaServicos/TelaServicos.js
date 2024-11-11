@@ -1,8 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, Dimensions, Text, Image, ScrollView } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons, SimpleLineIcons, Octicons, Feather, FontAwesome5, FontAwesome } from '@expo/vector-icons';
 import * as Animatable from 'react-native-animatable';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 import BarraPesquisa from '../../Estilos/BarraPesquisa';
 import PedidosCliente from '../Pedidos/PedidosCliente';
@@ -28,12 +31,41 @@ import redes from '../../../../assets/redes.jpg';
 import geladeira from '../../../../assets/geladeira.jpg';
 
 
-
-
 const Tab = createBottomTabNavigator();
-const { width } = Dimensions.get('window');
 
 const TelaInicio = () => {
+
+  const [usuario, setUsuario] = useState(null);
+  const [error, setError] = useState(null);
+
+  // Função para buscar os dados do usuário logado
+  const fetchUsuarioData = async () => {
+    try {
+      // Recupera o token JWT do AsyncStorage
+      const token = await AsyncStorage.getItem('token');
+
+      if (!token) {
+        setError('Token não encontrado. Por favor, faça login novamente.');
+        return;
+      }
+
+      const response = await axios.get('http://192.168.0.2:8080/usuarios/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`,  // Envia o token no cabeçalho
+        }
+      });
+
+      setUsuario(response.data);
+    } catch (err) {
+      setError('Erro ao buscar dados do usuário');
+      console.error(err);
+    }
+  };
+
+  // Chama a função de buscar dados assim que o componente for montado
+  useEffect(() => {
+    fetchUsuarioData();
+  }, []);
   const services = [
     { label: 'Assistência Técnica', icon: { type: FontAwesome, name: 'gears' } },
     { label: 'Aulas', icon: { type: FontAwesome5, name: 'book' } },

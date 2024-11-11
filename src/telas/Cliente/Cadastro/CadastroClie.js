@@ -101,7 +101,7 @@ export default function CadastroClie({ navigation }) {
         console.log('Dados que serão enviados:', JSON.stringify(userData, null, 2));
     
         try {
-            const response = await axios.post('http://192.168.0.6:8080/usuarios/cliente', userData, {
+            const response = await axios.post('http://192.168.0.2:8080/usuarios/cliente', userData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -418,8 +418,8 @@ export default function CadastroClie({ navigation }) {
                                         (<Icones name="eye" size={25} color="#282828" />)}
                                 </Pressable>
                             </View>
-                            <TouchableOpacity style={styles.botao} onPress={handleSubmit}>
-                            <Text style={styles.botaoTexto} onPress={() => navigation.navigate('ConfiClie')}>Cadastrar</Text>
+                            <TouchableOpacity style={styles.botao} >
+                            <Text style={styles.botaoTexto} onPress={handleSubmit}>Cadastrar</Text>
                         </TouchableOpacity>
 
                         <Text style={styles.cadastroTexto}>
