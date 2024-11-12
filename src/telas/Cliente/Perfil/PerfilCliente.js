@@ -1,167 +1,175 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Text, StyleSheet, View, TextInput, TouchableOpacity, ScrollView, Image } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
-export default function PerfilCliente({navigation}) {
-    const [isEditable, setIsEditable] = useState(false);
+export default function PerfilCliente({ navigation }) {
+  const [userData, setUserData] = useState(null);
+  const [isEditable, setIsEditable] = useState(false);
 
-    const [nome, setNome] = useState('João');
-    const [sobrenome, setSobrenome] = useState('Silva');
-    const [email, setEmail] = useState('joao.silva@email.com');
-    const [telefone, setTelefone] = useState('91234-5678');
-    const [cpf, setCpf] = useState('123.456.789-00');
-    const [cep, setCep] = useState('12345-678');
-    const [bairro, setBairro] = useState('Centro');
-    const [endereco, setEndereco] = useState('Rua Exemplo');
-    const [numero, setNumero] = useState('100');
-    const [complemento, setComplemento] = useState('Apt 101');
-    const [cidade, setCidade] = useState('São Paulo');
-    const [estado, setEstado] = useState('Guarulhos');
+  // Função que busca os dados do backend ao montar o componente
+  useEffect(() => {
+      async function fetchUserData() {
+          try {
+              const token = await AsyncStorage.getItem('token');
+              const response = await axios.get('http://192.168.0.7:8080/usuarios/{id}/perfil', {
+                  headers: {
+                      Authorization: `Bearer ${token}`
+                  }
+              });
+              setUserData(response.data); // Dados do backend carregados no userData
+          } catch (error) {
+              console.error("Erro ao recuperar dados do usuário:", error);
+          }
+      }
 
-    const toggleEditable = () => {
-        setIsEditable(!isEditable);
-    };
+      fetchUserData();
+  }, []);
 
-    const salvarEdicao = () => {
-        setIsEditable(false);
-        // Salvar as mudanças
-    };
+  const toggleEditable = () => {
+      setIsEditable(!isEditable);
+  };
 
-    return (
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-            <View style={styles.container}>
-                <View style={styles.header}>
-                    <Image
-                        source={{ uri: 'https://via.placeholder.com/100' }}
-                        style={styles.profileImage}
-                    />
-            
-                    <Text style={styles.nomeCompleto}>{`${nome} ${sobrenome}`}</Text>
-                    <Text style={styles.rating}>⭐⭐⭐⭐⭐</Text>
-                    
-                    <TouchableOpacity style={styles.editProfileButton} onPress={toggleEditable}>
-                        <Text style={styles.editProfileButtonText}>Editar perfil</Text>
-                    </TouchableOpacity>
-                </View>
+  const salvarEdicao = () => {
+      setIsEditable(false);
+      // Implementar envio de dados para salvar alterações no backend, se necessário
+  };
 
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Dados Pessoais</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Nome"
-                        value={nome}
-                        onChangeText={setNome}
-                        editable={isEditable}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Sobrenome"
-                        value={sobrenome}
-                        onChangeText={setSobrenome}
-                        editable={isEditable}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="E-mail"
-                        value={email}
-                        onChangeText={setEmail}
-                        editable={isEditable}
-                        keyboardType="email-address"
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Telefone"
-                        value={telefone}
-                        onChangeText={setTelefone}
-                        editable={isEditable}
-                        keyboardType="phone-pad"
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="CPF"
-                        value={cpf}
-                        editable={false} 
-                        keyboardType="numeric"
-                    />
-                </View>
+  // Renderização com os dados carregados automaticamente do backend
+  return (
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.container}>
+              <View style={styles.header}>
+                  <Image
+                      source={{ uri: userData?.fotoPerfil || 'https://via.placeholder.com/100' }}
+                      style={styles.profileImage}
+                  />
+                  <Text style={styles.nomeCompleto}>{userData?.nomeCompleto || ''}</Text>
+                  <Text style={styles.rating}>⭐⭐⭐⭐⭐</Text>
+                  
+                  <TouchableOpacity style={styles.editProfileButton} onPress={toggleEditable}>
+                      <Text style={styles.editProfileButtonText}>Editar perfil</Text>
+                  </TouchableOpacity>
+              </View>
 
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Endereço</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="CEP"
-                        value={cep}
-                        onChangeText={setCep}
-                        editable={isEditable}
-                        keyboardType="numeric"
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Bairro"
-                        value={bairro}
-                        onChangeText={setBairro}
-                        editable={isEditable}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Endereço"
-                        value={endereco}
-                        onChangeText={setEndereco}
-                        editable={isEditable}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Número Residencial"
-                        value={numero}
-                        onChangeText={setNumero}
-                        editable={isEditable}
-                        keyboardType="numeric"
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Complemento"
-                        value={complemento}
-                        onChangeText={setComplemento}
-                        editable={isEditable}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Cidade"
-                        value={cidade}
-                        onChangeText={setCidade}
-                        editable={isEditable}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Estado"
-                        value={estado}
-                        onChangeText={setEstado}
-                        editable={isEditable}
-                    />
-                </View>
+              <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Dados Pessoais</Text>
+                  <TextInput
+                      style={styles.input}
+                      placeholder="Nome"
+                      value={userData?.nome || ''}
+                      onChangeText={(text) => setUserData({...userData, nome: text})}
+                      editable={isEditable}
+                  />
+                  <TextInput
+                      style={styles.input}
+                      placeholder="Sobrenome"
+                      value={userData?.sobrenome || ''}
+                      onChangeText={(text) => setUserData({...userData, sobrenome: text})}
+                      editable={isEditable}
+                  />
+                  <TextInput
+                      style={styles.input}
+                      placeholder="E-mail"
+                      value={userData?.email || ''}
+                      onChangeText={(text) => setUserData({...userData, email: text})}
+                      editable={isEditable}
+                      keyboardType="email-address"
+                  />
+                  <TextInput
+                      style={styles.input}
+                      placeholder="Telefone"
+                      value={userData?.telefone || ''}
+                      onChangeText={(text) => setUserData({...userData, telefone: text})}
+                      editable={isEditable}
+                      keyboardType="phone-pad"
+                  />
+                  <TextInput
+                      style={styles.input}
+                      placeholder="CPF"
+                      value={userData?.cpf || ''}
+                      editable={false}
+                      keyboardType="numeric"
+                  />
+              </View>
 
-                {isEditable ? (
-                    <TouchableOpacity style={styles.saveButton} onPress={salvarEdicao}>
-                        <Text style={styles.saveButtonText}>Salvar</Text>
-                    </TouchableOpacity>
-                ) : null}
+              <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Endereço</Text>
+                  <TextInput
+                      style={styles.input}
+                      placeholder="CEP"
+                      value={userData?.cep || ''}
+                      onChangeText={(text) => setUserData({...userData, cep: text})}
+                      editable={isEditable}
+                      keyboardType="numeric"
+                  />
+                  <TextInput
+                      style={styles.input}
+                      placeholder="Bairro"
+                      value={userData?.bairro || ''}
+                      onChangeText={(text) => setUserData({...userData, bairro: text})}
+                      editable={isEditable}
+                  />
+                  <TextInput
+                      style={styles.input}
+                      placeholder="Endereço"
+                      value={userData?.endereco || ''}
+                      onChangeText={(text) => setUserData({...userData, endereco: text})}
+                      editable={isEditable}
+                  />
+                  <TextInput
+                      style={styles.input}
+                      placeholder="Número Residencial"
+                      value={userData?.numero || ''}
+                      onChangeText={(text) => setUserData({...userData, numero: text})}
+                      editable={isEditable}
+                      keyboardType="numeric"
+                  />
+                  <TextInput
+                      style={styles.input}
+                      placeholder="Complemento"
+                      value={userData?.complemento || ''}
+                      onChangeText={(text) => setUserData({...userData, complemento: text})}
+                      editable={isEditable}
+                  />
+                  <TextInput
+                      style={styles.input}
+                      placeholder="Cidade"
+                      value={userData?.cidade || ''}
+                      onChangeText={(text) => setUserData({...userData, cidade: text})}
+                      editable={isEditable}
+                  />
+                  <TextInput
+                      style={styles.input}
+                      placeholder="Estado"
+                      value={userData?.estado || ''}
+                      onChangeText={(text) => setUserData({...userData, estado: text})}
+                      editable={isEditable}
+                  />
+              </View>
 
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Configurações da conta</Text>
-                    <TouchableOpacity>
-                        <Text style={styles.link}>Trocar senha</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate('EntrarLoginCliente')}>
-                        <Text style={[styles.link, styles.red]}>Sair</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity>
-                        <Text style={[styles.link, styles.red]}>Excluir conta</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </ScrollView>
-    );
+              {isEditable ? (
+                  <TouchableOpacity style={styles.saveButton} onPress={salvarEdicao}>
+                      <Text style={styles.saveButtonText}>Salvar</Text>
+                  </TouchableOpacity>
+              ) : null}
+
+              <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Configurações da conta</Text>
+                  <TouchableOpacity>
+                      <Text style={styles.link}>Trocar senha</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => navigation.navigate('EntrarLoginCliente')}>
+                      <Text style={[styles.link, styles.red]}>Sair</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity>
+                      <Text style={[styles.link, styles.red]}>Excluir conta</Text>
+                  </TouchableOpacity>
+              </View>
+          </View>
+      </ScrollView>
+  );
 }
-
 const styles = StyleSheet.create({
     scrollContainer: {
         flexGrow: 1,

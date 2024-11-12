@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icones from 'react-native-vector-icons/Feather';
 import Icone from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon from "react-native-vector-icons/EvilIcons";
+import { Buffer } from 'buffer';
 
 export default function LoginCliente({ navigation }) {
     const [viewPass, setViewPass] = useState(true);
@@ -39,40 +40,44 @@ export default function LoginCliente({ navigation }) {
             return;
         }
 
-        try {
-            const response = await fetch('http://192.168.0.7:8080/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    emailLogin: emailLogin,
-                    senha: senha,
-                }),
-            });
-    
-            if (!response.ok) {
-                if (response.status === 401 || response.status === 403) {
+            try {
+                const response = await fetch('http://192.168.0.7:8080/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ emailLogin, senha }),
+                });
+        
+                if (!response.ok) {
                     Alert.alert("Erro", "Usuário ou senha inválidos");
-                } else {
-                    throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                    return;
                 }
-            } else {
+        
                 const data = await response.json();
-                console.log("Dados recebidos do backend:", data); 
-    
-                if (data && data.token && data.idUsuario) {  
+                const token = data.token;
+                if (data && data.token) {
                     await AsyncStorage.setItem('userToken', data.token);
-                    await AsyncStorage.setItem('idUsuario', data.idUsuario.toString());
-                    navigation.navigate('TelaServ'); 
-                } else {
-                    Alert.alert("Erro", "Resposta inválida ou sem token/ID.");
+                
+                    const partes = data.token.split('.');
+                
+                    if (partes.length !== 3) {
+                        Alert.alert("Erro", "Token inválido.");
+                        return;
+                    }
+                
+                    const payload = JSON.parse(Buffer.from(partes[1], 'base64').toString());
+                    console.log("Payload do token:", payload);
+                
+                    await AsyncStorage.setItem('userData', JSON.stringify(payload));
+                
+                    navigation.navigate('TelaServ');
                 }
+                
+            } catch (error) {
+                console.error("Erro ao fazer login:", error);
+                Alert.alert("Erro", "Ocorreu um erro ao tentar fazer login.");
             }
-        } catch (error) {
-            console.error("Erro de conexão:", error);
-            Alert.alert("Erro", error.message || "Ocorreu um erro ao tentar fazer login.");
-        }
+        
+        
     }
 
     return (
@@ -144,7 +149,6 @@ export default function LoginCliente({ navigation }) {
         </KeyboardAvoidingView>
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,

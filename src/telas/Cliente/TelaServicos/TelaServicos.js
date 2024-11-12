@@ -33,44 +33,25 @@ import geladeira from '../../../../assets/geladeira.jpg';
 const Tab = createBottomTabNavigator();
 
 const TelaInicio = () => {
+  
   const [userData, setUserData] = useState(null);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = await AsyncStorage.getItem('userToken');
-        const idUsuario = await AsyncStorage.getItem('idUsuario');
-        
-        console.log("Token:", token);
-        console.log("ID do usuário:", idUsuario);
-
-        if (token && idUsuario) {
-          const response = await fetch(`http://192.168.0.7:8080/usuarios/${idUsuario}`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
+    useEffect(() => {
+        async function fetchUserData() {
+            try {
+                const data = await AsyncStorage.getItem('userData');
+                if (data) {
+                    const parsedData = JSON.parse(data);
+                    setUserData(parsedData);
+                }
+            } catch (error) {
+                console.error("Erro ao recuperar dados do usuário:", error);
             }
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            setUserData(data);
-          } else {
-            Alert.alert("Erro", "Não foi possível buscar os dados do usuário.");
-          }
-        } else {
-          Alert.alert("Erro", "Token ou ID do usuário não encontrado. Por favor, faça login novamente.");
         }
-      } catch (error) {
-        console.error("Erro de conexão:", error);
-        Alert.alert("Erro", error.message || "Erro ao buscar dados do usuário.");
-      }
-    };
 
-    fetchUserData();
-  }, []);
-
+        fetchUserData();
+    }, []);
+    
   const services = [
     { label: 'Assistência Técnica', icon: { type: FontAwesome, name: 'gears' } },
     { label: 'Aulas', icon: { type: FontAwesome5, name: 'book' } },
@@ -86,8 +67,9 @@ const TelaInicio = () => {
   return (
     <ScrollView>
         <View style={styles.screenContainer}>
-                <TouchableOpacity style={styles.addressContainer} onPress={() => alert('Selecione o endereço')}>
-                  <Text style={styles.addressText}>Rua Exemplo, 100</Text>
+                <TouchableOpacity style={styles.addressContainer}>
+                  <Text style={styles.addressText}>{userData && userData.endereco ? userData.endereco : "Endereço não encontrado"}
+                  </Text>
                 </TouchableOpacity>
 
                 <View style={styles.headerContainer}>
@@ -95,7 +77,7 @@ const TelaInicio = () => {
                   <FontAwesome5 name="user-circle" size={45} color="#89958F" style={styles.userIcon} />
                 </View>
 
-                <Text style={styles.welcomeText}>Olá, {userData?.nome || "Usuário"} </Text>
+                <Text style={styles.welcomeText}>Olá, {userData?.nome || "Usuário"}! </Text>
 
                 <BarraPesquisa />
 
