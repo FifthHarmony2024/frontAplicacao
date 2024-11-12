@@ -34,7 +34,9 @@ const Tab = createBottomTabNavigator();
 
 const TelaInicio = () => {
   
-  const [userData, setUserData] = useState(null);
+  const [userData, setUserData] = useState(null); // dados com o token
+  const [userAddress, setUserAddress] = useState(null); // dados gerais
+
 
     useEffect(() => {
         async function fetchUserData() {
@@ -50,6 +52,26 @@ const TelaInicio = () => {
         }
 
         fetchUserData();
+    }, []);
+
+    useEffect(() => {
+      async function fetchUserAddress() {
+        try {
+          const data = await AsyncStorage.getItem('userData');
+          if (data) {
+            const parsedData = JSON.parse(data);
+            const idUsuario = parsedData.id; 
+  
+            const response = await fetch(`http://192.168.0.7:8080/usuarios/${idUsuario}/perfil`);
+            const addressData = await response.json();
+            setUserAddress(addressData);
+          }
+        } catch (error) {
+          console.error("Erro ao recuperar endereço do usuário:", error);
+        }
+      }
+  
+      fetchUserAddress();
     }, []);
     
   const services = [
@@ -68,8 +90,12 @@ const TelaInicio = () => {
     <ScrollView>
         <View style={styles.screenContainer}>
                 <TouchableOpacity style={styles.addressContainer}>
-                  <Text style={styles.addressText}>{userData && userData.endereco ? userData.endereco : "Endereço não encontrado"}
-                  </Text>
+                <Text style={styles.addressText}>
+                      {userAddress 
+                        ? `${userAddress.endereco}, Nº ${userAddress.numResidencial} - CEP: ${userAddress.cep}`
+                        : "Carregando endereço..."}
+                </Text>
+
                 </TouchableOpacity>
 
                 <View style={styles.headerContainer}>
