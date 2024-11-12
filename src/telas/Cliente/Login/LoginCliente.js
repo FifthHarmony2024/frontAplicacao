@@ -26,9 +26,8 @@ export default function LoginCliente({ navigation }) {
     }
 
     async function handleLogin() {
-        setLoginError('');  // Resetando o erro de login
+        setLoginError(''); 
 
-        // Validações dos campos de e-mail e senha
         if (!emailLogin && !senha) {
             Alert.alert("Erro", "Insira e-mail e senha.");
             return;
@@ -41,7 +40,7 @@ export default function LoginCliente({ navigation }) {
         }
 
         try {
-            const response = await fetch('http://192.168.0.2:8080/login', {
+            const response = await fetch('http://192.168.0.7:8080/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -51,23 +50,23 @@ export default function LoginCliente({ navigation }) {
                     senha: senha,
                 }),
             });
-
+    
             if (!response.ok) {
                 if (response.status === 401 || response.status === 403) {
-                    // Exibe alerta para usuário ou senha incorretos
                     Alert.alert("Erro", "Usuário ou senha inválidos");
                 } else {
                     throw new Error(`Erro ${response.status}: ${response.statusText}`);
                 }
             } else {
-                const data = response.headers.get("content-length") !== "0" ? await response.json() : null;
-
-                if (data && data.token) {
-                    const token = data.token;
-                    await AsyncStorage.setItem('userToken', token);
-                    navigation.navigate('TelaServ');
+                const data = await response.json();
+                console.log("Dados recebidos do backend:", data); 
+    
+                if (data && data.token && data.idUsuario) {  
+                    await AsyncStorage.setItem('userToken', data.token);
+                    await AsyncStorage.setItem('idUsuario', data.idUsuario.toString());
+                    navigation.navigate('TelaServ'); 
                 } else {
-                    Alert.alert("Erro", "Resposta inválida ou sem token.");
+                    Alert.alert("Erro", "Resposta inválida ou sem token/ID.");
                 }
             }
         } catch (error) {

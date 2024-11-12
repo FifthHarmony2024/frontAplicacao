@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, Dimensions, Text, Image, ScrollView } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Dimensions, Text, Image, ScrollView,Alert} from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons, SimpleLineIcons, Octicons, Feather, FontAwesome5, FontAwesome } from '@expo/vector-icons';
 import * as Animatable from 'react-native-animatable';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
@@ -34,38 +33,44 @@ import geladeira from '../../../../assets/geladeira.jpg';
 const Tab = createBottomTabNavigator();
 
 const TelaInicio = () => {
+  const [userData, setUserData] = useState(null);
 
-  const [usuario, setUsuario] = useState(null);
-  const [error, setError] = useState(null);
-
-  // Função para buscar os dados do usuário logado
-  const fetchUsuarioData = async () => {
-    try {
-      // Recupera o token JWT do AsyncStorage
-      const token = await AsyncStorage.getItem('token');
-
-      if (!token) {
-        setError('Token não encontrado. Por favor, faça login novamente.');
-        return;
-      }
-
-      const response = await axios.get('http://192.168.0.2:8080/usuarios/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`,  // Envia o token no cabeçalho
-        }
-      });
-
-      setUsuario(response.data);
-    } catch (err) {
-      setError('Erro ao buscar dados do usuário');
-      console.error(err);
-    }
-  };
-
-  // Chama a função de buscar dados assim que o componente for montado
   useEffect(() => {
-    fetchUsuarioData();
+    const fetchUserData = async () => {
+      try {
+        const token = await AsyncStorage.getItem('userToken');
+        const idUsuario = await AsyncStorage.getItem('idUsuario');
+        
+        console.log("Token:", token);
+        console.log("ID do usuário:", idUsuario);
+
+        if (token && idUsuario) {
+          const response = await fetch(`http://192.168.0.7:8080/usuarios/${idUsuario}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setUserData(data);
+          } else {
+            Alert.alert("Erro", "Não foi possível buscar os dados do usuário.");
+          }
+        } else {
+          Alert.alert("Erro", "Token ou ID do usuário não encontrado. Por favor, faça login novamente.");
+        }
+      } catch (error) {
+        console.error("Erro de conexão:", error);
+        Alert.alert("Erro", error.message || "Erro ao buscar dados do usuário.");
+      }
+    };
+
+    fetchUserData();
   }, []);
+
   const services = [
     { label: 'Assistência Técnica', icon: { type: FontAwesome, name: 'gears' } },
     { label: 'Aulas', icon: { type: FontAwesome5, name: 'book' } },
@@ -90,7 +95,7 @@ const TelaInicio = () => {
                   <FontAwesome5 name="user-circle" size={45} color="#89958F" style={styles.userIcon} />
                 </View>
 
-                <Text style={styles.welcomeText}>Olá, Renata Silva</Text>
+                <Text style={styles.welcomeText}>Olá, {userData?.nome || "Usuário"} </Text>
 
                 <BarraPesquisa />
 
