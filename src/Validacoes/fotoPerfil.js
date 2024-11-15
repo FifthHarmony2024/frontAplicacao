@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_FOTO_PERFIL_URL = 'http://192.168.0.7:8080/usuarios';  
+const API_FOTO_PERFIL_URL = 'http://192.168.0.6:8080/usuarios';  
 
 export const fotoPerfil = async (idUsuario, file) => {
   try {

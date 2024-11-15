@@ -19,7 +19,7 @@ export default function PerfilCliente({ navigation }) {
   
           const idUsuario = parsedData.id;
   
-          const response = await fetch(`http://192.168.0.7:8080/usuarios/${idUsuario}/perfil`);
+          const response = await fetch(`http://192.168.0.6:8080/usuarios/${idUsuario}/perfil`);
           const addressData = await response.json();
   
           console.log("Dados recebidos da API:", addressData);

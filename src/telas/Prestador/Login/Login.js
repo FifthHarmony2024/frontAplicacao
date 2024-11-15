@@ -1,69 +1,146 @@
 import React, { useState } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, Pressable } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, Pressable, Alert } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icones from 'react-native-vector-icons/Feather';
 import Icone from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon from "react-native-vector-icons/EvilIcons";
+import { Buffer } from 'buffer';
 
-export default function Login({ navigation }) {
-
+export default function LoginCliente({ navigation }) {
     const [viewPass, setViewPass] = useState(true);
-    
-    function togglePasswordVisibility(){
+    const [emailLogin, setEmailLogin] = useState('');
+    const [senha, setSenha] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [loginError, setLoginError] = useState('');
+
+    function togglePasswordVisibility() {
         setViewPass(!viewPass);
     }
 
-    return (
-        <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === "ios" ? "padding" : "height"} >
+    function validateEmail(email) {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!regex.test(email)) {
+            setEmailError("Por favor, insira um e-mail válido.");
+        } else {
+            setEmailError("");
+        }
+    }
 
+    async function handleLogin() {
+        setLoginError(''); 
+
+        if (!emailLogin && !senha) {
+            Alert.alert("Erro", "Insira e-mail e senha.");
+            return;
+        } else if (!emailLogin) {
+            Alert.alert("Erro", "Digite o e-mail.");
+            return;
+        } else if (!senha) {
+            Alert.alert("Erro", "Digite a senha.");
+            return;
+        }
+
+            try {
+                const response = await fetch('http://192.168.0.6:8080/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ emailLogin, senha }),
+                });
+        
+                if (!response.ok) {
+                    Alert.alert("Erro", "Usuário ou senha inválidos");
+                    return;
+                }
+        
+                const data = await response.json();
+                const token = data.token;
+                if (data && data.token) {
+                    await AsyncStorage.setItem('userToken', data.token);
+                
+                    const partes = data.token.split('.');
+                
+                    if (partes.length !== 3) {
+                        Alert.alert("Erro", "Token inválido.");
+                        return;
+                    }
+                
+                    const payload = JSON.parse(Buffer.from(partes[1], 'base64').toString());
+                    console.log("Payload do token:", payload);
+                
+                    await AsyncStorage.setItem('userData', JSON.stringify(payload));
+                
+                    navigation.navigate('Drawer');
+                }
+                
+            } catch (error) {
+                console.error("Erro ao fazer login:", error);
+                Alert.alert("Erro", "Ocorreu um erro ao tentar fazer login.");
+            }
+        
+        
+    }
+
+    return (
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
             <ScrollView contentContainerStyle={{ flexGrow: 1 }} bounces={false}>
                 <View style={styles.container}>
-                 <View style={styles.fundoRoxo}>
                     <View style={styles.circleBackground} />
-                    <Icones 
-                            style={styles.seta2} 
-                            name="chevron-left" 
-                            size={40} 
-                            color='#ffffff'  
-                            onPress={() => navigation.goBack('Perfil')} 
+                    <View style={styles.fundoRoxo}>
+                        <Icones
+                            style={styles.seta}
+                            name="chevron-left"
+                            size={40}
+                            color='#ffffff'
+                            onPress={() => navigation.goBack('Perfil')}
                         />
                         <Text style={styles.titulo}>Login</Text>
-                        
+
                         <View style={styles.inputContainer}>
                             <View style={styles.visualizar}>
                                 <Icone name="email-outline" size={20} color="#8A8A8A" style={styles.iconeEmail} />
-
-                                <TextInput 
+                                <TextInput
                                     style={styles.campos}
                                     placeholder="E-mail"
-                                    placeholderTextColor="#8A8A8A" />
+                                    placeholderTextColor="#8A8A8A"
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    value={emailLogin}
+                                    onChangeText={(text) => {
+                                        setEmailLogin(text);
+                                        validateEmail(text);
+                                    }}
+                                />
                             </View>
+                            {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
 
                             <View style={styles.visualizar}>
                                 <Icon name="lock" size={35} color="#8A8A8A" style={styles.iconeSenha} />
-                                <TextInput 
+                                <TextInput
                                     style={styles.camposSenha}
                                     placeholder="Senha"
                                     placeholderTextColor="#8A8A8A"
                                     secureTextEntry={viewPass}
+                                    value={senha}
+                                    onChangeText={setSenha}
                                 />
-                                <Pressable onPress={togglePasswordVisibility} style={styles.iconeOlho}> 
-                                    {viewPass ? 
+                                <Pressable onPress={togglePasswordVisibility} style={styles.iconeOlho}>
+                                    {viewPass ?
                                         (<Icones name="eye-off" size={25} color="#8A8A8A" />) :
                                         (<Icones name="eye" size={25} color="#8A8A8A" />)}
                                 </Pressable>
                             </View>
                         </View>
 
+                        {loginError ? <Text style={styles.errorText}>{loginError}</Text> : null}
+
                         <Text style={styles.linkTexto}>Esqueci minha senha</Text>
 
-                        <TouchableOpacity style={styles.botao} onPress={() => navigation.navigate('Drawer')}>
+                        <TouchableOpacity style={styles.botao} onPress={handleLogin}>
                             <Text style={styles.botaoTexto}>Entrar</Text>
                         </TouchableOpacity>
-                        
+
                     </View>
-                    
+
                     <Text style={styles.cadastroTexto}>
                         Não possui conta? <Text style={styles.cadastroLink} onPress={() => navigation.navigate('CadPrestador')}>Cadastre-se</Text>
                     </Text>
@@ -96,10 +173,9 @@ const styles = StyleSheet.create({
         marginBottom: 50,
         marginTop: -65,
     },
-    seta2:{
+    seta:{
         width: 350,
         fontSize: 30,
-        color: '#FFFFFF',
         marginBottom: 30,
         marginTop: 40,
     },
@@ -122,7 +198,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#000000',
         marginLeft: 10, 
-        
     },
     camposSenha: {
         flex: 1,
@@ -135,28 +210,18 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginLeft: 5,
-                textAlign: 'center'
-
+        textAlign: 'center'
     },
     iconeSenha: {
         paddingHorizontal: 5,
         justifyContent: 'center',
         alignItems: 'center',
         height: 35,    
-        marginLeft:-2,
+        marginLeft: -2,
         textAlign: 'center'
     },
     iconeOlho: {
         paddingHorizontal: 10,
-    },
-    botao: {
-        backgroundColor: '#FE914E',
-        borderRadius: 50,
-        width: '60%',
-        height: 50,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 100,
     },
     botaoTexto: {
         fontSize: 18,
@@ -164,7 +229,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     linkTexto: {
-        marginTop: -15,
+        marginTop: -16,
         marginRight: 150,
         color: '#FFFFFF',
         textDecorationLine: 'underline',
@@ -176,5 +241,21 @@ const styles = StyleSheet.create({
     cadastroLink: {
         color: '#FF0000',
         fontWeight: 'bold',
+    },
+    botao: {
+        backgroundColor: '#FF8E4E',
+        borderRadius: 50,
+        width: '60%',
+        height: 50,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 100,
+    },
+    errorText: {
+        color: '#FF8E4E',
+        fontSize: 14,
+        marginTop: -10,
+        marginBottom: 10,
+        marginLeft: 15,
     },
 });

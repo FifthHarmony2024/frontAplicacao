@@ -88,6 +88,7 @@ export default function Cadastro({ navigation }) {
             cidade: cidadeValue,
             estado: estadoValue, 
             sexoOpcao: sexoOpcaoValue,
+
         };
     
         console.log("userData:", userData);
