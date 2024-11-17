@@ -6,13 +6,14 @@ import { Dropdown } from 'react-native-element-dropdown';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import axios from 'axios';
 import styles from "../../EstilosCliente/estilosCli";
-import { buscarEstados, buscarCidades, buscarTodasCidades} from '../../../Validacoes/apiIBGE'; 
+import { buscarEstados, buscarCidades, buscarTodasCidades,buscarEnderecoPorCep} from '../../../Validacoes/apiIBGE'; 
 
 const sexoOpcao = [
-    { label: 'FEMININO', value: 'FEMININO' },
-    { label: 'MASCULINO', value: 'MASCULINO' },
-    { label: 'PREFIRO NÃO DECLARAR', value: 'PREFIRO NÃO DECLARAR' },
+    { label: 'Feminino', value: 'FEMININO' },
+    { label: 'Masculino', value: 'MASCULINO' },
+    { label: 'Prefiro Não Declarar', value: 'PREFIRO_NAO_DECLARAR'},
 ];
+
 
 export default function CadastroClie({ navigation }) {
     const [viewPass, setViewPass] = useState(true);
@@ -144,15 +145,16 @@ export default function CadastroClie({ navigation }) {
 
     useEffect(() => {
         const carregarEstados = async () => {
-        try {
-            const dadosEstados = await buscarEstados(); 
-            setEstados(dadosEstados); 
-        } catch (error) {
-            console.error('Erro ao carregar estados:', error);
-        }
+            try {
+                const dadosEstados = await buscarEstados();
+                setEstados(dadosEstados);
+            } catch (error) {
+                console.error('Erro ao carregar estados:', error);
+            }
         };
         carregarEstados();
     }, []);
+    
 
     useEffect(() => {
         const carregarCidades = async () => {
@@ -174,7 +176,7 @@ export default function CadastroClie({ navigation }) {
         };
         carregarCidades();
     }, [estadoValue]); 
-
+      
     return (
         <KeyboardAvoidingView
             style={{ flex: 1 }}
@@ -290,8 +292,22 @@ export default function CadastroClie({ navigation }) {
                                 placeholderTextColor="#282828"
                                 keyboardType="numeric"
                                 value={cep}
-                                onChangeText={setCep}
+                                onChangeText={(text) => {
+                                    setCep(text);
+                                    if (text.length === 8) {
+                                        buscarEnderecoPorCep(
+                                            text, 
+                                            setEndereco, 
+                                            setBairro, 
+                                            setEstadoValue, 
+                                            setCidadeValue, 
+                                            estados
+                                        );
+                                    }
+                                }}
                             />
+
+
                             <View style={styles.dropdownContainer}>
                                 {renderLabelEstado()}
                                 <Dropdown
@@ -305,15 +321,18 @@ export default function CadastroClie({ navigation }) {
                                     valueField="value"
                                     search
                                     maxHeight={300}
-                                    placeholder={!estadoFocus ? 'Selecione um estado' : '...'}
+                                    placeholder={!estadoValue ? 'Selecione um estado' : estadoValue}
                                     searchPlaceholder="Pesquisar..."
                                     value={estadoValue}
                                     onFocus={() => setEstadoFocus(true)}
                                     onBlur={() => setEstadoFocus(false)}
-                                    onChange={item => {
+                                    onChange={async (item) => {
                                         setEstadoValue(item.value);
                                         setCidadeValue(null); 
-                                        setCidades([]); 
+                                        setEndereco('');
+                                        setBairro('');
+                                        const dadosCidades = await buscarCidades(item.value);
+                                        setCidades(dadosCidades);
                                     }}
                                     renderLeftIcon={() => (
                                         <AntDesign
@@ -325,38 +344,43 @@ export default function CadastroClie({ navigation }) {
                                     )}
                                 />
                             </View>
+
+
                             <View style={styles.dropdownContainer}>
-                                {renderLabelCidade()}
-                                <Dropdown
-                                    style={[styles.dropdown, cidadeFocus && { borderColor: 'blue' }]}
-                                    placeholderStyle={styles.placeholderStyle}
-                                    selectedTextStyle={styles.selectedTextStyle}
-                                    inputSearchStyle={styles.inputSearchStyle}
-                                    iconStyle={styles.iconStyle}
-                                    search
-                                    maxHeight={300}
-                                    placeholder={!cidadeFocus ? 'Selecione uma cidade' : '...'}
-                                    searchPlaceholder="Pesquisar..."
-                                    data={cidades}
-                                    labelField="label"
-                                    valueField="value"
-                                    value={cidadeValue}
-                                    onFocus={() => setCidadeFocus(true)}
-                                    onBlur={() => setCidadeFocus(false)}
-                                    onChange={item => {
-                                        setCidadeValue(item.value);
-                                    }}
-                                    renderLeftIcon={() => (
-                                        <AntDesign
-                                            style={styles.icon}
-                                            color={cidadeFocus ? '#4E40A2' : '#8A8A8A'}
-                                            name="Safety"
-                                            size={20}
-                                        />
-                                    )}
-                                />
-                            </View>
-                        
+                            {renderLabelCidade()}
+                            <Dropdown
+                                style={[styles.dropdown, cidadeFocus && { borderColor: 'blue' }]}
+                                placeholderStyle={styles.placeholderStyle}
+                                selectedTextStyle={styles.selectedTextStyle}
+                                inputSearchStyle={styles.inputSearchStyle}
+                                iconStyle={styles.iconStyle}
+                                data={cidades}
+                                labelField="label"
+                                valueField="value"
+                                search
+                                maxHeight={300}
+                                placeholder={!cidadeValue ? 'Selecione uma cidade' : cidadeValue}
+                                searchPlaceholder="Pesquisar..."
+                                value={cidadeValue}
+                                onFocus={() => setCidadeFocus(true)}
+                                onBlur={() => setCidadeFocus(false)}
+                                onChange={(item) => {
+                                    setCidadeValue(item.value);
+                                    setEndereco('');
+                                    setBairro('');
+                                }}
+                                renderLeftIcon={() => (
+                                    <AntDesign
+                                        style={styles.icon}
+                                        color={cidadeFocus ? '#4E40A2' : '#8A8A8A'}
+                                        name="Safety"
+                                        size={20}
+                                    />
+                                )}
+                            />
+                        </View>
+
+
                             <TextInput 
                                 style={styles.campos}
                                 placeholder="Bairro"
