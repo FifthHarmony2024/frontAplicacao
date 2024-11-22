@@ -41,7 +41,7 @@ export default function LoginCliente({ navigation }) {
         }
 
             try {
-                const response = await fetch('http://192.168.0.6:8080/login', {
+                const response = await fetch('http://192.168.0.3:8080/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ emailLogin, senha }),

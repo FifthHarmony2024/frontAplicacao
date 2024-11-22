@@ -1,33 +1,80 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity } from 'react-native';
-import imgPes from '../../../../assets/imgPesquisa.png';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import { Feather, Ionicons } from '@expo/vector-icons';
 
-export default function BuscaPesquisa({ navigation }) {
-  const handleSearch = () => {
-    // Navega para a tela de busca 
-    navigation.navigate('BuscaCliente', { pesquisa: 'O que a pessoa digitou xxxx' });
+export default function BuscaPesquisa() {
+  const [searchTerm, setSearchTerm] = useState(''); // Armazena o termo de busca
+  const [prestadores, setPrestadores] = useState([]); // Armazena a lista de prestadores
+  const [loading, setLoading] = useState(false); // Estado para exibir carregamento
+
+  const fetchPrestadores = async () => {
+    if (searchTerm.trim() === '') {
+      alert('Por favor, insira um termo para buscar.');
+      return;
+    }
+  
+    setLoading(true);
+    setPrestadores([]); // Limpa a lista anterior enquanto busca
+  
+    try {
+      // Corrigindo a URL para incluir o parâmetro 'termo'
+      const response = await fetch(`http://192.168.0.3:8080/usuarios/prestadores/buscar-termo?termo=${encodeURIComponent(searchTerm)}`);
+      console.log('Response status:', response.status);
+  
+      if (response.ok) {
+        const data = await response.json();
+        setPrestadores(data);
+      } else if (response.status === 404) {
+        setPrestadores([]);
+        alert('Nenhum prestador encontrado para o termo informado.');
+      } else {
+        alert('Erro ao buscar prestadores. Tente novamente mais tarde.');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar prestadores:', error);
+      alert('Erro ao buscar prestadores. Verifique sua conexão.');
+    } finally {
+      setLoading(false);
+    }
   };
+  
+  
+
+  const renderItem = ({ item }) => (
+    <View style={styles.card}>
+      <Text style={styles.nome}>{item.nomeComercial}</Text>
+      <Text style={styles.categoria}>{item.categoria.nomeCategoria}</Text>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.titulo}>Encontre um serviço</Text>
-      </View>
-
+      <Text style={styles.titulo}>Buscar Prestadores</Text>
       <View style={styles.searchContainer}>
-        <TextInput style={styles.input} placeholder="Buscar" />
-        <TouchableOpacity onPress={handleSearch}>
-          <Ionicons name="options-outline" size={24} color="black" style={styles.iconRight} />
+        <Feather name="search" size={24} color="black" style={styles.iconLeft} />
+        <TextInput
+          style={styles.input}
+          placeholder="Digite o que você precisa"
+          placeholderTextColor="#999"
+          value={searchTerm}
+          onChangeText={setSearchTerm} // Atualiza o termo de busca
+        />
+        <TouchableOpacity onPress={fetchPrestadores}>
+          <Ionicons name="search" size={24} color="black" style={styles.iconRight} />
         </TouchableOpacity>
-        <Text style={styles.cancelText}>Cancelar</Text>
       </View>
 
-      <View style={styles.content}>
-        <Image source={imgPes} style={styles.image} />
-        <Text style={styles.mainText}>Qual é o serviço de hoje?</Text>
-        <Text style={styles.subText}>Digite o serviço ou filtre o prestador desejado que você procura</Text>
-      </View>
+      {loading ? (
+        <ActivityIndicator size="large" color="#7B68EE" style={styles.loading} />
+      ) : (
+        <FlatList
+          data={prestadores}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.idUsuario.toString()}
+          contentContainerStyle={styles.list}
+          ListEmptyComponent={<Text style={styles.emptyText}>Nenhum resultado encontrado</Text>}
+        />
+      )}
     </View>
   );
 }
@@ -36,67 +83,68 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-  },
-  header: {
-    backgroundColor: "#7B68EE",
-    padding: 30,
-    alignItems: 'center',
-    marginTop: 40,
+    padding: 20,
   },
   titulo: {
-    fontSize: 25,
-    color: "#FFF",
-    textAlign: 'center',
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 20,
   },
   searchContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 20,
-    marginTop: 20,
-    borderRadius: 20,
-    backgroundColor: '#FFF',
+    backgroundColor: '#fff',
+    borderRadius: 30,
+    paddingVertical: 10,
     paddingHorizontal: 15,
-    paddingVertical: 8,
+    alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+    marginBottom: 20,
+  },
+  iconLeft: {
+    marginRight: 10,
+  },
+  iconRight: {
+    marginLeft: 10,
   },
   input: {
     flex: 1,
     fontSize: 16,
     color: '#333',
   },
-  filterIcon: {
-    fontSize: 18,
-    color: '#7B68EE',
-    marginHorizontal: 10,
+  list: {
+    paddingBottom: 20,
   },
-  cancelText: {
-    color: '#7B68EE',
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  nome: {
     fontSize: 16,
-  },
-  content: {
-    alignItems: 'center',
-    marginTop: 50,
-  },
-  image: {
-    width: 200,
-    height: 200,
-    resizeMode: 'contain',
-  },
-  mainText: {
-    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
-    textAlign: 'center',
+  },
+  categoria: {
+    fontSize: 14,
+    color: '#89958F',
+  },
+  loading: {
     marginTop: 20,
   },
-  subText: {
-    fontSize: 16,
-    color: '#888',
+  emptyText: {
     textAlign: 'center',
-    marginTop: 10,
-    paddingHorizontal: 20,
+    color: '#89958F',
+    fontSize: 16,
   },
 });
