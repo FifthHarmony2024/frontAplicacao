@@ -31,6 +31,7 @@ import ServicoPesq from './src/telas/Cliente/Pesquisa/ServicoPesq';
 import ChatScreen from './src/telas/Prestador/Chat/ChatScreen';
 import ChatAgenda from './src/telas/Prestador/MinhaAgenda/ChatAgenda';
 import AgendamentoScreen from './src/telas/Prestador/MinhaAgenda/AgendamentoScreen';
+import DetalhesPrestador from './src/telas/Cliente/Pesquisa/DetalhesPrestador';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -140,11 +141,12 @@ export default function App() {
         <Stack.Screen name="Drawer" component={DrawerNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="Conversas" component={Chat} options={{ headerShown: false }} />
         <Stack.Screen name="ChatDentro" component={ChatScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="PesquisaBusca" component={BuscaPesquisa} options={{ headerShown: false }} />
         <Stack.Screen name="CadastroPres2" component={InfoPrestador} options={{ headerShown: false }} />
-        <Stack.Screen name="BuscaCliente" component={ServicoPesq} options={{ headerShown: false }} />
         <Stack.Screen name="AgendaCHAT" component={ChatAgenda} options={{ headerShown: false }} />
         <Stack.Screen name="Agendamento" component={AgendamentoScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="BuscaPesquisa" component={BuscaPesquisa} options={{headerShown: false }} />
+        <Stack.Screen name="ServicoPesq" component={ServicoPesq} options={{ headerShown: false}} />
+        <Stack.Screen name="DetalhesPrestador" component={DetalhesPrestador} options={{ headerShown: false}} />
 
       </Stack.Navigator>
     </NavigationContainer>

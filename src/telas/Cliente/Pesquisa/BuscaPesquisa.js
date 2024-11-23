@@ -1,95 +1,96 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
-import { Feather, Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, TextInput, Text, Image, TouchableOpacity, StyleSheet, Keyboard, Alert } from 'react-native';
+import { Feather, Ionicons, AntDesign } from '@expo/vector-icons';
 
-export default function BuscaPesquisa() {
-  const [searchTerm, setSearchTerm] = useState(''); // Armazena o termo de busca
-  const [prestadores, setPrestadores] = useState([]); // Armazena a lista de prestadores
-  const [loading, setLoading] = useState(false); // Estado para exibir carregamento
+import imgPesquisa from '../../../../assets/imgPesquisa.png';
 
-  const fetchPrestadores = async () => {
-    if (searchTerm.trim() === '') {
-      alert('Por favor, insira um termo para buscar.');
-      return;
+const BuscaPesquisa = ({ navigation, route }) => {
+  const { focus } = route.params || {};
+  const [searchTerm, setSearchTerm] = useState('');
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (focus && inputRef.current) {
+      inputRef.current.focus(); 
     }
-  
-    setLoading(true);
-    setPrestadores([]); // Limpa a lista anterior enquanto busca
-  
-    try {
-      // Corrigindo a URL para incluir o parâmetro 'termo'
-      const response = await fetch(`http://192.168.0.3:8080/usuarios/prestadores/buscar-termo?termo=${encodeURIComponent(searchTerm)}`);
-      console.log('Response status:', response.status);
-  
-      if (response.ok) {
-        const data = await response.json();
-        setPrestadores(data);
-      } else if (response.status === 404) {
-        setPrestadores([]);
-        alert('Nenhum prestador encontrado para o termo informado.');
-      } else {
-        alert('Erro ao buscar prestadores. Tente novamente mais tarde.');
-      }
-    } catch (error) {
-      console.error('Erro ao buscar prestadores:', error);
-      alert('Erro ao buscar prestadores. Verifique sua conexão.');
-    } finally {
-      setLoading(false);
+  }, [focus]);
+
+  const handleCancel = () => {
+    navigation.goBack();
+  };
+
+  const handleSearch = () => {
+    if (searchTerm.trim()) {
+      navigation.navigate('ServicoPesq', { termoBusca: searchTerm });
+    } else {
+      Alert.alert('Busca vazia', 'Por favor, digite algo para buscar.');
     }
   };
-  
-  
 
-  const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <Text style={styles.nome}>{item.nomeComercial}</Text>
-      <Text style={styles.categoria}>{item.categoria.nomeCategoria}</Text>
-    </View>
-  );
+  const clearSearch = () => {
+    setSearchTerm('');
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Buscar Prestadores</Text>
-      <View style={styles.searchContainer}>
-        <Feather name="search" size={24} color="black" style={styles.iconLeft} />
-        <TextInput
-          style={styles.input}
-          placeholder="Digite o que você precisa"
-          placeholderTextColor="#999"
-          value={searchTerm}
-          onChangeText={setSearchTerm} // Atualiza o termo de busca
-        />
-        <TouchableOpacity onPress={fetchPrestadores}>
-          <Ionicons name="search" size={24} color="black" style={styles.iconRight} />
+      <View style={styles.header}>
+        <TouchableOpacity onPress={handleCancel}>
+          <Ionicons name="arrow-back" size={24} color="#4E40A2" />
         </TouchableOpacity>
+        <Text style={styles.headerTitle}>Encontre um serviço</Text>
       </View>
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#7B68EE" style={styles.loading} />
-      ) : (
-        <FlatList
-          data={prestadores}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.idUsuario.toString()}
-          contentContainerStyle={styles.list}
-          ListEmptyComponent={<Text style={styles.emptyText}>Nenhum resultado encontrado</Text>}
+      <View style={styles.searchContainer}>
+        <TouchableOpacity onPress={handleSearch}>
+          <Feather name="search" size={20} color="#FE914E" style={styles.iconLeft} />
+        </TouchableOpacity>
+        <TextInput
+          ref={inputRef}
+          style={styles.input}
+          placeholder="Buscar"
+          placeholderTextColor="#999"
+          value={searchTerm}
+          onChangeText={setSearchTerm}
+          onSubmitEditing={handleSearch} 
+          returnKeyType="search" 
+          autoFocus 
         />
-      )}
+        {searchTerm.trim() ? (
+          <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>
+            <AntDesign name="closecircle" size={20} color="#7B68EE" />
+          </TouchableOpacity>
+        ) : (
+          <Ionicons name="options-outline" size={20} color="#7B68EE" style={styles.iconRight} />
+        )}
+      </View>
+
+      <View style={styles.content}>
+        <Image source={imgPesquisa} style={styles.image} />
+        <Text style={styles.description}>
+          Qual é o serviço de hoje?{'\n'}
+          Digite o serviço ou filtre o prestador desejado.
+        </Text>
+      </View>
     </View>
   );
-}
-
+};
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F5F5',
     padding: 20,
   },
-  titulo: {
-    fontSize: 22,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 30,
+    marginTop: 40,
+  },
+  headerTitle: {
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 20,
+    color: '#4E40A2',
+    marginLeft: 10, 
   },
   searchContainer: {
     flexDirection: 'row',
@@ -98,10 +99,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 15,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
     elevation: 5,
     marginBottom: 20,
   },
@@ -111,40 +108,30 @@ const styles = StyleSheet.create({
   iconRight: {
     marginLeft: 10,
   },
+  clearButton: {
+    marginLeft: 10,
+  },
   input: {
     flex: 1,
     fontSize: 16,
     color: '#333',
   },
-  list: {
-    paddingBottom: 20,
+  content: {
+    alignItems: 'center',
+    marginTop: 50,
   },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 5,
-    elevation: 3,
+  image: {
+    width: 290,
+    height: 290,
+    resizeMode: 'contain',
+    marginBottom: 20,
   },
-  nome: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  categoria: {
-    fontSize: 14,
-    color: '#89958F',
-  },
-  loading: {
-    marginTop: 20,
-  },
-  emptyText: {
+  description: {
+    fontSize: 18,
     textAlign: 'center',
-    color: '#89958F',
-    fontSize: 16,
+    color: '#666',
+    marginTop: -30,
   },
 });
+
+export default BuscaPesquisa;

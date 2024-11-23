@@ -15,9 +15,11 @@ export default function PesquisaClie({ navigation }) {
     { label: 'Moda e Beleza', icon: { type: FontAwesome5, name: 'cut' } },
   ];
 
+  
   const handleSearchPress = () => {
-    navigation.navigate('PesquisaBusca'); 
+    navigation.navigate('BuscaPesquisa', { focus: true }); 
   };
+
 
   return (
     <View style={styles.container}>

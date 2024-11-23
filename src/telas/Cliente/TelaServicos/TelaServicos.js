@@ -28,6 +28,7 @@ import ar from '../../../../assets/ar.jpg';
 import camera from '../../../../assets/camera.jpg';
 import redes from '../../../../assets/redes.jpg';
 import geladeira from '../../../../assets/geladeira.jpg';
+import ServicoPesq from '../Pesquisa/ServicoPesq';
 
 
 const Tab = createBottomTabNavigator();
@@ -453,6 +454,7 @@ export default function AppNavigator() {
     { name: 'Pedidos', label: 'Pedidos', iconType: SimpleLineIcons, iconName: 'handbag', component: PedidosCliente },
     { name: 'Notificações', label: 'Notificações', iconType: Ionicons, iconName: 'notifications', component: Notificacao },
     { name: 'Perfil', label: 'Perfil', iconType: Octicons, iconName: 'person', component: PerfilCliente },
+
   ];
 
   return (
@@ -477,4 +479,5 @@ export default function AppNavigator() {
       
     </Tab.Navigator>
   );
+  
 }

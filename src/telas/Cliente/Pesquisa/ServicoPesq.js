@@ -1,105 +1,208 @@
-import React from 'react';
-import { View, Text, TextInput, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import { View, FlatList, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Image, TextInput, Alert } from 'react-native';
+import axios from 'axios';
+import { Feather, Ionicons, AntDesign } from '@expo/vector-icons';
 
-const ServicoPesq = ({ route }) => {
-  // Verifique se route.params está definido
-  const pesquisa = route.params?.pesquisa || 'O que a pessoa digitou xxxx'; // Define um valor padrão se não houver pesquisa
+const ServicoPesq = ({ route, navigation }) => {
+    const { termoBusca } = route.params; 
+    const [results, setResults] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [favoritos, setFavoritos] = useState({}); 
+    const [searchTerm, setSearchTerm] = useState(termoBusca || '');
 
-  const prestadores = [
-    {
-      id: '1',
-      nome: 'Nome da Empresa 1',
-      imagem: 'https://via.placeholder.com/150',
-      categoria: 'GTD Estabele - Distância',
-    },
-    {
-      id: '2',
-      nome: 'Nome da Empresa 2',
-      imagem: 'https://via.placeholder.com/150',
-      categoria: 'GTD Estabele - Distância',
-    },
-  ];
+    useEffect(() => {
+        const fetchResults = async () => {
+            try {
+                const response = await axios.get(
+                    `http://192.168.0.2:8080/usuarios/prestadores/buscar-termo?termo=${searchTerm}`
+                );
+                console.log('Dados retornados pela API:', response.data);
+                setResults(response.data);
+            } catch (err) {
+                console.error('Erro ao buscar dados:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.card}>
-      <View style={styles.cardContent}>
-        <Text style={styles.nome}>{item.nome}</Text>
-        <Text style={styles.categoria}>{item.categoria}</Text>
-        <View style={styles.imagemContainer}>
-          <Image source={{ uri: item.imagem }} style={styles.imagem} />
+        if (searchTerm.trim()) {
+            fetchResults();
+        } else {
+            setResults([]); 
+        }
+    }, [searchTerm]);
+
+    const toggleFavorito = (id) => {
+        setFavoritos((prev) => ({ ...prev, [id]: !prev[id] }));
+    };
+
+    const handleSearch = () => {
+        if (searchTerm.trim()) {
+            navigation.navigate('ServicoPesq', { termoBusca: searchTerm });
+        } else {
+            Alert.alert('Busca vazia', 'Por favor, digite algo para buscar.');
+        }
+    };
+
+    const clearSearch = () => {
+        setSearchTerm('');
+    };
+
+    const renderItem = ({ item }) => (
+        <TouchableOpacity
+            style={styles.card}
+            onPress={() => navigation.navigate('DetalhesPrestador', { prestador: item })}
+        >
+=            <Image
+                source={{ uri: item.fotoPerfil || 'https://via.placeholder.com/50' }}
+                style={styles.profileImage}
+            />
+            <View style={styles.detailsContainer}>
+                <Text style={styles.name}>{item.nomeComercial}</Text>
+                <View style={styles.row}>
+                    <Text style={styles.rating}>⭐ {item.estrelas || 0}</Text>
+                    <Text style={styles.distance}>{item.distancia || '0'}m</Text>
+                </View>
+                <Text style={styles.services}>Serviços: {item.servicos || 'Não especificado'}</Text>
+            </View>
+            <TouchableOpacity
+                style={styles.favoriteIcon}
+                onPress={() => toggleFavorito(item.id)}
+            >
+                <Ionicons
+                    name={favoritos[item.id] ? 'heart' : 'heart-outline'}
+                    size={24}
+                    color={favoritos[item.id] ? '#FF6F61' : '#808080'} 
+                />
+            </TouchableOpacity>
+        </TouchableOpacity>
+    );
+
+    return (
+        <View style={styles.container}>
+            <View style={styles.searchContainer}>
+                <TouchableOpacity onPress={handleSearch}>
+                    <Feather name="search" size={20} color="#FE914E" style={styles.iconLeft} />
+                </TouchableOpacity>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Buscar"
+                    placeholderTextColor="#999"
+                    value={searchTerm}
+                    onChangeText={setSearchTerm}
+                    onSubmitEditing={handleSearch}
+                    returnKeyType="search"
+                />
+                {searchTerm.trim() ? (
+                    <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>
+                        <AntDesign name="closecircle" size={20} color="#7B68EE" />
+                    </TouchableOpacity>
+                ) : (
+                    <Ionicons name="options-outline" size={20} color="#7B68EE" style={styles.iconRight} />
+                )}
+            </View>
+
+            {loading && <ActivityIndicator size="large" color="#0000ff" />}
+            <FlatList
+                data={results}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={renderItem}
+                ListEmptyComponent={
+                    !loading && results.length === 0 && (
+                        <Text style={styles.empty}>Nenhum prestador encontrado.</Text> 
+                    )
+                }
+            />
         </View>
-      </View>
-    </TouchableOpacity>
-  );
-
-  return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="O que a pessoa digitou xxxx"
-        value={pesquisa}
-        editable={false} 
-      />
-      <FlatList
-        data={prestadores}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-      />
-    </View>
-  );
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-    padding: 20,
-  },
-  input: {
-    height: 50,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    marginBottom: 20,
-    marginTop:50
-  },
-  list: {
-    paddingBottom: 20,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 5,
-    elevation: 3,
-  },
-  cardContent: {
-    flexDirection: 'column',
-  },
-  nome: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  categoria: {
-    fontSize: 14,
-    color: '#89958F',
-  },
-  imagemContainer: {
-    marginTop: 10,
-  },
-  imagem: {
-    width: '100%',
-    height: 150,
-    borderRadius: 10,
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#f5f5f5',
+    },
+    searchContainer: {
+        flexDirection: 'row',
+        backgroundColor: '#fff',
+        borderRadius: 30,
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        alignItems: 'center',
+        elevation: 5,
+        marginBottom: 20,
+        marginTop: 53,
+        marginHorizontal: 10,
+    },
+    iconLeft: {
+        marginRight: 10,
+    },
+    iconRight: {
+        marginLeft: 10,
+    },
+    clearButton: {
+        marginLeft: 10,
+    },
+    input: {
+        flex: 1,
+        fontSize: 16,
+        color: '#333',
+    },
+    card: {
+        flexDirection: 'row',
+        backgroundColor: '#fff',
+        padding: 15,
+        borderRadius: 10,
+        marginBottom: 10,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 3,
+        marginHorizontal: 10,
+        marginTop: 10,
+    },
+    profileImage: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        marginRight: 15,
+    },
+    detailsContainer: {
+        flex: 1,
+    },
+    name: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 5,
+    },
+    row: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 5,
+    },
+    rating: {
+        fontSize: 14,
+        color: '#FFD700', 
+        marginRight: 10,
+    },
+    distance: {
+        fontSize: 14,
+        color: '#555',
+    },
+    services: {
+        fontSize: 14,
+        color: '#777',
+    },
+    favoriteIcon: {
+        marginLeft: 10,
+    },
+    empty: {
+        textAlign: 'center',
+        marginTop: 20,
+        color: '#999', 
+    },
 });
 
 export default ServicoPesq;
