@@ -32,6 +32,7 @@ import ChatScreen from './src/telas/Prestador/Chat/ChatScreen';
 import ChatAgenda from './src/telas/Prestador/MinhaAgenda/ChatAgenda';
 import AgendamentoScreen from './src/telas/Prestador/MinhaAgenda/AgendamentoScreen';
 import DetalhesPrestador from './src/telas/Cliente/Pesquisa/DetalhesPrestador';
+import VerTodos from './src/telas/Cliente/TelaServicos/VerTodos';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -147,6 +148,7 @@ export default function App() {
         <Stack.Screen name="BuscaPesquisa" component={BuscaPesquisa} options={{headerShown: false }} />
         <Stack.Screen name="ServicoPesq" component={ServicoPesq} options={{ headerShown: false}} />
         <Stack.Screen name="DetalhesPrestador" component={DetalhesPrestador} options={{ headerShown: false}} />
+        <Stack.Screen name="VerTodos" component={VerTodos} options={{ headerShown: false}} />
 
       </Stack.Navigator>
     </NavigationContainer>

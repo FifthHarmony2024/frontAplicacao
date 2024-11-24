@@ -102,7 +102,7 @@ export default function CadastroClie({ navigation }) {
         console.log('Dados que serão enviados:', JSON.stringify(userData, null, 2));
     
         try {
-            const response = await axios.post('http://192.168.0.6:8080/usuarios/cliente', userData, {
+            const response = await axios.post('http://192.168.0.2:8080/usuarios/cliente', userData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },

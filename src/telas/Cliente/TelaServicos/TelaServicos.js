@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons, SimpleLineIcons, Octicons, Feather, FontAwesome5, FontAwesome } from '@expo/vector-icons';
 import * as Animatable from 'react-native-animatable';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
 
 import BarraPesquisa from '../../Estilos/BarraPesquisa';
@@ -34,7 +35,7 @@ import ServicoPesq from '../Pesquisa/ServicoPesq';
 const Tab = createBottomTabNavigator();
 
 const TelaInicio = () => {
-  
+  const navigation = useNavigation();
   const [userData, setUserData] = useState(null); // dados com o token
   const [userAddress, setUserAddress] = useState(null); // dados gerais
 
@@ -63,7 +64,7 @@ const TelaInicio = () => {
             const parsedData = JSON.parse(data);
             const idUsuario = parsedData.id; 
   
-            const response = await fetch(`http://192.168.0.6:8080/usuarios/${idUsuario}/perfil`);
+            const response = await fetch(`http://192.168.0.2:8080/usuarios/${idUsuario}/perfil`);
             const addressData = await response.json();
             setUserAddress(addressData);
           }
@@ -75,17 +76,18 @@ const TelaInicio = () => {
       fetchUserAddress();
     }, []);
     
-  const services = [
-    { label: 'Assistência Técnica', icon: { type: FontAwesome, name: 'gears' } },
-    { label: 'Aulas', icon: { type: FontAwesome5, name: 'book' } },
-    { label: 'Eventos', icon: { type: FontAwesome5, name: 'glass-cheers' } },
-    { label: 'Saúde', icon: { type: FontAwesome5, name: 'heart' } },
-    { label: 'Reformas e Reparos', icon: { type: Ionicons, name: 'construct-outline' } },
-    { label: 'Serviços Gerais', icon: { type: FontAwesome5, name: 'briefcase' } },
-    { label: 'Serviços Domésticos', icon: { type: Ionicons, name: 'home' } },
-    { label: 'Transporte', icon: { type: FontAwesome5, name: 'car' } },
-    { label: 'Moda e Beleza', icon: { type: FontAwesome5, name: 'cut' } },
-  ];
+    const services = [
+      { label: 'Assistência Técnica', icon: { type: FontAwesome, name: 'gears' }, idCategoria: 1 },
+      { label: 'Aulas', icon: { type: FontAwesome5, name: 'book' }, idCategoria: 2 },
+      { label: 'Eventos', icon: { type: FontAwesome5, name: 'glass-cheers' }, idCategoria: 5 },
+      { label: 'Saúde', icon: { type: FontAwesome5, name: 'heart' }, idCategoria: 6 },
+      { label: 'Reformas e Reparos', icon: { type: Ionicons, name: 'construct-outline' }, idCategoria: 3 },
+      { label: 'Serviços Gerais', icon: { type: FontAwesome5, name: 'briefcase' }, idCategoria: 7 },
+      { label: 'Serviços Domésticos', icon: { type: Ionicons, name: 'home' }, idCategoria: 4 },
+      { label: 'Transporte', icon: { type: FontAwesome5, name: 'car' }, idCategoria: 8 },
+      { label: 'Moda e Beleza', icon: { type: FontAwesome5, name: 'cut' }, idCategoria: 9 },
+    ];
+    
 
   return (
     <ScrollView>
@@ -109,14 +111,18 @@ const TelaInicio = () => {
                 <BarraPesquisa />
 
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.serviceScroll}>
-                  {services.map((service, index) => (
-                    <TouchableOpacity key={index} style={styles.serviceButton} onPress={() => alert(service.label)}>
-                      <View style={styles.iconCircle}>
-                        <service.icon.type name={service.icon.name} size={24} color="#7B68EE" />
-                      </View>
-                      <Text style={styles.serviceLabel}>{service.label}</Text>
-                    </TouchableOpacity>
-                  ))}
+                      {services.map((service) => (
+                        <TouchableOpacity
+                          key={service.idCategoria} 
+                          style={styles.serviceButton} 
+                          onPress={() => navigation.navigate('VerTodos', { idCategoria: service.idCategoria })} 
+                        >
+                          <View style={styles.iconCircle}>
+                            <service.icon.type name={service.icon.name} size={24} color="#7B68EE" />
+                          </View>
+                          <Text style={styles.serviceLabel}>{service.label}</Text>
+                        </TouchableOpacity>
+                      ))}
                 </ScrollView>
 
                 <View style={styles.sectionHeader}>
