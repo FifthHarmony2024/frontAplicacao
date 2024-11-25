@@ -1,85 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image, TextInput, ScrollView } from "react-native";
 import { launchImageLibrary } from 'react-native-image-picker';
 import Icones from 'react-native-vector-icons/Feather'; 
 import Icons from 'react-native-vector-icons/Ionicons';
 import Icom from 'react-native-vector-icons/AntDesign';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function PerfilPrestador({ navigation }) {
-    const [imageUri, setImageUri] = useState(null);
-    const [catalogImages, setCatalogImages] = useState([]);
-    const [serviceDescription, setServiceDescription] = useState(""); 
-    const [additionalServiceInfo, setAdditionalServiceInfo] = useState(""); 
-    const [isEditingDescription, setIsEditingDescription] = useState(false);
-
-    const [newService, setNewService] = useState(""); // Novo serviço a ser adicionado
-    const [customServices, setCustomServices] = useState([]); // Lista de serviços adicionados pelo usuário
-    const [editingServiceIndex, setEditingServiceIndex] = useState(null); // Índice do serviço em edição
-
-
-    // Dados simulados de cadastro
-    const categoryFromCadastro = "Serviço de Limpeza"; 
-    const servicesFromCadastro = ["Limpeza de Casas", "Limpeza Comercial"]; 
-
-    const openGallery = () => {
-        const options = {
-            mediaType: 'photo',
-        };
-
-        launchImageLibrary(options, (response) => {
-            if (response.didCancel) {
-                console.log('Usuário cancelou a seleção de imagem');
-            } else if (response.errorCode) {
-                console.log('Erro ao selecionar imagem: ', response.errorMessage);
-            } else if (response.assets && response.assets.length > 0) {
-                setImageUri(response.assets[0].uri);
+    const [userAddress, setUserAddress] = useState(null);  // Endereço do usuário
+    const [userData, setUserData] = useState(null);  // Dados gerais do usuário
+  
+    const handleAddImage = () => {
+        // Lógica para abrir o seletor de imagens
+        console.log('Botão de adicionar imagem pressionado');
+    };
+    
+    useEffect(() => {
+        async function fetchUserData() {
+            try {
+                const data = await AsyncStorage.getItem('userData');
+                if (data) {
+                    const parsedData = JSON.parse(data);
+    
+                    if (!userData) {
+                        console.log("Dados armazenados no AsyncStorage:", parsedData);
+                    }
+    
+                    const idUsuario = parsedData.id;
+    
+                    const response = await fetch(`http://192.168.0.5:8080/usuarios/${idUsuario}/perfilPrestador`);
+                    const addressData = await response.json();
+    
+                    if (!userAddress) {
+                        console.log("Dados recebidos da API:", addressData);
+                    }
+    
+                    const fullUserData = {
+                        ...parsedData,
+                        ...addressData,
+                    };
+    
+                    await AsyncStorage.setItem('userData', JSON.stringify(fullUserData));
+    
+                    setUserData(fullUserData); 
+                    setUserAddress(addressData);
+                }
+            } catch (error) {
+                console.error("Erro ao recuperar dados do usuário:", error);
             }
-        });
-    };
-
-    const addCatalogImage = () => {
-        const options = {
-            mediaType: 'photo',
-        };
-
-        launchImageLibrary(options, (response) => {
-            if (response.didCancel) {
-                console.log('Usuário cancelou a seleção de imagem');
-            } else if (response.errorCode) {
-                console.log('Erro ao selecionar imagem: ', response.errorMessage);
-            } else if (response.assets && response.assets.length > 0) {
-                setCatalogImages([...catalogImages, response.assets[0].uri]);
-            }
-        });
-    };
-
-    const saveServiceDescription = () => {
-        console.log("Descrição salva:", serviceDescription);
-        setIsEditingDescription(false); 
-    };
-
-    const addNewService = () => {
-        if (newService.trim() !== "") {
-            setCustomServices([...customServices, newService]);
-            setNewService("");
         }
-    };
-
-    const editService = (index) => {
-        setEditingServiceIndex(index);
-        setNewService(customServices[index]);
-    };
-
-    const saveEditedService = () => {
-        if (editingServiceIndex !== null && newService.trim() !== "") {
-            const updatedServices = [...customServices];
-            updatedServices[editingServiceIndex] = newService;
-            setCustomServices(updatedServices);
-            setEditingServiceIndex(null);
-            setNewService("");
-        }
-    };
-
+    
+        fetchUserData();
+    }, []);
+    
 
     return (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -114,7 +87,9 @@ export default function PerfilPrestador({ navigation }) {
 
                 <View style={styles.userInfoContainer}>
                     <View style={styles.nameEditContainer}>
-                        <Text style={styles.headerText}>Nome do Usuário</Text>
+                    <Text style={styles.nomeCom}>
+                            {userData?.nomeComercial || 'Usuário'}
+                    </Text>
                         <Icones
                             style={styles.editar}
                             name="edit"
@@ -125,16 +100,7 @@ export default function PerfilPrestador({ navigation }) {
                 </View>
 
                 <View style={styles.adContainer}>
-                    <TouchableOpacity onPress={openGallery}>
-                        {imageUri ? (
-                            <Image source={{ uri: imageUri }}/>
-                        ) : (
-                            <View style={styles.defaultImage}>
-                                <Text style={styles.addImageText}>Adicionar Imagem</Text>
-                            </View>
-                        )}
-                    </TouchableOpacity>
-
+                    
                     <View style={styles.sectionContainer}>
                         <View style={styles.sectionHeader}>
                             <Icom
@@ -147,132 +113,118 @@ export default function PerfilPrestador({ navigation }) {
                         </View>
 
                         <Text style={styles.label}>Categoria:</Text>
-                        <Text style={styles.infoText}>{categoryFromCadastro}</Text>
+                        <Text style={styles.infoTextLarge}>{userData?.nomeCategoria || ''}</Text>
 
                         <Text style={styles.label}>Descrição do Serviço:</Text>
-                    {isEditingDescription ? (
-                        <View>
-                            <TextInput 
-                                style={styles.input} 
-                                value={serviceDescription} 
-                                onChangeText={setServiceDescription} 
-                                placeholder="Digite a descrição do serviço"
-                                multiline 
-                            />
-                            <TouchableOpacity style={styles.saveButton} onPress={saveServiceDescription}>
+                            <View style={styles.editDescriptionContainer}>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Digite a descrição do seu serviço"
+                                    placeholderTextColor="#aaa"
+                                    value={userData?.descricaoServico || ''} 
+                                    onChangeText={(text) => {
+                                        const updatedData = { ...userData, descricaoServico: text };
+                                        setUserData(updatedData); 
+                                    }}
+                                    multiline
+                                />
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    // Lógica para salvar no backend ou mostrar confirmação
+                                    alert(`Descrição "${userData?.descricaoServico}" salva com sucesso!`);
+                                }}
+                                style={styles.saveButton}
+                            >
                                 <Text style={styles.saveButtonText}>Salvar Descrição</Text>
                             </TouchableOpacity>
-                        </View>
-                    ) : (
-                        <View style={styles.editDescriptionContainer}>
-                            <Text style={styles.infoText}>
-                                {serviceDescription || "Você ainda não adicionou uma descrição"}
-                            </Text>
-                            <TouchableOpacity onPress={() => setIsEditingDescription(true)}>
-                                <Icones name="edit-3" size={20} color="#4E40A2" style={styles.editIcon} />
-                            </TouchableOpacity>
-                        </View>
-
-                    )}
                     </View>
 
-                    <View style={styles.sectionContainer}>
-                    <View style={styles.sectionHeader}>
-                        <Icom
-                            style={styles.icon}
-                            name="folderopen"
-                            size={25} 
-                            color="#FE914E"
-                        />
-                        <Text style={styles.sectionTitle}>Serviços que Atendo</Text>
-                    </View>
-
-                    {servicesFromCadastro.map((service, index) => (
-                        <Text key={index} style={styles.infoText}>{service}</Text>
-                    ))}
-
-                    {customServices.map((service, index) => (
-                        <View key={index} style={styles.editDescriptionContainer}>
-                            <Text style={styles.infoText}>{service}</Text>
-                            <TouchableOpacity onPress={() => editService(index)}>
-                                <Icones name="edit-3" size={20} color="#4E40A2" style={styles.editIcon} />
-                            </TouchableOpacity>
-                        </View>
-                    ))}
-
-                    {editingServiceIndex !== null ? (
-                        <View>
-                            <TextInput 
-                                style={styles.input} 
-                                value={newService} 
-                                onChangeText={setNewService} 
-                                placeholder="Edite o serviço"
-                                multiline 
-                            />
-                            <TouchableOpacity style={styles.saveButton} onPress={saveEditedService}>
-                                <Text style={styles.saveButtonText}>Salvar Serviço</Text>
-                            </TouchableOpacity>
-                        </View>
-                    ) : (
-                        <View>
-                            <TextInput 
-                                style={styles.input} 
-                                value={newService} 
-                                onChangeText={setNewService} 
-                                placeholder="Adicionar mais serviços"
-                                multiline 
-                            />
-                            <TouchableOpacity style={styles.saveButton} onPress={addNewService}>
-                                <Text style={styles.saveButtonText}>Adicionar Serviço</Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                </View>
 
                     <View style={styles.sectionContainer}>
                         <View style={styles.sectionHeader}>
-                            <Icons
-                                style={styles.icon}
-                                name="medal-outline"
-                                size={25} 
-                                color="#FE914E"
-                            />
-                            <Text style={styles.sectionTitle}>Minhas Conquistas</Text>
-                        </View>
-                        <Text style={styles.infoText}>Conquistas automáticas baseadas nos pedidos finalizados.</Text>
-                    </View>
+                        <Icons name="briefcase-outline" size={25} color="#FE914E" style={styles.icon} />
 
-                    <View style={styles.sectionContainer}>
-                        <View style={styles.sectionHeader}>
-                            <Icom
-                                style={styles.icon}
-                                name="folderopen"
-                                size={25} 
-                                color="#FE914E"
-                            />
-                            <Text style={styles.sectionTitle}>Catálogo</Text>
+                            <Text style={styles.sectionTitle}>Meus Serviços</Text>
                         </View>
-                        <View style={styles.catalogContainer}>
-                            {catalogImages.length === 0 ? (
-                                <Text>Sem imagens no catálogo</Text>
+
+                        <Text style={styles.label}>Serviços:</Text>
+                            {Array.isArray(userData?.nomeServico) ? (
+                                userData.nomeServico.length > 0 ? (
+                                    userData.nomeServico.map((servico, index) => (
+                                        <View key={index} style={styles.serviceItem}>
+                                            <Text style={styles.serviceText}>{servico}</Text>
+                                        </View>
+                                    ))
+                                ) : (
+                                    <Text style={styles.infoTextLarge}>Nenhum serviço cadastrado</Text>
+                                )
                             ) : (
-                                <View style={styles.catalogImagesContainer}>
-                                    {catalogImages.map((uri, index) => (
-                                        <Image
-                                            key={index}
-                                            source={{ uri }}
-                                            style={styles.catalogImage}
-                                        />
-                                    ))}
-                                </View>
+                                <Text style={styles.infoTextLarge}>Nenhum serviço cadastrado</Text>
                             )}
-                        </View>
 
-                        <TouchableOpacity style={styles.addButton} onPress={addCatalogImage}>
-                            <Text style={styles.addButtonText}>+</Text>
+
+                        {userData?.servicos?.map((servico, index) => (
+                            <View key={index} style={styles.serviceItem}>
+                                <Text style={styles.serviceText}>{servico}</Text>
+                            </View>
+                        ))}
+
+                        <Text style={styles.label}>Adicionar Mais Serviços:</Text>
+                        <View style={styles.editDescriptionContainer}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Adicione mais serviços"
+                                placeholderTextColor="#aaa"
+                                value={userData?.novoServico || ''} 
+                                onChangeText={(text) => {
+                                    const updatedData = { ...userData, novoServico: text };
+                                    setUserData(updatedData); 
+                                }}
+                                multiline
+                            />
+                        </View>
+                        <TouchableOpacity
+                            onPress={() => {
+                                if (userData?.novoServico?.trim()) {
+                                    const updatedServicos = [...(userData?.servicos || []), userData.novoServico.trim()];
+                                    setUserData({ ...userData, servicos: updatedServicos, novoServico: '' });
+                                    alert(`Serviço "${userData.novoServico}" adicionado com sucesso!`);
+                                } else {
+                                    alert('Por favor, insira um serviço válido.');
+                                }
+                            }}
+                            style={styles.saveButton}
+                        >
+                            <Text style={styles.saveButtonText}>Adicionar Serviço</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
+
+                    <View style={styles.sectionContainer}>
+                        <View style={styles.sectionHeader}>
+                            <Icons name="trophy-outline" size={25} color="#FFD700" style={styles.icon} />
+                            <Text style={styles.sectionTitle}>Conquistas</Text>
+                        </View>
+                        <View style={styles.statsContainer}>
+                            <Text style={styles.statsLabel}>Quantidade de pessoas atendidas:</Text>
+                            <Text style={styles.statsValue}>{userData?.quantidadeAtendimentos || 0}</Text>
+                        </View>
+                    </View>
+
+                    <View style={styles.sectionContainer}>
+                        <View style={styles.sectionHeader}>
+                            <Icons name="image-outline" size={25} color="#4E40A2" style={styles.icon} />
+                            <Text style={styles.sectionTitle}>Catálogo</Text>
+                        </View>
+
+                        <TouchableOpacity style={styles.addImageButton} onPress={handleAddImage}>
+                            <Icons name="add-circle-outline" size={20} color="#FFFFFF" style={styles.addIcon} />
+                            <Text style={styles.addImageText}>Adicionar Imagem</Text>
+                        </TouchableOpacity>
+                    </View>
+
+
+                 </View>
             </View>
         </ScrollView>
     );
@@ -332,11 +284,12 @@ const styles = StyleSheet.create({
         marginTop: -310, 
         paddingLeft: 12
     },
-    headerText: {
+    nomeCom: {
         fontSize: 20,
         fontWeight: 'bold',
         color: '#FFFFFF', 
     },
+   
     adContainer: {
         backgroundColor: '#F5F5F5',
         marginHorizontal: 20,
@@ -381,8 +334,8 @@ const styles = StyleSheet.create({
         color: '#4E40A2',
         marginTop: 10,
     },
-    infoText: {
-        fontSize: 15,
+    infoTextLarge: {
+        fontSize: 17,
         color: '#666',
         marginTop: 5,
     },
@@ -447,9 +400,13 @@ const styles = StyleSheet.create({
         marginTop: -70,
         marginBottom: 10
     },
+    addIcon: {
+        marginRight: 8,
+    },
     addImageText: {
         color: '#FFFFFF',
-        fontSize: 12,
+        fontSize: 14,
+        fontWeight: 'bold',
     },
     nameEditContainer: {
         flexDirection: 'row',
@@ -473,5 +430,21 @@ const styles = StyleSheet.create({
     },
     editIcon: {
         marginLeft: 10,
+    },
+    statsContainer: {
+        marginTop: 16,
+        padding: 8,
+        backgroundColor: '#F8F8F8',
+        borderRadius: 8,
+    },
+    statsLabel: {
+        fontSize: 14,
+        color: '#555',
+    },
+    statsValue: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#4E40A2',
+        marginTop: 4,
     },
 });

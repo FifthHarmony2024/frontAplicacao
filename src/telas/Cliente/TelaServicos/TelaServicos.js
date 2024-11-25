@@ -29,7 +29,6 @@ import ar from '../../../../assets/ar.jpg';
 import camera from '../../../../assets/camera.jpg';
 import redes from '../../../../assets/redes.jpg';
 import geladeira from '../../../../assets/geladeira.jpg';
-import ServicoPesq from '../Pesquisa/ServicoPesq';
 
 
 const Tab = createBottomTabNavigator();

@@ -42,7 +42,7 @@ export default function InfoPrestador({route, navigation }) {
             cpf: perfilValue === 'AUTONOMO' ? cpf : null, 
             cnpj: perfilValue === 'MICROEMPREENDEDOR' ? cnpj : null,
             idCategoria: selectedCategoria, 
-            servicos: selectedServicos, 
+            idServico: selectedServicos, 
             nomeComercial,
             tipoPrestador: perfilValue, 
             role: "PRESTADOR"
@@ -62,7 +62,7 @@ export default function InfoPrestador({route, navigation }) {
         console.log('Dados que serão enviados:', JSON.stringify(finalUserData, null, 2));
     
         try {
-            const response = await axios.post('http://192.168.0.2:8080/usuarios/prestador', finalUserData, {
+            const response = await axios.post('http://192.168.0.5:8080/usuarios/prestador', finalUserData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
