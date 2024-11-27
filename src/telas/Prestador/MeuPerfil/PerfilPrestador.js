@@ -1,20 +1,116 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image, TextInput, ScrollView } from "react-native";
-import { launchImageLibrary } from 'react-native-image-picker';
 import Icones from 'react-native-vector-icons/Feather'; 
 import Icons from 'react-native-vector-icons/Ionicons';
 import Icom from 'react-native-vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function PerfilPrestador({ navigation }) {
     const [userAddress, setUserAddress] = useState(null);  // Endereço do usuário
     const [userData, setUserData] = useState(null);  // Dados gerais do usuário
-  
-    const handleAddImage = () => {
-        // Lógica para abrir o seletor de imagens
-        console.log('Botão de adicionar imagem pressionado');
+    const [catalogo, setCatalogo] = useState([]); // Armazena as imagens do catálogo
+
+    const handleUploadImage = async () => {
+        try {
+            // Solicitar permissões para acessar a galeria
+            const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (!permissionResult.granted) {
+                alert('É necessário conceder permissão para acessar a galeria.');
+                return;
+            }
+    
+            // Abrir o seletor de imagens
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                quality: 1,
+            });
+    
+            if (!result.canceled) {
+                const { uri } = result.assets[0]; // Obtém o URI da imagem selecionada
+    
+                // Log para verificar o URI
+                console.log("URI da imagem selecionada:", uri);
+    
+                const descricao = "Descrição do serviço"; // Substituir pela descrição desejada
+    
+                // Buscar o ID do usuário do AsyncStorage
+                const storedUserData = await AsyncStorage.getItem('userData');
+                const userData = storedUserData ? JSON.parse(storedUserData) : null;
+                const usuarioId = userData?.id;
+    
+                if (!usuarioId) {
+                    alert("Erro: Usuário não autenticado.");
+                    return;
+                }
+    
+                // Criar o objeto FormData
+                const formData = new FormData();
+                formData.append('file', {
+                    uri: uri,
+                    type: 'image/jpeg', // Tipo padrão para imagens
+                    name: uri.split('/').pop(),
+                });
+                formData.append('descricao', descricao);
+                formData.append('usuarioId', usuarioId);
+    
+                // Enviar para o backend
+                const response = await fetch('http://192.168.0.5:8080/postagens/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                    body: formData,
+                });
+    
+                const data = await response.text();
+                if (response.ok) {
+                    alert('Imagem enviada com sucesso!');
+                    console.log("Resposta do servidor:", data); // Verifica o retorno do servidor
+                } else {
+                    alert('Erro ao enviar imagem: ' + data);
+                }
+            }
+        } catch (error) {
+            console.error("Erro ao selecionar ou enviar imagem:", error);
+            alert("Erro ao enviar imagem.");
+        }
     };
     
+
+            
+    const fetchCatalogo = async () => {
+        try {
+            // Buscar o ID do usuário do AsyncStorage
+            const storedUserData = await AsyncStorage.getItem('userData');
+            const userData = storedUserData ? JSON.parse(storedUserData) : null;
+            const usuarioId = userData?.id;
+    
+            if (!usuarioId) {
+                alert("Erro: Usuário não autenticado.");
+                return;
+            }
+    
+            // Fetch imagens do catálogo
+            const response = await fetch(`http://192.168.0.5:8080/postagens/usuario/${usuarioId}`);
+            const data = await response.json();
+    
+            if (response.ok) {
+                console.log("Imagens retornadas pelo catálogo:", data); // Log das imagens retornadas
+                setCatalogo(data); // Atualiza o estado com as imagens retornadas
+            } else {
+                alert('Erro ao buscar catálogo: ' + (data.message || 'Erro desconhecido.'));
+            }
+        } catch (error) {
+            console.error("Erro ao buscar catálogo:", error);
+        }
+    };
+    
+        useEffect(() => {
+            fetchCatalogo();
+        }, []);
+
     useEffect(() => {
         async function fetchUserData() {
             try {
@@ -217,12 +313,30 @@ export default function PerfilPrestador({ navigation }) {
                             <Text style={styles.sectionTitle}>Catálogo</Text>
                         </View>
 
-                        <TouchableOpacity style={styles.addImageButton} onPress={handleAddImage}>
-                            <Icons name="add-circle-outline" size={20} color="#FFFFFF" style={styles.addIcon} />
-                            <Text style={styles.addImageText}>Adicionar Imagem</Text>
+                        <ScrollView contentContainerStyle={styles.catalogImagesContainer}>
+                            {catalogo.length > 0 ? (
+                                catalogo.map((imagem, index) => {
+                                    const imageUri = `http://192.168.0.5:8080/${imagem.url.replace(/\\/g, '/')}`;
+                                    console.log("Imagem carregada no catálogo:", imageUri);  // Verifique o valor da URL da imagem
+
+                                    return (
+                                        <Image
+                                            key={index}
+                                            source={{ uri: imageUri }}
+                                            style={styles.catalogImage}
+                                            onError={(error) => console.log("Erro ao carregar imagem:", error)}  // Verifique o erro
+                                        />
+                                    );
+                                })
+                            ) : (
+                                <Text style={styles.infoTextLarge}>Nenhuma imagem no catálogo</Text>
+                            )}
+                        </ScrollView>
+
+                        <TouchableOpacity style={styles.addImageButton} onPress={handleUploadImage}>
+                            <Icons name="add-circle-outline" size={55} color="#4E40A2" style={styles.addIcon} />
                         </TouchableOpacity>
                     </View>
-
 
                  </View>
             </View>
@@ -401,12 +515,7 @@ const styles = StyleSheet.create({
         marginBottom: 10
     },
     addIcon: {
-        marginRight: 8,
-    },
-    addImageText: {
-        color: '#FFFFFF',
-        fontSize: 14,
-        fontWeight: 'bold',
+        marginRight: -50,
     },
     nameEditContainer: {
         flexDirection: 'row',
@@ -447,4 +556,14 @@ const styles = StyleSheet.create({
         color: '#4E40A2',
         marginTop: 4,
     },
+    
+    catalogImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 10,
+        margin: 5,
+        resizeMode: 'cover', // Ou tente 'contain'
+        backgroundColor: '#ccc', // Teste com um fundo para verificar a área.
+    },
+    
 });
