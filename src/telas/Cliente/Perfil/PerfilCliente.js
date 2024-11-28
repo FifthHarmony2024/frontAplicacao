@@ -3,9 +3,9 @@ import { Text, StyleSheet, View, TextInput, TouchableOpacity, ScrollView } from 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function PerfilCliente({ navigation }) {
-  const [userAddress, setUserAddress] = useState(null);  // Endereço do usuário
-  const [userData, setUserData] = useState(null);  // Dados gerais do usuário
-
+  const [userAddress, setUserAddress] = useState(null); 
+  const [userData, setUserData] = useState(null);  
+  
   useEffect(() => {
     async function fetchUserData() {
       try {
@@ -16,7 +16,7 @@ export default function PerfilCliente({ navigation }) {
   
           const idUsuario = parsedData.id;
   
-          const response = await fetch(`http://192.168.0.2:8080/usuarios/${idUsuario}/perfil`);
+          const response = await fetch(`http://192.168.0.5:8080/usuarios/${idUsuario}/perfil`);
           const addressData = await response.json();
   
           console.log("Dados recebidos da API:", addressData);

@@ -14,7 +14,7 @@ const ServicoPesq = ({ route, navigation }) => {
         const fetchResults = async () => {
             try {
                 const response = await axios.get(
-                    `http://192.168.0.2:8080/usuarios/prestadores/buscar-termo?termo=${searchTerm}`
+                    `http://192.168.0.5:8080/usuarios/prestadores/buscar-termo?termo=${searchTerm}`
                 );
                 console.log('Dados retornados pela API:', response.data);
                 setResults(response.data);

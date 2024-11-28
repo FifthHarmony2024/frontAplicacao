@@ -7,20 +7,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function PerfilPrestador({ navigation }) {
-    const [userAddress, setUserAddress] = useState(null);  // Endereço do usuário
-    const [userData, setUserData] = useState(null);  // Dados gerais do usuário
-    const [catalogo, setCatalogo] = useState([]); // Armazena as imagens do catálogo
+    const [userAddress, setUserAddress] = useState(null); 
+    const [userData, setUserData] = useState(null);  
+    const [catalogo, setCatalogo] = useState([]);
 
     const handleUploadImage = async () => {
         try {
-            // Solicitar permissões para acessar a galeria
             const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
             if (!permissionResult.granted) {
                 alert('É necessário conceder permissão para acessar a galeria.');
                 return;
             }
     
-            // Abrir o seletor de imagens
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ImagePicker.MediaTypeOptions.Images,
                 allowsEditing: true,
@@ -28,14 +26,12 @@ export default function PerfilPrestador({ navigation }) {
             });
     
             if (!result.canceled) {
-                const { uri } = result.assets[0]; // Obtém o URI da imagem selecionada
+                const { uri } = result.assets[0]; 
     
-                // Log para verificar o URI
                 console.log("URI da imagem selecionada:", uri);
     
-                const descricao = "Descrição do serviço"; // Substituir pela descrição desejada
+                const descricao = "Descrição do serviço"; 
     
-                // Buscar o ID do usuário do AsyncStorage
                 const storedUserData = await AsyncStorage.getItem('userData');
                 const userData = storedUserData ? JSON.parse(storedUserData) : null;
                 const usuarioId = userData?.id;
@@ -45,17 +41,15 @@ export default function PerfilPrestador({ navigation }) {
                     return;
                 }
     
-                // Criar o objeto FormData
                 const formData = new FormData();
                 formData.append('file', {
                     uri: uri,
-                    type: 'image/jpeg', // Tipo padrão para imagens
+                    type: 'image/jpeg',
                     name: uri.split('/').pop(),
                 });
                 formData.append('descricao', descricao);
                 formData.append('usuarioId', usuarioId);
     
-                // Enviar para o backend
                 const response = await fetch('http://192.168.0.5:8080/postagens/upload', {
                     method: 'POST',
                     headers: {
@@ -67,7 +61,7 @@ export default function PerfilPrestador({ navigation }) {
                 const data = await response.text();
                 if (response.ok) {
                     alert('Imagem enviada com sucesso!');
-                    console.log("Resposta do servidor:", data); // Verifica o retorno do servidor
+                    console.log("Resposta do servidor:", data); 
                 } else {
                     alert('Erro ao enviar imagem: ' + data);
                 }
@@ -78,11 +72,9 @@ export default function PerfilPrestador({ navigation }) {
         }
     };
     
-
             
     const fetchCatalogo = async () => {
         try {
-            // Buscar o ID do usuário do AsyncStorage
             const storedUserData = await AsyncStorage.getItem('userData');
             const userData = storedUserData ? JSON.parse(storedUserData) : null;
             const usuarioId = userData?.id;
@@ -92,13 +84,12 @@ export default function PerfilPrestador({ navigation }) {
                 return;
             }
     
-            // Fetch imagens do catálogo
             const response = await fetch(`http://192.168.0.5:8080/postagens/usuario/${usuarioId}`);
             const data = await response.json();
     
             if (response.ok) {
-                console.log("Imagens retornadas pelo catálogo:", data); // Log das imagens retornadas
-                setCatalogo(data); // Atualiza o estado com as imagens retornadas
+                console.log("Imagens retornadas pelo catálogo:", data); 
+                setCatalogo(data);
             } else {
                 alert('Erro ao buscar catálogo: ' + (data.message || 'Erro desconhecido.'));
             }
@@ -107,9 +98,9 @@ export default function PerfilPrestador({ navigation }) {
         }
     };
     
-        useEffect(() => {
+    useEffect(() => {
             fetchCatalogo();
-        }, []);
+    }, []);
 
     useEffect(() => {
         async function fetchUserData() {
@@ -195,6 +186,7 @@ export default function PerfilPrestador({ navigation }) {
                     </View>
                 </View>
 
+
                 <View style={styles.adContainer}>
                     
                     <View style={styles.sectionContainer}>
@@ -227,7 +219,6 @@ export default function PerfilPrestador({ navigation }) {
                             </View>
                             <TouchableOpacity
                                 onPress={() => {
-                                    // Lógica para salvar no backend ou mostrar confirmação
                                     alert(`Descrição "${userData?.descricaoServico}" salva com sucesso!`);
                                 }}
                                 style={styles.saveButton}
@@ -477,16 +468,21 @@ const styles = StyleSheet.create({
         marginTop: 15,
     },
     catalogImagesContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-evenly', // Distribui as imagens de forma mais uniforme
+    marginTop: 10, // Espaço extra para uma boa apresentação
     },
+
     catalogImage: {
-        width: 100,
-        height: 100,
+        width: '30%', // Garante que cada imagem ocupe um terço da largura (ajuste conforme o layout)
+        aspectRatio: 1, // Mantém as imagens quadradas
         borderRadius: 10,
         margin: 5,
+        resizeMode: 'cover', // Certifica-se de que as imagens fiquem ajustadas ao espaço
+        backgroundColor: '#ccc', // Apenas como fallback enquanto a imagem carrega
     },
+
     addButton: {
         backgroundColor: '#4E40A2',
         width: 50,

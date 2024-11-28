@@ -63,7 +63,7 @@ const TelaInicio = () => {
             const parsedData = JSON.parse(data);
             const idUsuario = parsedData.id; 
   
-            const response = await fetch(`http://192.168.0.2:8080/usuarios/${idUsuario}/perfil`);
+            const response = await fetch(`http://192.168.0.5:8080/usuarios/${idUsuario}/perfil`);
             const addressData = await response.json();
             setUserAddress(addressData);
           }
