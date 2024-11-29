@@ -1,34 +1,60 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, FlatList,TouchableOpacity} from 'react-native';
-import Icons from 'react-native-vector-icons/Ionicons';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import axios from 'axios';
+import fotoPadrao from '../../../../assets/fotoPadrao.png';
 
 const DetalhesPrestador = ({ route }) => {
-    const { prestador } = route.params;
+    const { idUsuario } = route.params;
+    const [prestador, setPrestador] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        console.log('idUsuario recebido:', idUsuario);  // Verifique se o ID está sendo passado corretamente
+
+        const fetchPrestadorDetails = async () => {
+            if (!idUsuario) {
+                Alert.alert('Erro', 'ID do prestador não encontrado.');
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const response = await axios.get(`http://192.168.0.5:8080/usuarios/prestadores/${idUsuario}`);
+                console.log('Detalhes do prestador:', response.data);
+                setPrestador(response.data);
+            } catch (err) {
+                console.error('Erro ao buscar detalhes do prestador:', err);
+                Alert.alert('Erro', 'Ocorreu um erro ao carregar os dados do prestador. Tente novamente mais tarde.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPrestadorDetails();
+    }, [idUsuario]);
+
+    if (loading) {
+        return <ActivityIndicator size="large" color="#0000ff" style={styles.centered} />;
+    }
+
+    if (!prestador) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.error}>Prestador não encontrado.</Text>
+            </View>
+        );
+    }
+
+    const baseUrl = 'http://192.168.0.5:8080/';
+    const imageUrl = prestador.fotoPerfil ? `${baseUrl}${prestador.fotoPerfil.replace(/\\/g, '/')}` : null;
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <Image
-                    source={{ uri: prestador.fotoPerfil || 'https://via.placeholder.com/150' }}
-                    style={styles.profileImage}
-                />
-                <Text style={styles.name}>{prestador.nomeComercial}</Text>
-                <Text style={styles.info}>⭐ {prestador.estrelas || 0}</Text>
-            </View>
-            <Text style={styles.description}>{prestador.descricao || 'Descrição indisponível'}</Text>
-            <Text style={styles.subHeader}>Serviços que atende</Text>
-            <FlatList
-                data={prestador.servicos || []}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => <Text style={styles.item}>{item}</Text>}
+            <Image
+                source={imageUrl ? { uri: imageUrl } : fotoPadrao}
+                style={styles.profileImage}
             />
-
-            <View style={styles.chatContainer}>
-                <TouchableOpacity onPress={() => navigation.navigate('Conversas')}>
-                    <Icons style={styles.chatIcon} name="chatbubbles-outline" size={70} color="#FE914E" />
-                </TouchableOpacity>
-                <Text style={styles.chatText}>Entrar no Chat</Text>
-            </View>
+            <Text style={styles.name}>{prestador.nomeComercial || 'Nome não disponível'}</Text>
         </View>
     );
 };
@@ -36,51 +62,32 @@ const DetalhesPrestador = ({ route }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
-        backgroundColor: '#fff',
-    },
-    header: {
         alignItems: 'center',
-        marginBottom: 16,
+        justifyContent: 'center',
+        backgroundColor: '#f5f5f5',
+        padding: 20,
     },
     profileImage: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        marginBottom: 20,
     },
     name: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: 'bold',
-        marginVertical: 8,
+        color: '#333',
     },
-    info: {
-        fontSize: 16,
-        color: '#777',
+    error: {
+        fontSize: 18,
+        color: '#ff6347',
+        textAlign: 'center',
     },
-    description: {
-        fontSize: 14,
-        marginBottom: 16,
-    },
-    subHeader: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 8,
-    },
-    item: {
-        fontSize: 14,
-        marginBottom: 4,
-    },
-    chatContainer: {
-        position: 'absolute', 
-        bottom: 20, 
-        right: 20, 
+    centered: {
+        flex: 1,
+        justifyContent: 'center',
         alignItems: 'center',
-    },
-    chatText: {
-        color: '#FE914E',
-        marginTop: 5,
-    },
-   
+    }
 });
 
 export default DetalhesPrestador;

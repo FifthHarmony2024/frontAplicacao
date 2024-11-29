@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, FlatList, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Image, TextInput, Alert } from 'react-native';
 import axios from 'axios';
 import { Feather, Ionicons, AntDesign } from '@expo/vector-icons';
+import fotoPadrao from '../../../../assets/fotoPadrao.png';
 
 const ServicoPesq = ({ route, navigation }) => {
     const { termoBusca } = route.params; 
@@ -17,20 +18,31 @@ const ServicoPesq = ({ route, navigation }) => {
                     `http://192.168.0.5:8080/usuarios/prestadores/buscar-termo?termo=${searchTerm}`
                 );
                 console.log('Dados retornados pela API:', response.data);
-                setResults(response.data);
+                setResults(response.data); 
+
             } catch (err) {
-                console.error('Erro ao buscar dados:', err);
+                if (err.response && err.response.status === 404) {
+                    console.warn('Nenhum prestador encontrado.');
+                    setResults([]); 
+                } else {
+                    console.error('Erro ao buscar dados:', err);
+                    Alert.alert('Erro', 'Ocorreu um erro ao buscar os dados. Tente novamente mais tarde.');
+                }
             } finally {
                 setLoading(false);
             }
         };
-
+    
         if (searchTerm.trim()) {
             fetchResults();
         } else {
-            setResults([]); 
+            setResults([]);
+            setLoading(false);
         }
     }, [searchTerm]);
+    
+    
+    
 
     const toggleFavorito = (id) => {
         setFavoritos((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -48,38 +60,49 @@ const ServicoPesq = ({ route, navigation }) => {
         setSearchTerm('');
     };
 
-    const renderItem = ({ item }) => (
-        <TouchableOpacity
-            style={styles.card}
-            onPress={() => navigation.navigate('DetalhesPrestador', { prestador: item })}
-        >
-            <Image
-                source={{ uri: item.fotoPerfil || 'https://via.placeholder.com/50' }}
-                style={styles.profileImage}
-            />
-            <View style={styles.detailsContainer}>
-                <Text style={styles.name}>{item.nomeComercial || 'Nome não disponível'}</Text>
-                <Text style={styles.services}>
-                    Serviços: {item.servicos || 'Não especificado'}
-                </Text>
-                <Text style={styles.category}>
-                    Categoria: {item.categoria || 'Sem categoria'}
-                </Text>
-            </View>
-            <TouchableOpacity
-                style={styles.favoriteIcon}
-                onPress={() => toggleFavorito(item.id)}
-            >
-                <Ionicons
-                    name={favoritos[item.id] ? 'heart' : 'heart-outline'}
-                    size={24}
-                    color={favoritos[item.id] ? '#FF6F61' : '#808080'}
-                />
-            </TouchableOpacity>
-        </TouchableOpacity>
-    );
+    const renderItem = ({ item }) => {
+        const baseUrl = 'http://192.168.0.5:8080/';
+        const imageUrl = item.fotoPerfil
+            ? `${baseUrl}${item.fotoPerfil.replace(/\\/g, '/')}`
+            : null;
     
+        return (
+            <TouchableOpacity
+                style={styles.card}
+                onPress={() => {
+                    console.log('Prestador selecionado:', item); // Confirma os dados no console
+                    navigation.navigate('DetalhesPrestador', { idUsuario: item.id}); // Envia o objeto completo
+                }}              
+            >
 
+                <Image
+                    source={imageUrl ? { uri: imageUrl } : fotoPadrao}
+                    style={styles.profileImage}
+                    onError={() => console.error('Erro ao carregar imagem')}
+                />
+                <View style={styles.detailsContainer}>
+                    <Text style={styles.name}>{item.nomeComercial || 'Nome não disponível'}</Text>
+                    <Text style={styles.services}>
+                        Serviços: {item.nomeServico ? item.nomeServico.join(', ') : 'Não especificado'}
+                    </Text>
+                    <Text style={styles.category}>
+                        Categoria: {item.nomeCategoria || 'Sem categoria'}
+                    </Text>
+                </View>
+                <TouchableOpacity
+                    style={styles.favoriteIcon}
+                    onPress={() => toggleFavorito(item.id)}
+                >
+                    <Ionicons
+                        name={favoritos[item.id] ? 'heart' : 'heart-outline'}
+                        size={24}
+                        color={favoritos[item.id] ? '#FF6F61' : '#808080'}
+                    />
+                </TouchableOpacity>
+            </TouchableOpacity>
+        );
+    };
+    
     return (
         <View style={styles.container}>
             <View style={styles.searchContainer}>
