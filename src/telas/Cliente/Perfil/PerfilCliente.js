@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Text, StyleSheet, View, TextInput, TouchableOpacity, ScrollView } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import FotoPerfil from "../../../Validacoes/FotoPerfil";
 
 export default function PerfilCliente({ navigation }) {
   const [userAddress, setUserAddress] = useState(null); 
@@ -55,6 +56,7 @@ export default function PerfilCliente({ navigation }) {
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
         <View style={styles.header}>
+          <FotoPerfil/>
           <Text style={styles.nomeCompleto}>{userData?.nome || ''}</Text>
           <Text style={styles.rating}>⭐⭐⭐⭐⭐</Text>
         </View>
@@ -183,7 +185,8 @@ const styles = StyleSheet.create({
   nomeCompleto: {
     fontSize: 18,
     color: '#4E40A2',
-    marginBottom: 5,
+    marginBottom: 10,
+    marginTop:18
   },
   rating: {
     fontSize: 16,

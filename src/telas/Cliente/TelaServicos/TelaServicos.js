@@ -5,7 +5,7 @@ import { Ionicons, SimpleLineIcons, Octicons, Feather, FontAwesome5, FontAwesome
 import * as Animatable from 'react-native-animatable';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-
+import FotoPerfilCliente from '../../../Validacoes/FotoPerfilCliente';
 
 import BarraPesquisa from '../../Estilos/BarraPesquisa';
 import PedidosCliente from '../Pedidos/PedidosCliente';
@@ -101,8 +101,7 @@ const TelaInicio = () => {
                 </TouchableOpacity>
 
                 <View style={styles.headerContainer}>
-                  <Image source={require('../../../../assets/nomepreto.png')} style={styles.logo} />
-                  <FontAwesome5 name="user-circle" size={45} color="#89958F" style={styles.userIcon} />
+                  <FotoPerfilCliente />
                 </View>
 
                 <Text style={styles.welcomeText}>Olá, {userData?.nome || "Usuário"}! </Text>
@@ -281,14 +280,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     justifyContent: 'space-between', 
     alignItems: 'center',
-    marginBottom: 20,
-  },
-  logo: {
-    width: 120,
-    height: 120,
-    resizeMode: 'contain',
-    marginTop: -35,
-    marginRight:8
   },
   addressContainer: {
     backgroundColor: '#e6e6fa',

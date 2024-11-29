@@ -53,17 +53,18 @@ const ServicoPesq = ({ route, navigation }) => {
             style={styles.card}
             onPress={() => navigation.navigate('DetalhesPrestador', { prestador: item })}
         >
-=            <Image
+            <Image
                 source={{ uri: item.fotoPerfil || 'https://via.placeholder.com/50' }}
                 style={styles.profileImage}
             />
             <View style={styles.detailsContainer}>
-                <Text style={styles.name}>{item.nomeComercial}</Text>
-                <View style={styles.row}>
-                    <Text style={styles.rating}>⭐ {item.estrelas || 0}</Text>
-                    <Text style={styles.distance}>{item.distancia || '0'}m</Text>
-                </View>
-                <Text style={styles.services}>Serviços: {item.servicos || 'Não especificado'}</Text>
+                <Text style={styles.name}>{item.nomeComercial || 'Nome não disponível'}</Text>
+                <Text style={styles.services}>
+                    Serviços: {item.servicos || 'Não especificado'}
+                </Text>
+                <Text style={styles.category}>
+                    Categoria: {item.categoria || 'Sem categoria'}
+                </Text>
             </View>
             <TouchableOpacity
                 style={styles.favoriteIcon}
@@ -72,11 +73,12 @@ const ServicoPesq = ({ route, navigation }) => {
                 <Ionicons
                     name={favoritos[item.id] ? 'heart' : 'heart-outline'}
                     size={24}
-                    color={favoritos[item.id] ? '#FF6F61' : '#808080'} 
+                    color={favoritos[item.id] ? '#FF6F61' : '#808080'}
                 />
             </TouchableOpacity>
         </TouchableOpacity>
     );
+    
 
     return (
         <View style={styles.container}>

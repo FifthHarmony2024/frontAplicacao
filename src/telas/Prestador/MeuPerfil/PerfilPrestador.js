@@ -5,6 +5,7 @@ import Icons from 'react-native-vector-icons/Ionicons';
 import Icom from 'react-native-vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
+import FotoPerfil from "../../../Validacoes/FotoPerfil";
 
 export default function PerfilPrestador({ navigation }) {
     const [userAddress, setUserAddress] = useState(null); 
@@ -62,6 +63,8 @@ export default function PerfilPrestador({ navigation }) {
                 if (response.ok) {
                     alert('Imagem enviada com sucesso!');
                     console.log("Resposta do servidor:", data); 
+
+                
                 } else {
                     alert('Erro ao enviar imagem: ' + data);
                 }
@@ -185,8 +188,12 @@ export default function PerfilPrestador({ navigation }) {
                         />
                     </View>
                 </View>
+                <View style={styles.profilePictureContainer}>
 
+                    <FotoPerfil />
+                </View>
 
+               
                 <View style={styles.adContainer}>
                     
                     <View style={styles.sectionContainer}>
@@ -304,18 +311,22 @@ export default function PerfilPrestador({ navigation }) {
                             <Text style={styles.sectionTitle}>Catálogo</Text>
                         </View>
 
-                        <ScrollView contentContainerStyle={styles.catalogImagesContainer}>
+                        <ScrollView 
+                            horizontal 
+                            showsHorizontalScrollIndicator={false} 
+                            contentContainerStyle={styles.catalogImagesContainer}
+                        >
                             {catalogo.length > 0 ? (
                                 catalogo.map((imagem, index) => {
                                     const imageUri = `http://192.168.0.5:8080/${imagem.url.replace(/\\/g, '/')}`;
-                                    console.log("Imagem carregada no catálogo:", imageUri);  // Verifique o valor da URL da imagem
+                                    console.log("Imagem carregada no catálogo:", imageUri);
 
                                     return (
                                         <Image
                                             key={index}
                                             source={{ uri: imageUri }}
                                             style={styles.catalogImage}
-                                            onError={(error) => console.log("Erro ao carregar imagem:", error)}  // Verifique o erro
+                                            onError={(error) => console.log("Erro ao carregar imagem:", error)}
                                         />
                                     );
                                 })
@@ -323,6 +334,7 @@ export default function PerfilPrestador({ navigation }) {
                                 <Text style={styles.infoTextLarge}>Nenhuma imagem no catálogo</Text>
                             )}
                         </ScrollView>
+
 
                         <TouchableOpacity style={styles.addImageButton} onPress={handleUploadImage}>
                             <Icons name="add-circle-outline" size={55} color="#4E40A2" style={styles.addIcon} />
@@ -407,12 +419,13 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 5,
         alignItems: 'center',
-        marginTop: 55, 
+        marginTop: -20, 
     },
     sectionContainer: {
         width: '100%',
         padding: 15,
-        marginBottom: 20,
+        marginBottom: 15,
+        marginTop:30,
         backgroundColor: '#FFFFFF',
         borderRadius: 10,
         shadowColor: '#000',
@@ -468,21 +481,16 @@ const styles = StyleSheet.create({
         marginTop: 15,
     },
     catalogImagesContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-evenly', // Distribui as imagens de forma mais uniforme
-    marginTop: 10, // Espaço extra para uma boa apresentação
+        flexDirection: 'row',
+        alignItems: 'center', 
+        paddingHorizontal: 10,
     },
-
     catalogImage: {
-        width: '30%', // Garante que cada imagem ocupe um terço da largura (ajuste conforme o layout)
-        aspectRatio: 1, // Mantém as imagens quadradas
         borderRadius: 10,
-        margin: 5,
-        resizeMode: 'cover', // Certifica-se de que as imagens fiquem ajustadas ao espaço
-        backgroundColor: '#ccc', // Apenas como fallback enquanto a imagem carrega
+        marginHorizontal: 8, 
+        resizeMode: 'cover', 
+        backgroundColor: '#ccc',
     },
-
     addButton: {
         backgroundColor: '#4E40A2',
         width: 50,
@@ -510,8 +518,11 @@ const styles = StyleSheet.create({
         marginTop: -70,
         marginBottom: 10
     },
-    addIcon: {
-        marginRight: -50,
+    addImageButton:{
+        alignSelf: 'center',  
+        marginTop: 20,       
+        position: 'relative',
+
     },
     nameEditContainer: {
         flexDirection: 'row',
@@ -545,6 +556,7 @@ const styles = StyleSheet.create({
     statsLabel: {
         fontSize: 14,
         color: '#555',
+        
     },
     statsValue: {
         fontSize: 16,
@@ -558,8 +570,11 @@ const styles = StyleSheet.create({
         height: 100,
         borderRadius: 10,
         margin: 5,
-        resizeMode: 'cover', // Ou tente 'contain'
-        backgroundColor: '#ccc', // Teste com um fundo para verificar a área.
+        resizeMode: 'cover', 
+        backgroundColor: '#ccc',
     },
-    
+    profilePictureContainer: {
+        zIndex: 2,
+        
+    },
 });
