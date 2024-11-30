@@ -6,6 +6,7 @@ import Icom from 'react-native-vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import FotoPerfil from "../../../Validacoes/FotoPerfil";
+import API_CONFIG_URL from '../../../Validacoes/ipConfig';
 
 export default function PerfilPrestador({ navigation }) {
     const [userAddress, setUserAddress] = useState(null); 
@@ -51,7 +52,7 @@ export default function PerfilPrestador({ navigation }) {
                 formData.append('descricao', descricao);
                 formData.append('usuarioId', usuarioId);
     
-                const response = await fetch('http://192.168.0.5:8080/postagens/upload', {
+                const response = await fetch(`${API_CONFIG_URL}postagens/upload`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'multipart/form-data',
@@ -87,7 +88,7 @@ export default function PerfilPrestador({ navigation }) {
                 return;
             }
     
-            const response = await fetch(`http://192.168.0.5:8080/postagens/usuario/${usuarioId}`);
+            const response = await fetch(`${API_CONFIG_URL}postagens/usuario/${usuarioId}`);
             const data = await response.json();
     
             if (response.ok) {
@@ -118,7 +119,7 @@ export default function PerfilPrestador({ navigation }) {
     
                     const idUsuario = parsedData.id;
     
-                    const response = await fetch(`http://192.168.0.5:8080/usuarios/${idUsuario}/perfilPrestador`);
+                    const response = await fetch(`${API_CONFIG_URL}usuarios/${idUsuario}/perfilPrestador`);
                     const addressData = await response.json();
     
                     if (!userAddress) {
@@ -318,7 +319,7 @@ export default function PerfilPrestador({ navigation }) {
                         >
                             {catalogo.length > 0 ? (
                                 catalogo.map((imagem, index) => {
-                                    const imageUri = `http://192.168.0.5:8080/${imagem.url.replace(/\\/g, '/')}`;
+                                    const imageUri = `${API_CONFIG_URL}${imagem.url.replace(/\\/g, '/')}`;
                                     console.log("Imagem carregada no catálogo:", imageUri);
 
                                     return (

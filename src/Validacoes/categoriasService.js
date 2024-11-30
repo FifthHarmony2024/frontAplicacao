@@ -1,6 +1,7 @@
 import axios from 'axios';
+import API_CONFIG_URL from '../Validacoes/ipConfig';
 
-const API_CATEGORIAS_URL = 'http://192.168.0.5:8080/categorias'; 
+const API_CATEGORIAS_URL = `${API_CONFIG_URL}categorias`; 
 
 export const buscarCategorias = async () => {
   try {

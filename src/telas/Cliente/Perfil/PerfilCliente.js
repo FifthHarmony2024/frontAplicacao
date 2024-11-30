@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Text, StyleSheet, View, TextInput, TouchableOpacity, ScrollView } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import FotoPerfil from "../../../Validacoes/FotoPerfil";
+import API_CONFIG_URL from '.././../../Validacoes/ipConfig';
 
 export default function PerfilCliente({ navigation }) {
   const [userAddress, setUserAddress] = useState(null); 
@@ -17,7 +18,7 @@ export default function PerfilCliente({ navigation }) {
   
           const idUsuario = parsedData.id;
   
-          const response = await fetch(`http://192.168.0.5:8080/usuarios/${idUsuario}/perfil`);
+          const response = await fetch(`${API_CONFIG_URL}usuarios/${idUsuario}/perfil`);
           const addressData = await response.json();
   
           console.log("Dados recebidos da API:", addressData);

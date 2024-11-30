@@ -7,6 +7,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import axios from 'axios';
 import styles from "../../EstilosCliente/estilosCli";
 import { buscarEstados, buscarCidades, buscarTodasCidades,buscarEnderecoPorCep} from '../../../Validacoes/apiIBGE'; 
+import API_CONFIG_URL from '../../../Validacoes/ipConfig';
 
 const sexoOpcao = [
     { label: 'Feminino', value: 'FEMININO' },
@@ -102,7 +103,7 @@ export default function CadastroClie({ navigation }) {
         console.log('Dados que serão enviados:', JSON.stringify(userData, null, 2));
     
         try {
-            const response = await axios.post('http://192.168.0.5:8080/usuarios/cliente', userData, {
+            const response = await axios.post(`${API_CONFIG_URL}usuarios/cliente`, userData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },

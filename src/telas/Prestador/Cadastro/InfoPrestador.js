@@ -7,7 +7,7 @@ import axios from 'axios';
 import CategoriaServicoDropdown from "./CategoriaServicoDropdown";
 import ServicoCategoriaDropdown from "./ServicoCategoriaDropdown";
 import { StyleSheet } from 'react-native';
-
+import API_CONFIG_URL from "../../../Validacoes/ipConfig";
 import lgPerfil from '../../../../assets/logoPerfil.png';
 
 const perfil = [
@@ -62,7 +62,7 @@ export default function InfoPrestador({route, navigation }) {
         console.log('Dados que serão enviados:', JSON.stringify(finalUserData, null, 2));
     
         try {
-            const response = await axios.post('http://192.168.0.5:8080/usuarios/prestador', finalUserData, {
+            const response = await axios.post(`${API_CONFIG_URL}usuarios/prestador`, finalUserData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },

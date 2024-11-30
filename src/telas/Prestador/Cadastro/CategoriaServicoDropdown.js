@@ -70,7 +70,7 @@ const CategoriaServicoDropdown = ({ selectedValue, onValueChange }) => {
         onFocus={() => setCategoriaFocus(true)}
         onBlur={() => setCategoriaFocus(false)}
         onChange={item => {
-          onValueChange(item.value); // Chama a função passada para atualizar o valor selecionado
+          onValueChange(item.value); 
           setCategoriaFocus(false);
         }}
         renderLeftIcon={() => (

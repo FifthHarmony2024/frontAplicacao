@@ -6,6 +6,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/Feather';
 import Icones from 'react-native-vector-icons/Ionicons';
+import FotoPerfil from "../frontAplicacao/src/Validacoes/FotoPerfil";
+import { useFetchUserData } from '../frontAplicacao/src/Validacoes/useFetchUserData'; 
 
 import Home from './src/telas/Home';
 import Login from './src/telas/Prestador/Login/Login';
@@ -38,16 +40,27 @@ const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
 function CustomDrawerContent(props) {
+  const { userData, loading } = useFetchUserData(); 
+
   return (
     <DrawerContentScrollView {...props}>
       <View style={styles.profileContainer}>
-        {/* Colocar uma função para a imagem do perfil */}
-        <Image
-          source={require('./assets/logoPerfil.png')} 
-          style={styles.profileImage}
-        />
-        <Text style={styles.profileName}>Nome Completo</Text>
-        <Text style={styles.profileSubtitle}>Nome Comercial</Text>
+        <View style={styles.profilePictureContainer}>
+          <FotoPerfil />
+        </View>
+        
+        {!loading && userData ? (
+          <>
+          <Text style={styles.profileName}>
+            {userData.nome && userData.sobrenome 
+              ? `${userData.nome} ${userData.sobrenome}` 
+              : ''}
+          </Text>
+            <Text style={styles.profileSubtitle}>{userData.nomeComercial || "Nome Comercial"}</Text>
+          </>
+        ) : (
+          <Text>Carregando...</Text>
+        )}
       </View>
 
       <DrawerItemList {...props} />
@@ -174,6 +187,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
+    marginTop:11
   },
   profileSubtitle: {
     fontSize: 14,

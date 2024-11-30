@@ -1,6 +1,8 @@
+import API_CONFIG_URL from '.././Validacoes/ipConfig';
+
 export const buscarServicosPorCategoria = async (idCategoria) => {
   try {
-    const response = await fetch(`http://192.168.0.5:8080/servicos/categoria/${idCategoria}`);
+    const response = await fetch(`${API_CONFIG_URL}servicos/categoria/${idCategoria}`);
     console.log('Response:', response);
     
     if (!response.ok) {

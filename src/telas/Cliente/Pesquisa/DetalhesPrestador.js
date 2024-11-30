@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import axios from 'axios';
 import fotoPadrao from '../../../../assets/fotoPadrao.png';
+import API_CONFIG_URL from '../../../Validacoes/ipConfig';
 
 const DetalhesPrestador = ({ route }) => {
     const { idUsuario } = route.params;
@@ -9,7 +10,7 @@ const DetalhesPrestador = ({ route }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        console.log('idUsuario recebido:', idUsuario);  // Verifique se o ID está sendo passado corretamente
+        console.log('idUsuario recebido:', idUsuario);  
 
         const fetchPrestadorDetails = async () => {
             if (!idUsuario) {
@@ -19,7 +20,7 @@ const DetalhesPrestador = ({ route }) => {
             }
 
             try {
-                const response = await axios.get(`http://192.168.0.5:8080/usuarios/prestadores/${idUsuario}`);
+                const response = await axios.get(`${API_CONFIG_URL}usuarios/prestadores/${idUsuario}`);
                 console.log('Detalhes do prestador:', response.data);
                 setPrestador(response.data);
             } catch (err) {
@@ -45,7 +46,7 @@ const DetalhesPrestador = ({ route }) => {
         );
     }
 
-    const baseUrl = 'http://192.168.0.5:8080/';
+    const baseUrl = `${API_CONFIG_URL}`;
     const imageUrl = prestador.fotoPerfil ? `${baseUrl}${prestador.fotoPerfil.replace(/\\/g, '/')}` : null;
 
     return (

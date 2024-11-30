@@ -3,6 +3,7 @@ import { View, Image, Alert, StyleSheet, ActivityIndicator, TouchableOpacity } f
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import API_CONFIG_URL from '.././Validacoes/ipConfig';
 
 export default function FotoPerfil() {
     const [imageUri, setImageUri] = useState(null);
@@ -15,13 +16,13 @@ export default function FotoPerfil() {
                 const userData = storedUserData ? JSON.parse(storedUserData) : null;
 
                 if (userData && userData.id) {
-                    const response = await fetch(`http://192.168.0.5:8080/usuarios/${userData.id}/foto-adicionada`);
+                    const response = await fetch(`${API_CONFIG_URL}usuarios/${userData.id}/foto-adicionada`);
                     if (response.ok) {
                         const fotoPerfil = await response.text();
                         if (fotoPerfil === "static/images/fotoPadrao.png") {
                             setImageUri(require('../../assets/fotoPadrao.png'));  
                         } else {
-                            setImageUri(`http://192.168.0.5:8080/${fotoPerfil.replace(/\\/g, '/')}`); 
+                            setImageUri(`${API_CONFIG_URL}${fotoPerfil.replace(/\\/g, '/')}`); 
                         }
                     } else {
                         console.error("Erro ao buscar a foto de perfil:", response.status);
@@ -69,7 +70,7 @@ export default function FotoPerfil() {
                     name: uri.split('/').pop(),
                 });
 
-                const response = await fetch(`http://192.168.0.5:8080/usuarios/${userData.id}/foto-perfil`, {
+                const response = await fetch(`${API_CONFIG_URL}usuarios/${userData.id}/foto-perfil`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'multipart/form-data',

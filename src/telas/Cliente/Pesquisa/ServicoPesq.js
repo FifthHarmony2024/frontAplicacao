@@ -3,6 +3,7 @@ import { View, FlatList, Text, StyleSheet, ActivityIndicator, TouchableOpacity, 
 import axios from 'axios';
 import { Feather, Ionicons, AntDesign } from '@expo/vector-icons';
 import fotoPadrao from '../../../../assets/fotoPadrao.png';
+import API_CONFIG_URL from '../../../Validacoes/ipConfig';
 
 const ServicoPesq = ({ route, navigation }) => {
     const { termoBusca } = route.params; 
@@ -15,7 +16,7 @@ const ServicoPesq = ({ route, navigation }) => {
         const fetchResults = async () => {
             try {
                 const response = await axios.get(
-                    `http://192.168.0.5:8080/usuarios/prestadores/buscar-termo?termo=${searchTerm}`
+                    `${API_CONFIG_URL}usuarios/prestadores/buscar-termo?termo=${searchTerm}`
                 );
                 console.log('Dados retornados pela API:', response.data);
                 setResults(response.data); 
@@ -61,7 +62,7 @@ const ServicoPesq = ({ route, navigation }) => {
     };
 
     const renderItem = ({ item }) => {
-        const baseUrl = 'http://192.168.0.5:8080/';
+        const baseUrl = `${API_CONFIG_URL}`;
         const imageUrl = item.fotoPerfil
             ? `${baseUrl}${item.fotoPerfil.replace(/\\/g, '/')}`
             : null;

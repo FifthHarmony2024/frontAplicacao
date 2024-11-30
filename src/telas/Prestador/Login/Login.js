@@ -5,6 +5,7 @@ import Icones from 'react-native-vector-icons/Feather';
 import Icone from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon from "react-native-vector-icons/EvilIcons";
 import { Buffer } from 'buffer';
+import API_CONFIG_URL from '../../../Validacoes/ipConfig';
 
 export default function LoginCliente({ navigation }) {
     const [viewPass, setViewPass] = useState(true);
@@ -41,7 +42,7 @@ export default function LoginCliente({ navigation }) {
         }
 
             try {
-                const response = await fetch('http://192.168.0.5:8080/login', {
+                const response = await fetch(`${API_CONFIG_URL}login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ emailLogin, senha }),
