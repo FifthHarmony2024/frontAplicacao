@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, TextInput, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, TextInput, ScrollView, Modal,Platform} from "react-native";
 import Icones from 'react-native-vector-icons/Feather'; 
 import Icons from 'react-native-vector-icons/Ionicons';
 import Icom from 'react-native-vector-icons/AntDesign';
@@ -7,100 +7,122 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import FotoPerfil from "../../../Validacoes/FotoPerfil";
 import API_CONFIG_URL from '../../../Validacoes/ipConfig';
+import Icon from 'react-native-vector-icons/Feather';
 
 export default function PerfilPrestador({ navigation }) {
     const [userAddress, setUserAddress] = useState(null); 
     const [userData, setUserData] = useState(null);  
     const [catalogo, setCatalogo] = useState([]);
+    const [expandedImage, setExpandedImage] = useState(null);
 
-    const handleUploadImage = async () => {
+    
+   const handleUploadImage = async () => {
+    try {
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permissionResult.granted) {
+            alert('É necessário conceder permissão para acessar a galeria.');
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            quality: 1,
+        });
+
+        if (result.canceled || !result.assets || !result.assets[0]?.uri) {
+            alert('Nenhuma imagem foi selecionada.');
+            return;
+        }
+
+        const { uri } = result.assets[0];
+
+        console.log("URI da imagem selecionada:", uri);
+
+        const descricao = "Descrição do serviço";
+
+        const storedUserData = await AsyncStorage.getItem('userData');
+        const userData = storedUserData ? JSON.parse(storedUserData) : null;
+        const usuarioId = userData?.id;
+
+        if (!usuarioId) {
+            alert("Erro: Usuário não autenticado.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', {
+            uri: Platform.OS === 'android' ? uri : uri.replace('file://', ''),
+            type: 'image/jpeg',
+            name: uri.split('/').pop(),
+        });
+        formData.append('descricao', descricao);
+        formData.append('usuarioId', usuarioId);
+
+        console.log("FormData construído:", formData);
+
+        const response = await fetch(`${API_CONFIG_URL}postagens/upload`, {
+            method: 'POST',
+            body: formData,
+        });
+
+        let data;
         try {
-            const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (!permissionResult.granted) {
-                alert('É necessário conceder permissão para acessar a galeria.');
-                return;
-            }
-    
-            const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                allowsEditing: true,
-                quality: 1,
-            });
-    
-            if (!result.canceled) {
-                const { uri } = result.assets[0]; 
-    
-                console.log("URI da imagem selecionada:", uri);
-    
-                const descricao = "Descrição do serviço"; 
-    
-                const storedUserData = await AsyncStorage.getItem('userData');
-                const userData = storedUserData ? JSON.parse(storedUserData) : null;
-                const usuarioId = userData?.id;
-    
-                if (!usuarioId) {
-                    alert("Erro: Usuário não autenticado.");
-                    return;
-                }
-    
-                const formData = new FormData();
-                formData.append('file', {
-                    uri: uri,
-                    type: 'image/jpeg',
-                    name: uri.split('/').pop(),
-                });
-                formData.append('descricao', descricao);
-                formData.append('usuarioId', usuarioId);
-    
-                const response = await fetch(`${API_CONFIG_URL}postagens/upload`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                    body: formData,
-                });
-    
-                const data = await response.text();
-                if (response.ok) {
-                    alert('Imagem enviada com sucesso!');
-                    console.log("Resposta do servidor:", data); 
+            const contentType = response.headers.get('content-type');
+            data = contentType && contentType.includes('application/json')
+                ? await response.json()
+                : await response.text();
+        } catch (error) {
+            console.error("Erro ao interpretar a resposta do servidor:", error);
+            throw new Error('Erro ao processar a resposta do servidor.');
+        }
+
+        if (response.ok) {
+            alert('Imagem enviada com sucesso!');
+            console.log("Resposta do servidor:", data);
+
+            const novaImagem = {
+                id: data.id, 
+                url: data.url,
+            };
+            setCatalogo((prevCatalogo) => [...prevCatalogo, novaImagem]);
+        } else {
+            alert('Erro ao enviar imagem: ' + (data.message || 'Erro desconhecido.'));
+            console.error("Erro do servidor:", data);
+        }
+    } catch (error) {
+        console.error("Erro ao selecionar ou enviar imagem:", error);
+        alert("Erro ao enviar imagem.");
+    }
+};
 
                 
-                } else {
-                    alert('Erro ao enviar imagem: ' + data);
-                }
-            }
-        } catch (error) {
-            console.error("Erro ao selecionar ou enviar imagem:", error);
-            alert("Erro ao enviar imagem.");
-        }
-    };
-    
-            
     const fetchCatalogo = async () => {
         try {
             const storedUserData = await AsyncStorage.getItem('userData');
             const userData = storedUserData ? JSON.parse(storedUserData) : null;
             const usuarioId = userData?.id;
-    
+
             if (!usuarioId) {
                 alert("Erro: Usuário não autenticado.");
                 return;
             }
-    
+
             const response = await fetch(`${API_CONFIG_URL}postagens/usuario/${usuarioId}`);
             const data = await response.json();
-    
+
             if (response.ok) {
-                console.log("Imagens retornadas pelo catálogo:", data); 
+                console.log("Imagens retornadas pelo catálogo:", data);
                 setCatalogo(data);
             } else {
                 alert('Erro ao buscar catálogo: ' + (data.message || 'Erro desconhecido.'));
             }
         } catch (error) {
             console.error("Erro ao buscar catálogo:", error);
+            alert("Erro ao carregar o catálogo.");
         }
     };
+
     
     useEffect(() => {
             fetchCatalogo();
@@ -316,25 +338,36 @@ export default function PerfilPrestador({ navigation }) {
                             horizontal 
                             showsHorizontalScrollIndicator={false} 
                             contentContainerStyle={styles.catalogImagesContainer}
-                        >
-                            {catalogo.length > 0 ? (
-                                catalogo.map((imagem, index) => {
-                                    const imageUri = `${API_CONFIG_URL}${imagem.url.replace(/\\/g, '/')}`;
-                                    console.log("Imagem carregada no catálogo:", imageUri);
+                        >   
+                        {catalogo.length > 0 ? (
+                            catalogo.map((imagem, index) => {
+                                const imageUri = imagem.url ? `${API_CONFIG_URL}${imagem.url.replace(/\\/g, '/')}` : null;
+                                console.log("Imagem carregada no catálogo:", imageUri);
 
-                                    return (
-                                        <Image
-                                            key={index}
-                                            source={{ uri: imageUri }}
-                                            style={styles.catalogImage}
-                                            onError={(error) => console.log("Erro ao carregar imagem:", error)}
-                                        />
-                                    );
-                                })
-                            ) : (
-                                <Text style={styles.infoTextLarge}>Nenhuma imagem no catálogo</Text>
-                            )}
+                                return (
+                                    <TouchableOpacity
+                                        key={index}
+                                        onPress={() => setExpandedImage(imageUri)}
+                                    >
+                                        {imageUri ? (
+                                            <Image
+                                                source={{ uri: imageUri }}
+                                                style={styles.catalogImage}
+                                                onError={(error) => console.log("Erro ao carregar imagem:", error)}
+                                            />
+                                        ) : (
+                                            <Text style={styles.infoTextLarge}>Imagem inválida</Text>
+                                        )}
+                                    </TouchableOpacity>
+                                );
+                            })
+                        ) : (
+                            <Text style={styles.infoTextLarge}>Nenhuma imagem no catálogo</Text>
+                        )}
+
                         </ScrollView>
+
+
 
 
                         <TouchableOpacity style={styles.addImageButton} onPress={handleUploadImage}>
@@ -342,6 +375,19 @@ export default function PerfilPrestador({ navigation }) {
                         </TouchableOpacity>
                     </View>
 
+                    <Modal visible={!!expandedImage} transparent={true} animationType="fade">
+                        <View style={styles.modalContainer}>
+                            <TouchableOpacity
+                                style={styles.modalClose}
+                                onPress={() => setExpandedImage(null)}
+                            >
+                                <Icon name="x" size={30} color="#fff" />
+                            </TouchableOpacity>
+                            {expandedImage && (
+                                <Image source={{ uri: expandedImage }} style={styles.modalImage} />
+                            )}
+                        </View>
+                    </Modal>
                  </View>
             </View>
         </ScrollView>
@@ -486,12 +532,6 @@ const styles = StyleSheet.create({
         alignItems: 'center', 
         paddingHorizontal: 10,
     },
-    catalogImage: {
-        borderRadius: 10,
-        marginHorizontal: 8, 
-        resizeMode: 'cover', 
-        backgroundColor: '#ccc',
-    },
     addButton: {
         backgroundColor: '#4E40A2',
         width: 50,
@@ -578,4 +618,30 @@ const styles = StyleSheet.create({
         zIndex: 2,
         
     },
+    catalogImage: {
+        width: 150,
+        height: 150, 
+        borderRadius: 10,
+        margin: 10,
+        resizeMode: 'cover',
+        backgroundColor: '#ccc',
+    },
+    modalImage: {
+        width: '90%',
+        height: '70%',
+        resizeMode: 'contain', 
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    },
+    modalClose: {
+        position: 'absolute',
+        top: 50,
+        right: 20,
+        zIndex: 2,
+    },
+    
 });

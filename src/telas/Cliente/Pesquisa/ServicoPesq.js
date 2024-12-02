@@ -71,11 +71,10 @@ const ServicoPesq = ({ route, navigation }) => {
             <TouchableOpacity
                 style={styles.card}
                 onPress={() => {
-                    console.log('Prestador selecionado:', item); // Confirma os dados no console
-                    navigation.navigate('DetalhesPrestador', { idUsuario: item.id}); // Envia o objeto completo
-                }}              
+                    console.log('Dados enviados para a navegação:', item); 
+                    navigation.navigate('DetalhesPrestador', { idUsuario: item.idUsuario });
+                }}                            
             >
-
                 <Image
                     source={imageUrl ? { uri: imageUrl } : fotoPadrao}
                     style={styles.profileImage}

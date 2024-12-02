@@ -25,16 +25,15 @@ import PerfilPrestador from './src/telas/Prestador/MeuPerfil/PerfilPrestador';
 import Pedidos from './src/telas/Prestador/MeusPedidos/Pedidos';
 import Agenda from './src/telas/Prestador/MinhaAgenda/Agenda';
 import TelaServicos from './src/telas/Cliente/TelaServicos/TelaServicos';
-import Chat from './src/telas/Prestador/Chat/Chat';
 import NotificacaoPrest from './src/telas/Prestador/NotificacaoPrestador/NotificacaoPrest';
 import BuscaPesquisa from './src/telas/Cliente/Pesquisa/BuscaPesquisa';
 import InfoPrestador from './src/telas/Prestador/Cadastro/InfoPrestador';
 import ServicoPesq from './src/telas/Cliente/Pesquisa/ServicoPesq';
-import ChatScreen from './src/telas/Prestador/Chat/ChatScreen';
 import ChatAgenda from './src/telas/Prestador/MinhaAgenda/ChatAgenda';
 import AgendamentoScreen from './src/telas/Prestador/MinhaAgenda/AgendamentoScreen';
 import DetalhesPrestador from './src/telas/Cliente/Pesquisa/DetalhesPrestador';
 import VerTodos from './src/telas/Cliente/TelaServicos/VerTodos';
+
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -153,8 +152,6 @@ export default function App() {
         <Stack.Screen name="TermoCliente" component={TermoUsoCliente} options={{ headerShown: false }} />
         <Stack.Screen name="TelaServ" component={TelaServicos} options={{ headerShown: false }} />
         <Stack.Screen name="Drawer" component={DrawerNavigator} options={{ headerShown: false }} />
-        <Stack.Screen name="Conversas" component={Chat} options={{ headerShown: false }} />
-        <Stack.Screen name="ChatDentro" component={ChatScreen} options={{ headerShown: false }} />
         <Stack.Screen name="CadastroPres2" component={InfoPrestador} options={{ headerShown: false }} />
         <Stack.Screen name="AgendaCHAT" component={ChatAgenda} options={{ headerShown: false }} />
         <Stack.Screen name="Agendamento" component={AgendamentoScreen} options={{ headerShown: false }} />
@@ -162,7 +159,7 @@ export default function App() {
         <Stack.Screen name="ServicoPesq" component={ServicoPesq} options={{ headerShown: false}} />
         <Stack.Screen name="DetalhesPrestador" component={DetalhesPrestador} options={{ headerShown: false}} />
         <Stack.Screen name="VerTodos" component={VerTodos} options={{ headerShown: false}} />
-
+        
       </Stack.Navigator>
     </NavigationContainer>
   );

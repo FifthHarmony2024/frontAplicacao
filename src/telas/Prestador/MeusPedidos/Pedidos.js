@@ -19,7 +19,6 @@ export default function PerfilPrestador({ navigation }) {
                     </TouchableOpacity>
                 </View>
 
-                {/* Navegação entre páginas */}
                 <View style={styles.navbar}>
                     <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Início')}>
                         <Text style={styles.navText}>Meu Perfil</Text>
