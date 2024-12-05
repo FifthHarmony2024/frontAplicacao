@@ -28,8 +28,8 @@ export default function LoginCliente({ navigation }) {
     }
 
     async function handleLogin() {
-        setLoginError(''); 
-
+        setLoginError('');
+    
         if (!emailLogin && !senha) {
             Alert.alert("Erro", "Insira e-mail e senha.");
             return;
@@ -40,47 +40,53 @@ export default function LoginCliente({ navigation }) {
             Alert.alert("Erro", "Digite a senha.");
             return;
         }
-
-            try {
-                const response = await fetch(`${API_CONFIG_URL}login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ emailLogin, senha }),
-                });
-        
-                if (!response.ok) {
-                    Alert.alert("Erro", "Usuário ou senha inválidos");
+    
+        try {
+            const response = await fetch(`${API_CONFIG_URL}login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ emailLogin, senha }),
+            });
+    
+            if (!response.ok) {
+                Alert.alert("Erro", "Usuário ou senha inválidos.");
+                return;
+            }
+    
+            const data = await response.json();
+            const token = data.token;
+    
+            if (data && token) {
+                await AsyncStorage.setItem('userToken', token);
+    
+                const partes = token.split('.');
+                if (partes.length !== 3) {
+                    Alert.alert("Erro", "Token inválido.");
                     return;
                 }
-        
-                const data = await response.json();
-                const token = data.token;
-                if (data && data.token) {
-                    await AsyncStorage.setItem('userToken', data.token);
-                
-                    const partes = data.token.split('.');
-                
-                    if (partes.length !== 3) {
-                        Alert.alert("Erro", "Token inválido.");
-                        return;
-                    }
-                
-                    const payload = JSON.parse(Buffer.from(partes[1], 'base64').toString());
-                    console.log("Payload do token:", payload);
-                
-                    await AsyncStorage.setItem('userData', JSON.stringify(payload));
-                
-                    navigation.navigate('TelaServ');
+    
+                const payload = JSON.parse(Buffer.from(partes[1], 'base64').toString());
+                console.log("Payload do token:", payload);
+    
+                if (payload.roles !== "CLIENTE") {
+                    Alert.alert("Erro", "Você não possui cadastro ou não é cliente.");
+                    return;
                 }
-                
-            } catch (error) {
-                console.error("Erro ao fazer login:", error);
-                Alert.alert("Erro", "Ocorreu um erro ao tentar fazer login.");
-            }
-        
-        
-    }
+                await AsyncStorage.setItem('userRole', payload.roles); 
 
+                await AsyncStorage.setItem('userData', JSON.stringify(payload));
+
+                const userId = await AsyncStorage.getItem('userId');
+                const userIdInt = parseInt(userId);  
+                
+                navigation.navigate('TelaServ');
+            }
+        } catch (error) {
+            console.error("Erro ao fazer login:", error);
+            Alert.alert("Erro", "Ocorreu um erro ao tentar fazer login.");
+        }
+    }
+    
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
             <ScrollView contentContainerStyle={{ flexGrow: 1 }} bounces={false}>

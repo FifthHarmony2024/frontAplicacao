@@ -1,12 +1,40 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
 import Icones from 'react-native-vector-icons/Feather'; 
 import Icons from 'react-native-vector-icons/Ionicons';
 import NotIcone from 'react-native-vector-icons/MaterialCommunityIcons';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function PerfilPrestador({ navigation }) {
     const [showNotification, setShowNotification] = useState(true);
+    const [userData, setUserData] = useState(null); // State to store user data
+
+    useEffect(() => {
+        async function fetchUserData() {
+            try {
+                const data = await AsyncStorage.getItem('userData');
+                if (data) {
+                    setUserData(JSON.parse(data));
+                } else {
+                    Alert.alert('Erro', 'Não foi possível carregar os dados do usuário.');
+                }
+            } catch (error) {
+                console.error('Erro ao recuperar os dados do usuário:', error);
+                Alert.alert('Erro', 'Ocorreu um erro ao carregar os dados do usuário.');
+            }
+        }
+
+        fetchUserData();
+    }, []);
+
+    const handleNavigateToListaClientes = () => {
+        if (userData && userData.id) {
+            navigation.navigate('ListaClientes', { idUsuarioLogado: userData.id });
+        } else {
+            Alert.alert('Erro', 'ID do usuário não encontrado.');
+        }
+    };
+
     return (
         <View style={styles.container}> 
             <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -46,12 +74,12 @@ export default function PerfilPrestador({ navigation }) {
 
                 {/* Conteúdo que será rolado */}
                 <View style={styles.content}>
-                    {/* para adiconar os pedidos ou outro conteúdo que será rolável */}
+                    {/* Para adicionar os pedidos ou outro conteúdo rolável */}
                 </View>
             </ScrollView>
 
             <View style={styles.chatContainer}>
-                <TouchableOpacity onPress={() => navigation.navigate('Conversas')}>
+                <TouchableOpacity onPress={handleNavigateToListaClientes}>
                     <Icons style={styles.chatIcon} name="chatbubbles-outline" size={70} color="#FE914E" />
                 </TouchableOpacity>
                 <Text style={styles.chatText}>Entrar no Chat</Text>

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import {View,Text,Image,StyleSheet,ActivityIndicator,Alert,FlatList,TouchableOpacity,Modal,} from 'react-native';
+import { View, Text, Image, StyleSheet, ActivityIndicator, Alert, FlatList, TouchableOpacity, Modal } from 'react-native';
 import axios from 'axios';
 import fotoPadrao from '../../../../assets/fotoPadrao.png';
 import API_CONFIG_URL from '../../../Validacoes/ipConfig';
 import Icon from 'react-native-vector-icons/Feather';
 import Icons from 'react-native-vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ChatScreen from '../ClienteChat/ChatScreen';
 
 const DetalhesPrestador = ({ route, navigation }) => {
     const [prestador, setPrestador] = useState(null);
@@ -12,14 +14,50 @@ const DetalhesPrestador = ({ route, navigation }) => {
     const [loading, setLoading] = useState(true);
     const [loadingPostagens, setLoadingPostagens] = useState(true);
     const [expandedImage, setExpandedImage] = useState(null);
-    const { idUsuario } = route.params || {};
-
+    const { idUsuario} = route.params || {}; 
+    const [userAddress, setUserAddress] = useState(null); 
+    const [userData, setUserData] = useState(null);
+    
+    useEffect(() => {
+        async function fetchUserData() {
+            try {
+                const data = await AsyncStorage.getItem('userData');
+                if (data) {
+                    const parsedData = JSON.parse(data);
+                    console.log("Dados armazenados no AsyncStorage:", parsedData);
+    
+                    const idUsuario = parsedData.id;
+    
+                    const response = await fetch(`${API_CONFIG_URL}usuarios/${idUsuario}/perfil`);
+                    const addressData = await response.json();
+    
+                    console.log("Dados recebidos da API:", addressData);
+    
+                    const fullUserData = {
+                        ...parsedData, 
+                        ...addressData,
+                    };
+    
+                    await AsyncStorage.setItem('userData', JSON.stringify(fullUserData));
+    
+                    setUserData(fullUserData); 
+                    setUserAddress(addressData); 
+                }
+            } catch (error) {
+                console.error("Erro ao recuperar dados do usuário:", error);
+            }
+        }
+    
+        fetchUserData();
+    }, []);
+    
     useEffect(() => {
         if (!idUsuario) {
             Alert.alert('Erro', 'ID do prestador não foi fornecido.');
             return;
         }
 
+        // Carregar detalhes do prestador
         const fetchPrestadorDetails = async () => {
             try {
                 const response = await axios.get(`${API_CONFIG_URL}usuarios/${idUsuario}/perfilPrestador`);
@@ -31,6 +69,7 @@ const DetalhesPrestador = ({ route, navigation }) => {
             }
         };
 
+        // Carregar postagens do prestador
         const fetchPostagens = async () => {
             try {
                 const response = await axios.get(`${API_CONFIG_URL}postagens/prestador/${idUsuario}`);
@@ -84,7 +123,6 @@ const DetalhesPrestador = ({ route, navigation }) => {
 
     return (
         <View style={styles.container}>
-            {/* Cabeçalho */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Icon name="chevron-left" size={30} color="#fff" />
@@ -101,13 +139,11 @@ const DetalhesPrestador = ({ route, navigation }) => {
                 </View>
             </View>
 
-            {/* Descrição */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Descrição</Text>
                 <Text style={styles.text}>{prestador.descricaoServico || 'Nenhuma descrição disponível.'}</Text>
             </View>
 
-            {/* Serviços */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Serviços que atende</Text>
                 {prestador.nomeServico?.length ? (
@@ -139,7 +175,6 @@ const DetalhesPrestador = ({ route, navigation }) => {
                 )}
             </View>
 
-            {/* Modal de imagem expandida */}
             <Modal visible={!!expandedImage} transparent={true} animationType="fade">
                 <View style={styles.modalContainer}>
                     <TouchableOpacity
@@ -155,7 +190,20 @@ const DetalhesPrestador = ({ route, navigation }) => {
             </Modal>
 
             <View style={styles.chatContainer}>
-                <TouchableOpacity onPress={() => navigation.navigate('Conversas')}>
+                            <TouchableOpacity
+                    onPress={() => {
+                        if (!userData || !userData.id || !idUsuario) {
+                            Alert.alert("Erro", "Informações do usuário ou prestador estão faltando.");
+                            return;
+                        }
+
+                        // Navegar para a tela de chat passando os IDs
+                        navigation.navigate('ChatCliente', {
+                            idUsuarioLogado: userData.id, // ID do usuário logado
+                            idUsuarioDestinatario: idUsuario, // ID do prestador
+                        });
+                    }}
+                >
                     <Icons style={styles.chatIcon} name="chatbubbles-outline" size={70} color="#FE914E" />
                 </TouchableOpacity>
                 <Text style={styles.chatText}>Entrar em contato</Text>
@@ -203,12 +251,11 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 10,
-        color:'#4E40A2'  
-
+        color: '#4E40A2',
     },
     catalogTitle: {
         paddingRight: 20,
-        textAlign:'center',
+        textAlign: 'center',
     },
     text: {
         fontSize: 14,
@@ -273,9 +320,9 @@ const styles = StyleSheet.create({
         zIndex: 1,
     },
     chatContainer: {
-        position: 'absolute', 
-        bottom: 20, 
-        right: 20, 
+        position: 'absolute',
+        bottom: 20,
+        right: 20,
         alignItems: 'center',
     },
     chatText: {
