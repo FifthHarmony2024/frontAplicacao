@@ -73,6 +73,7 @@ export default function LoginCliente({ navigation }) {
                     return;
                 }
     
+
                 await AsyncStorage.setItem('userData', JSON.stringify(payload));
     
                 navigation.navigate('Drawer');

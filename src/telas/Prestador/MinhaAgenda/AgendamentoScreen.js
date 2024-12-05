@@ -115,9 +115,21 @@ export default function AgendamentoScreen({ navigation, route }) {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Enviar para o Cliente</Text>
-      </TouchableOpacity>
+      <TouchableOpacity
+  style={styles.button}
+  onPress={() => {
+    const agendamentoInfo = {
+      data: data ? data.toLocaleDateString('pt-PT') : "Não definida",
+      horario: horario || "Não definido",
+      local: "Endereço definido pelo usuário",
+      orcamento,
+    };
+    navigation.navigate('ChatPrestador', { agendamento: agendamentoInfo });
+  }}
+>
+  <Text style={styles.buttonText}>Enviar para o Cliente</Text>
+</TouchableOpacity>
+
     </ScrollView>
   );
 }

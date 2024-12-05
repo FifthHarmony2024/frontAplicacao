@@ -57,7 +57,6 @@ const DetalhesPrestador = ({ route, navigation }) => {
             return;
         }
 
-        // Carregar detalhes do prestador
         const fetchPrestadorDetails = async () => {
             try {
                 const response = await axios.get(`${API_CONFIG_URL}usuarios/${idUsuario}/perfilPrestador`);
@@ -69,7 +68,6 @@ const DetalhesPrestador = ({ route, navigation }) => {
             }
         };
 
-        // Carregar postagens do prestador
         const fetchPostagens = async () => {
             try {
                 const response = await axios.get(`${API_CONFIG_URL}postagens/prestador/${idUsuario}`);
@@ -196,11 +194,9 @@ const DetalhesPrestador = ({ route, navigation }) => {
                             Alert.alert("Erro", "Informações do usuário ou prestador estão faltando.");
                             return;
                         }
-
-                        // Navegar para a tela de chat passando os IDs
                         navigation.navigate('ChatCliente', {
-                            idUsuarioLogado: userData.id, // ID do usuário logado
-                            idUsuarioDestinatario: idUsuario, // ID do prestador
+                            idUsuarioLogado: userData.id, 
+                            idUsuarioDestinatario: idUsuario, 
                         });
                     }}
                 >

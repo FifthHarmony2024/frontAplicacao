@@ -165,6 +165,7 @@ export default function App() {
         <Stack.Screen name="ChatCliente" component={ChatScreen} options={{ headerShown: false}} />
         <Stack.Screen name="ListaClientes" component={ListaClientesScreen} options={{ headerShown: false}} />
         <Stack.Screen name="ChatPrestador" component={ChatPrestador} options={{ headerShown: false}} />
+        <Stack.Screen name="ChatAgenda" component={ChatAgenda} options={{ headerShown: false}} />
 
         
       </Stack.Navigator>

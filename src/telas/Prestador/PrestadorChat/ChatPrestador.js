@@ -1,18 +1,46 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Image, ActivityIndicator } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import API_CONFIG_URL from '../../../Validacoes/ipConfig';
 
-const ChatPrestador = ({ route }) => {
-  const { idUsuarioLogado, idUsuarioDestinatario } = route.params;  // IDs do prestador e do cliente
+const ChatPrestador = ({ route, navigation }) => {
+  const { idUsuarioLogado, idUsuarioDestinatario, clienteInfo } = route.params;
   const [mensagens, setMensagens] = useState([]);
   const [novaMensagem, setNovaMensagem] = useState('');
-  const flatListRef = useRef(); // Referência para o FlatList
+  const [cliente, setCliente] = useState(clienteInfo || null);
+  const [loading, setLoading] = useState(true);
+  const flatListRef = useRef();
 
-  const API_URL = 'http://192.168.0.6:8080/chat'; // Substitua pela URL do backend
+  useEffect(() => {
+    const carregarDados = async () => {
+      setLoading(true);
+      if (!clienteInfo) {
+        await buscarPerfilCliente();
+      }
+      await buscarMensagens();
+      setLoading(false);
+    };
 
-  // Função para buscar mensagens
+    carregarDados();
+  }, [clienteInfo]);
+
+  const buscarPerfilCliente = async () => {
+    try {
+      const response = await fetch(`${API_CONFIG_URL}usuarios/${idUsuarioDestinatario}/perfil`);
+      if (response.ok) {
+        const data = await response.json();
+        setCliente(data);
+      } else {
+        console.error('Erro ao buscar perfil do cliente:', response.status);
+      }
+    } catch (error) {
+      console.error('Erro na requisição:', error);
+    }
+  };
+
   const buscarMensagens = async () => {
     try {
-      const response = await fetch(`${API_URL}/usuario/${idUsuarioDestinatario}`);
+      const response = await fetch(`${API_CONFIG_URL}chat/usuario/${idUsuarioDestinatario}`);
       if (response.ok) {
         const data = await response.json();
         setMensagens(data);
@@ -24,7 +52,6 @@ const ChatPrestador = ({ route }) => {
     }
   };
 
-  // Função para enviar uma nova mensagem
   const enviarMensagem = async () => {
     if (!novaMensagem.trim()) return;
 
@@ -36,7 +63,7 @@ const ChatPrestador = ({ route }) => {
     };
 
     try {
-      const response = await fetch(`${API_URL}/enviar`, {
+      const response = await fetch(`${API_CONFIG_URL}chat/enviar`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,17 +73,9 @@ const ChatPrestador = ({ route }) => {
 
       if (response.ok) {
         const mensagemEnviada = await response.json();
-        console.log('Mensagem enviada com sucesso:', mensagemEnviada);
-
-        // Atualiza as mensagens
-        setMensagens((prevMensagens) => {
-          const mensagensAtualizadas = [...prevMensagens, mensagemEnviada];
-          mensagensAtualizadas.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-          return mensagensAtualizadas;
-        });
-
-        setNovaMensagem(''); // Limpa o campo de mensagem
-        flatListRef.current.scrollToEnd({ animated: true }); // Rola para o final
+        setMensagens((prevMensagens) => [...prevMensagens, mensagemEnviada]);
+        setNovaMensagem('');
+        flatListRef.current.scrollToEnd({ animated: true });
       } else {
         console.error('Erro ao enviar mensagem:', response.status);
       }
@@ -65,30 +84,53 @@ const ChatPrestador = ({ route }) => {
     }
   };
 
-  // Carregar as mensagens quando a tela for montada
-  useEffect(() => {
-    buscarMensagens();
-  }, []);
-
-  // Função para renderizar as mensagens
   const renderItem = ({ item }) => {
     const isSentByMe = item.usuarioRemetente.idUsuario === idUsuarioLogado;
     return (
       <View style={[styles.message, isSentByMe ? styles.sentMessage : styles.receivedMessage]}>
-        <Text>{item.messagemChat}</Text>
+        <Text style={styles.messageText}>{item.messagemChat}</Text>
+        <Text style={styles.timestamp}>{new Date(item.timestamp).toLocaleString()}</Text>
       </View>
     );
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#4E40A2" />
+        <Text>Carregando...</Text>
+      </View>
+    );
+  }
+
+  const clienteFoto = cliente?.fotoPerfil ? `${API_CONFIG_URL}${cliente.fotoPerfil.replace(/\\/g, '/')}` : 'https://via.placeholder.com/150';
+  const clienteNome = cliente?.nome || 'Usuário';
+
   return (
     <View style={styles.container}>
-      <FlatList
-        ref={flatListRef} // Adiciona a referência
-        data={mensagens}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => index.toString()}
-        onContentSizeChange={() => flatListRef.current.scrollToEnd({ animated: true })} // Rola para o final quando o conteúdo mudar
-      />
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={24} color="#000" style={styles.icon} />
+        </TouchableOpacity>
+        <Image
+          source={{ uri: clienteFoto }}
+          style={styles.profileImage}
+        />
+        <Text style={styles.profileName}>{clienteNome}</Text>
+        <Icon name="more-vert" size={24} color="#000" style={styles.icon} />
+      </View>
+
+      <View style={styles.messagesContainer}>
+        <FlatList
+          ref={flatListRef}
+          data={mensagens}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => index.toString()}
+          onContentSizeChange={() => flatListRef.current.scrollToEnd({ animated: true })}
+          onLayout={() => flatListRef.current.scrollToEnd({ animated: true })}
+        />
+      </View>
+
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -96,8 +138,8 @@ const ChatPrestador = ({ route }) => {
           value={novaMensagem}
           onChangeText={setNovaMensagem}
         />
-        <TouchableOpacity onPress={enviarMensagem}>
-          <Text style={styles.sendButton}>Enviar</Text>
+        <TouchableOpacity style={styles.iconContainer} onPress={enviarMensagem}>
+          <Icon name="send" size={24} color="#4E40A2" />
         </TouchableOpacity>
       </View>
     </View>
@@ -108,13 +150,41 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    justifyContent: 'space-between',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    top:45
+  },
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginHorizontal: 10,
+  },
+  profileName: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  icon: {
+    padding: 5,
+  },
+  messagesContainer: {
+    flex: 1,
+    paddingHorizontal: 10,
   },
   inputContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
     padding: 10,
     backgroundColor: '#fff',
-    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#ccc',
   },
   input: {
     flex: 1,
@@ -124,14 +194,14 @@ const styles = StyleSheet.create({
     padding: 10,
     marginRight: 10,
   },
-  sendButton: {
-    color: '#4E40A2',
-    fontWeight: 'bold',
+  iconContainer: {
+    padding: 5,
   },
   message: {
     padding: 10,
-    margin: 10,
+    marginVertical: 5,
     borderRadius: 8,
+    maxWidth: '80%',
   },
   sentMessage: {
     backgroundColor: '#FE914E',
@@ -140,6 +210,20 @@ const styles = StyleSheet.create({
   receivedMessage: {
     backgroundColor: '#ddd',
     alignSelf: 'flex-start',
+  },
+  messageText: {
+    fontSize: 16,
+  },
+  timestamp: {
+    fontSize: 12,
+    color: '#555',
+    textAlign: 'right',
+    marginTop: 5,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

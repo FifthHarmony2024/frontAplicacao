@@ -1,35 +1,43 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Image, Alert } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import axios from 'axios';
+import API_CONFIG_URL from '../../../Validacoes/ipConfig'; 
 
-const ChatScreen = ({ route }) => {
-    const { idUsuarioLogado, idUsuarioDestinatario } = route.params; // IDs do cliente e do prestador
+const ChatScreen = ({ route,navigation }) => {
+    const { idUsuarioLogado, idUsuarioDestinatario,  } = route.params;
+    const [prestador, setPrestador] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [mensagens, setMensagens] = useState([]);
+    const [novaMensagem, setNovaMensagem] = useState('');
+    const flatListRef = useRef();
 
-    const [mensagens, setMensagens] = useState([]); // Armazena as mensagens do chat
-    const [novaMensagem, setNovaMensagem] = useState(''); // Armazena a mensagem que será enviada
-    const flatListRef = useRef(); // Referência para a FlatList
 
-    const API_URL = 'http://192.168.0.6:8080/chat'; // Substitua pela URL do backend
+    const fetchPrestadorDetails = async () => {
+        try {
+            const response = await axios.get(`${API_CONFIG_URL}usuarios/${idUsuarioDestinatario}/perfilPrestador`);
+            setPrestador(response.data);
+        } catch (err) {
+            Alert.alert('Erro', 'Ocorreu um erro ao carregar os dados do prestador.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    // Função para buscar mensagens enviadas pelo prestador para o cliente
     const buscarMensagens = async () => {
         try {
-            const response = await fetch(`${API_URL}/cliente/${idUsuarioLogado}`); // A URL agora busca mensagens para o cliente
+            const response = await fetch(`${API_CONFIG_URL}chat/usuario/${idUsuarioLogado}`);
             if (response.ok) {
                 const data = await response.json();
-                console.log('Mensagens recebidas:', data); // Log para depuração
-
-                // Filtra as mensagens entre o cliente e o prestador
-                const mensagensFiltradas = data.filter(
-                    (msg) =>
-                        (msg.usuarioRemetente.idUsuario === idUsuarioDestinatario && // Prestador é o remetente
-                            msg.usuarioDestinatario.idUsuario === idUsuarioLogado) || // Cliente é o destinatário
-                        (msg.usuarioRemetente.idUsuario === idUsuarioLogado && // Cliente é o remetente
-                            msg.usuarioDestinatario.idUsuario === idUsuarioDestinatario) // Prestador é o destinatário
-                );
-
-                // Ordena as mensagens pela data (do mais antigo para o mais recente)
-                mensagensFiltradas.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-
+                const mensagensFiltradas = data
+                    .filter(
+                        (msg) =>
+                            (msg.usuarioRemetente.idUsuario === idUsuarioDestinatario &&
+                                msg.usuarioDestinatario.idUsuario === idUsuarioLogado) ||
+                            (msg.usuarioRemetente.idUsuario === idUsuarioLogado &&
+                                msg.usuarioDestinatario.idUsuario === idUsuarioDestinatario)
+                    )
+                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 setMensagens(mensagensFiltradas);
             } else {
                 console.error('Erro ao buscar mensagens:', response.status);
@@ -39,7 +47,6 @@ const ChatScreen = ({ route }) => {
         }
     };
 
-    // Função para enviar uma nova mensagem
     const enviarMensagem = async () => {
         if (!novaMensagem.trim()) return;
 
@@ -51,7 +58,7 @@ const ChatScreen = ({ route }) => {
         };
 
         try {
-            const response = await fetch(`${API_URL}/enviar`, {
+            const response = await fetch(`${API_CONFIG_URL}chat/enviar`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -61,17 +68,11 @@ const ChatScreen = ({ route }) => {
 
             if (response.ok) {
                 const mensagemEnviada = await response.json();
-                console.log('Mensagem enviada com sucesso:', mensagemEnviada);
-
-                // Atualiza as mensagens
                 setMensagens((prevMensagens) => {
-                    const mensagensAtualizadas = [...prevMensagens, mensagemEnviada];
-                    mensagensAtualizadas.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-                    return mensagensAtualizadas;
+                    const mensagensAtualizadas = [mensagemEnviada, ...prevMensagens];
+                    return mensagensAtualizadas.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 });
-
-                setNovaMensagem(''); // Limpa o campo de mensagem
-                flatListRef.current.scrollToEnd({ animated: true }); // Rola para o final
+                setNovaMensagem('');
             } else {
                 console.error('Erro ao enviar mensagem:', response.status);
             }
@@ -80,12 +81,11 @@ const ChatScreen = ({ route }) => {
         }
     };
 
-    // Carregar as mensagens quando a tela for montada
     useEffect(() => {
         buscarMensagens();
+        fetchPrestadorDetails();
     }, []);
 
-    // Função para formatar a data e hora
     const formatarDataHora = (timestamp) => {
         const data = new Date(timestamp);
         return data.toLocaleString('pt-BR', {
@@ -95,11 +95,9 @@ const ChatScreen = ({ route }) => {
             day: 'numeric',
             hour: 'numeric',
             minute: 'numeric',
-            second: 'numeric',
         });
     };
 
-    // Renderiza uma mensagem na lista
     const renderItem = ({ item }) => {
         const isSentByMe = item.usuarioRemetente.idUsuario === idUsuarioLogado;
         return (
@@ -112,16 +110,33 @@ const ChatScreen = ({ route }) => {
         );
     };
 
-    return (
+     return (
         <View style={styles.container}>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => navigation.goBack('DetalhesPrestador')}>
+                    <Icon name="arrow-back" size={24} color="#000" style={styles.icon} />
+                </TouchableOpacity>
+                <Image
+                    source={{
+                        uri: prestador?.fotoPerfil
+                            ? `${API_CONFIG_URL}${prestador.fotoPerfil.replace(/\\/g, '/')}`
+                            : 'https://via.placeholder.com/150',
+                    }}
+                    style={styles.profileImage}
+                />
+                <Text style={styles.profileName}>{prestador?.nomeComercial || 'Usuário'}</Text>
+                <Icon name="more-vert" size={24} color="#000" style={styles.icon} />
+            </View>
+
             <FlatList
                 ref={flatListRef}
                 data={mensagens}
                 renderItem={renderItem}
                 keyExtractor={(item, index) => index.toString()}
-                inverted={true} // Adiciona a propriedade inverted para inverter a lista
-                onContentSizeChange={() => flatListRef.current.scrollToEnd({ animated: true })} // Rola para o final quando a lista é atualizada
+                contentContainerStyle={styles.flatListContainer}
+                inverted
             />
+
             <View style={styles.inputContainer}>
                 <TextInput
                     style={styles.input}
@@ -138,58 +153,86 @@ const ChatScreen = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-    justifyContent: 'space-between',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    padding: 10,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-  },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 20,
-    padding: 10,
-    marginRight: 10,
-  },
-  sendButton: {
-    color: '#4E40A2',
-    fontWeight: 'bold',
-  },
-  message: {
-    padding: 10,
-    margin: 10,
-    borderRadius: 8,
-    maxWidth: '80%',
-  },
-  sentMessage: {
-    backgroundColor: '#4E40A2', // Cor de fundo das mensagens enviadas
-    alignSelf: 'flex-end',
-  },
-  receivedMessage: {
-    backgroundColor: '#fff', // Cor de fundo das mensagens recebidas
-    alignSelf: 'flex-start',
-  },
-  messageText: {
-    fontSize: 16,
-  },
-  sentText: {
-    color: '#fff', // Cor do texto das mensagens enviadas (branco)
-  },
-  receivedText: {
-    color: '#000', // Cor do texto das mensagens recebidas (preto)
-  },
-  timestamp: {
-    fontSize: 10,
-    color: '#888',
-    marginTop: 5,
-    textAlign: 'right',
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#f5f5f5',
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 10,
+        backgroundColor: '#f0f0f0',
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+        height: 80,
+        marginTop:25
+    },
+    profileImage: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        marginHorizontal: 10,
+        marginTop:15
+    },
+    profileName: {
+        flex: 1,
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginTop:14
+    },
+    icon: {
+        padding: 5,
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        padding: 10,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+    },
+    input: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 20,
+        padding: 10,
+        marginRight: 10,
+    },
+    sendButton: {
+        color: '#4E40A2',
+        fontWeight: 'bold',
+    },
+    flatListContainer: {
+        paddingBottom: 20, 
+    },
+    message: {
+        padding: 10,
+        margin: 10,
+        borderRadius: 8,
+        maxWidth: '80%',
+    },
+    sentMessage: {
+        backgroundColor: '#4E40A2',
+        alignSelf: 'flex-end',
+    },
+    receivedMessage: {
+        backgroundColor: '#fff',
+        alignSelf: 'flex-start',
+    },
+    messageText: {
+        fontSize: 16,
+    },
+    sentText: {
+        color: '#fff',
+    },
+    receivedText: {
+        color: '#000',
+    },
+    timestamp: {
+        fontSize: 10,
+        color: '#888',
+        marginTop: 5,
+        textAlign: 'right',
+    },
 });
 
 export default ChatScreen;

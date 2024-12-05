@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal } from "react-native";
 import Icones from 'react-native-vector-icons/Feather';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import NotIcone from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icons from 'react-native-vector-icons/Ionicons';
+import API_CONFIG_URL from "../../../Validacoes/ipConfig";
+import AsyncStorage from '@react-native-async-storage/async-storage';  // Importando AsyncStorage
+import axios from 'axios';
 
 LocaleConfig.locales['pt'] = {
     monthNames: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
@@ -19,13 +22,32 @@ export default function Agenda({ navigation }) {
     const [markedDays, setMarkedDays] = useState({});
     const [showNotification, setShowNotification] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
+    const [userAddress, setUserAddress] = useState(null); 
+    const [userData, setUserData] = useState(null);  
+    useEffect(() => {
+        // Recuperar o ID do usuário do AsyncStorage assim que o componente for montado
+        const fetchUserId = async () => {
+            try {
+                const storedUserId = await AsyncStorage.getItem('userId');
+                if (storedUserId) {
+                    setIdUsuario(storedUserId);  // Armazena o ID no estado
+                } else {
+                    console.log("ID de usuário não encontrado");
+                }
+            } catch (error) {
+                console.error('Erro ao recuperar o ID do usuário:', error);
+            }
+        };
+        fetchUserId();
+    }, []);
+    
 
     const marcarDia = (day) => {
         setSelectedDay(day.dateString); 
         setModalVisible(true);  
     };
 
-    const handleOptionSelect = (option) => {
+    const handleOptionSelect = async (option) => {
         if (option === "Dia de Trabalho") {
             setMarkedDays((prev) => ({
                 ...prev,
@@ -36,9 +58,53 @@ export default function Agenda({ navigation }) {
                 ...prev,
                 [selectedDay]: { selected: true, selectedColor: '#FE914E', workDay: false },
             }));
+
+            // Chama a função para marcar folga e enviar os dados para o backend
+            await marcarFolga(selectedDay);
         }
-        setModalVisible(false);  
+        setModalVisible(false);
     };
+    useEffect(() => {
+        async function fetchUserData() {
+            try {
+                const data = await AsyncStorage.getItem('userData');
+                if (data) {
+                    const parsedData = JSON.parse(data);
+                    setUserData(parsedData); // Armazenar os dados do usuário
+
+                    console.log("Dados armazenados no AsyncStorage:", parsedData);
+                }
+            } catch (error) {
+                console.error("Erro ao recuperar dados do usuário:", error);
+            }
+        }
+        fetchUserData();
+    }, []);
+
+    const marcarFolga = async (diaFolga) => {
+        try {
+            if (!userData || !userData.id) {
+                console.error('ID do usuário não encontrado');
+                return;
+            }
+    
+            const idUsuario = userData.id;
+            // Formatar para 'yyyy-MM-dd' sem horas, minutos ou UTC
+            const data = new Date(diaFolga).toISOString().split('T')[0];  // '2024-12-13'
+    
+            const response = await axios.post(
+                `${API_CONFIG_URL}agenda/marcar-folga?idUsuario=${idUsuario}&diaServico=${data}`
+            );
+    
+            if (response.status === 200) {
+                console.log('Folga marcada com sucesso!');
+            }
+        } catch (error) {
+            console.error('Erro ao marcar folga:', error);
+        }
+    };
+    
+    
 
     const renderServicos = () => {
         if (!selectedDay) {
