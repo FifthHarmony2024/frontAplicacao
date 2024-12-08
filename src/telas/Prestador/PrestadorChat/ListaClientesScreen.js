@@ -10,13 +10,14 @@ const ListaClientesScreen = ({ navigation, route }) => {
 
   const API_URL = `${API_CONFIG_URL}chat`;
 
+  // Função para buscar mensagens do backend
   const buscarMensagens = async () => {
     try {
       const response = await fetch(`${API_URL}/prestador/${idUsuario}`);
       if (response.ok) {
         const data = await response.json();
-        console.log('Mensagens recebidas:', data);
 
+        // Agrupar mensagens por outro usuário
         const mensagensAgrupadas = data.reduce((acc, msg) => {
           const outroUsuarioId =
             msg.usuarioRemetente.idUsuario === idUsuario
@@ -30,6 +31,7 @@ const ListaClientesScreen = ({ navigation, route }) => {
           return acc;
         }, {});
 
+        // Ordenar mensagens dentro de cada grupo
         const mensagensOrdenadas = Object.values(mensagensAgrupadas).map((grupo) =>
           grupo.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
         );
@@ -43,10 +45,14 @@ const ListaClientesScreen = ({ navigation, route }) => {
     }
   };
 
+  // Atualizar mensagens periodicamente
   useEffect(() => {
     buscarMensagens();
+    const intervalId = setInterval(buscarMensagens, 5000); // Atualiza a cada 5 segundos
+    return () => clearInterval(intervalId); // Limpa o intervalo ao desmontar o componente
   }, []);
 
+  // Função para marcar mensagens como lidas
   const atualizarStatusMensagem = async (idUsuarioDestinatario) => {
     try {
       await fetch(`${API_URL}/marcar-lida`, {
@@ -65,6 +71,7 @@ const ListaClientesScreen = ({ navigation, route }) => {
     }
   };
 
+  // Filtrar mensagens pela pesquisa
   const mensagensFiltradas = mensagensAgrupadas.filter((grupo) => {
     if (pesquisa) {
       const outroUsuario =
@@ -77,6 +84,7 @@ const ListaClientesScreen = ({ navigation, route }) => {
     return true;
   });
 
+  // Renderizar cada item da lista
   const renderItem = ({ item }) => {
     const outroUsuario =
       item[0].usuarioRemetente.idUsuario === idUsuario

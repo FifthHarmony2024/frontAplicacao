@@ -34,11 +34,9 @@ import geladeira from '../../../../assets/geladeira.jpg';
 
 const Tab = createBottomTabNavigator();
 
-const TelaInicio = () => {
-  const navigation = useNavigation();
-  const [userData, setUserData] = useState(null); // dados com o token
-  const [userAddress, setUserAddress] = useState(null); // dados gerais
-
+const TelaInicio = ({navigation, route}) => {
+  const [userData, setUserData] = useState(null); 
+  const [userAddress, setUserAddress] = useState(null);
 
     useEffect(() => {
         async function fetchUserData() {
@@ -88,7 +86,12 @@ const TelaInicio = () => {
       { label: 'Moda e Beleza', icon: { type: FontAwesome5, name: 'cut' }, idCategoria: 9 },
     ];
     
-
+    const categorias = [
+      { idCategoria: 3, nome: 'Reformas e Reparos' },
+      { idCategoria: 9, nome: 'Moda e Beleza' },
+      { idCategoria: 1, nome: 'Assistência Técnica' },
+    ];
+    
   return (
     <ScrollView>
         <View style={styles.screenContainer}>
@@ -107,7 +110,7 @@ const TelaInicio = () => {
 
                 <Text style={styles.welcomeText}>Olá, {userData?.nome || "Usuário"}! </Text>
 
-                <BarraPesquisa />
+                <BarraPesquisa navigation={navigation} route={route} />
 
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.serviceScroll}>
                       {services.map((service) => (
@@ -126,7 +129,7 @@ const TelaInicio = () => {
 
                 <View style={styles.sectionHeader}>
                   <Text style={styles.categorias}>Reformas e Reparos</Text>
-                  <TouchableOpacity style={styles.verTodosButton} onPress={() => alert('Ver todos os serviços')}>
+                  <TouchableOpacity style={styles.verTodosButton} onPress={() => navigation.navigate('VerTodos', { idCategoria: 3 })}>
                     <Text style={styles.verTodosText}>Ver Todos</Text>
                   </TouchableOpacity>
                 </View>
@@ -166,7 +169,7 @@ const TelaInicio = () => {
 
                 <View style={styles.sectionHeader}>
                   <Text style={styles.categoriaModa}>Moda e Beleza</Text>
-                  <TouchableOpacity style={styles.verTodosButton} onPress={() => alert('Ver todos os serviços')}>
+                  <TouchableOpacity style={styles.verTodosButton} onPress={() => navigation.navigate('VerTodos', { idCategoria: 9 })}                  >
                     <Text style={styles.verTodosText}>Ver Todos</Text>
                   </TouchableOpacity>
                 </View>
@@ -197,7 +200,7 @@ const TelaInicio = () => {
 
                 <View style={styles.sectionHeader}>
                   <Text style={styles.categorias}>Assistência Técnica</Text>
-                  <TouchableOpacity style={styles.verTodosButton} onPress={() => alert('Ver todos os serviços')}>
+                  <TouchableOpacity style={styles.verTodosButton} onPress={() => navigation.navigate('VerTodos', { idCategoria: 1})}                  >
                     <Text style={styles.verTodosText}>Ver Todos</Text>
                   </TouchableOpacity>
                 </View>

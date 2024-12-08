@@ -19,7 +19,9 @@ const sexoOpcao = [
 export default function CadastroClie({ navigation }) {
     const [viewPass, setViewPass] = useState(true);
     const [viewConfirmPass, setViewConfirmPass] = useState(true);
-    
+    const [errors, setErrors] = useState({});
+
+
 
     function togglePasswordVisibility() {
         setViewPass(!viewPass);
@@ -33,7 +35,38 @@ export default function CadastroClie({ navigation }) {
     const [dataDeNascimento, setDataDeNascimento] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
 
+    const validateFields = () => {
+        let validationErrors = {};
+        
+        if (!nome.trim()) validationErrors.nome = 'O campo Nome é obrigatório.';
+        if (!sobrenome.trim()) validationErrors.sobrenome = 'O campo Sobrenome é obrigatório.';
+        if (!emailLogin.trim() || !/\S+@\S+\.\S+/.test(emailLogin)) validationErrors.emailLogin = 'E-mail inválido.';
+        if (!telefone.trim()) validationErrors.telefone = 'O campo Telefone é obrigatório.';
+        if (!cpf.trim() || cpf.length !== 11) validationErrors.cpf = 'CPF deve ter 11 dígitos.';
+        if (!dataDeNascimento) {
+            validationErrors.dataDeNascimento = 'A data de nascimento é obrigatória.';
+        }        
+        if (!senha.trim()) validationErrors.senha = 'A senha é obrigatória.';
+        if (senha !== confSenha) validationErrors.confSenha = 'As senhas não coincidem.';
+        if (!cep.trim() || cep.length !== 8) validationErrors.cep = 'CEP inválido.';
+        if (!estadoValue) {
+            validationErrors.estado = 'O campo Gênero é obrigatório.';
+        }        
+        if (!cidadeValue) validationErrors.cidade = 'O campo Cidade é obrigatório.';
+        if (!endereco.trim()) validationErrors.endereco = 'O campo Endereço é obrigatório.';
+        if (!bairro.trim()) validationErrors.bairro = 'O campo Bairro é obrigatório.';
+        if (!numResidencial) validationErrors.numResidencial = 'Número residencial é obrigatório.';
+        if (!sexoOpcaoValue) {
+            validationErrors.sexoOpcao = 'O campo Gênero é obrigatório.';
+        }
+      
+        setErrors(validationErrors);
+        return Object.keys(validationErrors).length === 0;
 
+       
+    };
+    
+    
     const [nome, setNome] = useState('');
     const [sobrenome, setSobrenome] = useState('');
     const [emailLogin, setEmailLogin] = useState('');
@@ -59,6 +92,8 @@ export default function CadastroClie({ navigation }) {
         if (event.type === 'set' && selectedDate) {
         const formattedDate = selectedDate.toISOString().split('T')[0];
         setDataDeNascimento(formattedDate);
+        setErrors((prevErrors) => ({ ...prevErrors, dataDeNascimento: undefined }));
+
     }
     };
 
@@ -76,8 +111,45 @@ export default function CadastroClie({ navigation }) {
         return null;
     };
 
+    const formatarTelefone = (text) => {
+        const numeroLimpo = text.replace(/\D/g, '');
+    
+        let telefoneFormatado = numeroLimpo;
+    
+        if (numeroLimpo.length > 2) {
+          telefoneFormatado = `(${numeroLimpo.slice(0, 2)}) ${numeroLimpo.slice(2)}`;
+        }
+        if (numeroLimpo.length > 7) {
+          telefoneFormatado = `(${numeroLimpo.slice(0, 2)}) ${numeroLimpo.slice(2, 7)}-${numeroLimpo.slice(7, 11)}`;
+        }
+    
+        if (telefoneFormatado.length > 15) {
+          telefoneFormatado = telefoneFormatado.slice(0, 15);
+        }
+    
+        setTelefone(telefoneFormatado);
+      };
+    
+      const validarTelefone = () => {
+        const regexTelefone = /^\(\d{2}\) \d{5}-\d{4}$/;
+    
+        if (!regexTelefone.test(telefone)) {
+          setErrors((prevErrors) => ({
+            ...prevErrors,
+            telefone: 'O telefone deve estar no formato (DD) 99999-9999',
+          }));
+        } else {
+          setErrors((prevErrors) => ({
+            ...prevErrors,
+            telefone: null, 
+          }));
+        }
+      };
     
     const handleSubmit = async () => {
+        if (!validateFields()) {
+            return; 
+        }
         let userData = {
             nome,
             sobrenome,
@@ -130,6 +202,7 @@ export default function CadastroClie({ navigation }) {
                 </Text>
             );
         }
+
         return null;
     };
 
@@ -202,30 +275,46 @@ export default function CadastroClie({ navigation }) {
                                 placeholder="Nome"
                                 placeholderTextColor="#282828"
                                 value={nome}
-                                onChangeText={setNome}
-                            />
+                                onChangeText={(text) => {
+                                    setNome(text); 
+                                    setErrors(prevErrors => ({ ...prevErrors, nome: undefined }));
+                                }}                            />
+                            {errors.nome && <Text style={styles.errorText}>{errors.nome}</Text>}
+
                             <TextInput 
                                 style={styles.campos}
                                 placeholder="Sobrenome"
                                 placeholderTextColor="#282828"
                                 value={sobrenome}
-                                onChangeText={setSobrenome}
-                            />
+                                onChangeText={(text) => {
+                                    setSobrenome(text);
+                                    setErrors(prevErrors => ({ ...prevErrors, sobrenome: undefined }));
+                                }}                            />
+                            {errors.sobrenome && <Text style={styles.errorText}>{errors.sobrenome}</Text>}
+
                             <TextInput 
                                 style={styles.campos}
                                 placeholder="E-mail"
                                 placeholderTextColor="#282828"
                                 value={emailLogin}
-                                onChangeText={setEmailLogin}
-                            />
-                             <TextInput 
+                                onChangeText={(text) => {
+                                    setEmailLogin(text); 
+                                    setErrors(prevErrors => ({ ...prevErrors, emailLogin: undefined }));
+                                }}                            />
+                            {errors.emailLogin && <Text style={styles.errorText}>{errors.emailLogin}</Text>}
+
+                            <TextInput 
                                 style={styles.campos}
-                                placeholder="Telefone"
+                                placeholder="(DD) 99999-9999"
                                 placeholderTextColor="#282828"
                                 keyboardType="numeric"
                                 value={telefone}
-                                onChangeText={setTelefone}
+                                onChangeText={formatarTelefone}
+                                onBlur={validarTelefone} 
                             />
+
+                            {errors.telefone && <Text style={styles.errorText}>{errors.telefone}</Text>}
+
                            <View style={styles.dropdownContainer}>
                                 {renderLabelSexoOpcao()}
                                 <Dropdown
@@ -243,9 +332,11 @@ export default function CadastroClie({ navigation }) {
                                     value={sexoOpcaoValue}
                                     onFocus={() => setSexoOpcaoFocus(true)}
                                     onBlur={() => setSexoOpcaoFocus(false)}
-                                    onChange={item => {
+                    
+                                    onChange={(item) => {
                                         setSexoOpcao(item.value);
                                         setSexoOpcaoFocus(false);
+                                        setErrors(prevErrors => ({ ...prevErrors, sexoOpcao: undefined })); 
                                     }}
                                     renderLeftIcon={() => (
                                         <AntDesign
@@ -254,8 +345,12 @@ export default function CadastroClie({ navigation }) {
                                             name="Safety"
                                             size={20}
                                         />
+                                
                                     )}
+
                                 />
+                                {errors.sexoOpcao && <Text style={styles.errorTextSe}>{errors.sexoOpcao}</Text>}
+
                             </View>
 
                             <TextInput 
@@ -263,10 +358,19 @@ export default function CadastroClie({ navigation }) {
                                 placeholder="CPF"
                                 placeholderTextColor="#282828"
                                 keyboardType="numeric"
+                                maxLength={11} 
                                 value={cpf}
-                                onChangeText={setCpf}
+                                onChangeText={(text) => {
+                                    setCpf(text);
+                                    if (text.length === 11) {
+                                        const isValidCPF = /^\d{11}$/.test(text);
+                                        if (isValidCPF) {
+                                            setErrors(prevErrors => ({ ...prevErrors, cpf: undefined })); 
+                                        }
+                                    }
+                                }}
                             />
-
+                            {errors.cpf && <Text style={styles.errorText}>{errors.cpf}</Text>}
                                                     
                             <TouchableOpacity 
                                 style={[styles.campos, styles.dataDeNascimento, !dataDeNascimento && { backgroundColor: '#f0f0f0' }]}  
@@ -277,6 +381,9 @@ export default function CadastroClie({ navigation }) {
                                 </Text>
                             </TouchableOpacity>
 
+                            {errors.dataDeNascimento && (
+                               <Text style={styles.errorText}>{errors.dataDeNascimento}</Text>
+                            )}
                             {showDatePicker && (
                                 <DateTimePicker
                                     value={new Date()} 
@@ -287,6 +394,7 @@ export default function CadastroClie({ navigation }) {
                                     minimumDate={new Date(1940, 0, 1)}
                                 />
                             )}
+
                              <TextInput 
                                 style={styles.campos}
                                 placeholder="CEP"
@@ -307,6 +415,7 @@ export default function CadastroClie({ navigation }) {
                                     }
                                 }}
                             />
+                            {errors.cep && <Text style={styles.errorText}>{errors.cep}</Text>}
 
 
                             <View style={styles.dropdownContainer}>
@@ -334,6 +443,8 @@ export default function CadastroClie({ navigation }) {
                                         setBairro('');
                                         const dadosCidades = await buscarCidades(item.value);
                                         setCidades(dadosCidades);
+                                        setErrors(prevErrors => ({ ...prevErrors, estado: undefined })); // Remove o erro ao selecionar
+
                                     }}
                                     renderLeftIcon={() => (
                                         <AntDesign
@@ -344,6 +455,8 @@ export default function CadastroClie({ navigation }) {
                                         />
                                     )}
                                 />
+                                {errors.estado && <Text style={styles.errorTextSe}>{errors.estado}</Text>}
+
                             </View>
 
 
@@ -368,6 +481,7 @@ export default function CadastroClie({ navigation }) {
                                 onChange={(item) => {
                                     setCidadeValue(item.value);
                                     setEndereco('');
+                                    setErrors(prevErrors => ({ ...prevErrors, cidade: undefined })); // Remove o erro ao selecionar
                                     setBairro('');
                                 }}
                                 renderLeftIcon={() => (
@@ -379,6 +493,8 @@ export default function CadastroClie({ navigation }) {
                                     />
                                 )}
                             />
+                             {errors.cidade && <Text style={styles.errorTextSe}>{errors.cidade}</Text>}
+
                         </View>
 
 
@@ -389,6 +505,8 @@ export default function CadastroClie({ navigation }) {
                                 value={bairro}
                                 onChangeText={setBairro}
                             />
+                             {errors.bairro && <Text style={styles.errorText}>{errors.bairro}</Text>}
+
                             <TextInput 
                                 style={styles.campos}
                                 placeholder="Endereço"
@@ -396,6 +514,8 @@ export default function CadastroClie({ navigation }) {
                                 value={endereco}
                                 onChangeText={setEndereco}
                             />
+                            {errors.endereco && <Text style={styles.errorText}>{errors.endereco}</Text>}
+
                             <TextInput 
                                 style={styles.campos}
                                 placeholder="Nº Residencial"
@@ -404,6 +524,7 @@ export default function CadastroClie({ navigation }) {
                                 value={numResidencial.toString()} 
                                 onChangeText={text => setN_Residencial(text ? Number(text) : 0)} 
                             />
+                            {errors.numResidencial && <Text style={styles.errorText}>{errors.numResidencial}</Text>}
 
                             <TextInput 
                                 style={styles.campos}
@@ -414,13 +535,18 @@ export default function CadastroClie({ navigation }) {
                             />
 
                             <View style={styles.inputSenha}>
-                                <TextInput 
+                             <TextInput 
                                     style={styles.camposSenha}
                                     placeholder="Senha"
                                     placeholderTextColor="#282828"
                                     secureTextEntry={viewPass}
                                     value={senha}
-                                onChangeText={setSenha}
+                                    onChangeText={(text) => {
+                                        setSenha(text);
+                                        if (text.trim()) {
+                                            setErrors(prevErrors => ({ ...prevErrors, senha: undefined }));
+                                        }
+                                    }}
                                 />
                                 <Pressable onPress={togglePasswordVisibility} style={styles.iconeOlho}> 
                                     {viewPass ? 
@@ -429,20 +555,27 @@ export default function CadastroClie({ navigation }) {
                                 </Pressable>
                             </View>
                             <View style={styles.inputSenha}>
-                                <TextInput 
+                            <TextInput 
                                     style={styles.camposSenha}
                                     placeholder="Confirmar Senha"
                                     placeholderTextColor="#282828"
                                     secureTextEntry={viewConfirmPass}
                                     value={confSenha}
-                                    onChangeText={setConfSenha}
-                                />
+                                    onChangeText={(text) => {
+                                        setConfSenha(text);
+                                        if (text === senha) {
+                                            setErrors(prevErrors => ({ ...prevErrors, confSenha: undefined })); 
+                                        }
+                                    }}
+                            />
                                 <Pressable onPress={toggleConfirmPasswordVisibility} style={styles.iconeOlho}> 
                                     {viewConfirmPass ? 
                                         (<Icones name="eye-off" size={25} color="#282828" />) :
                                         (<Icones name="eye" size={25} color="#282828" />)}
                                 </Pressable>
                             </View>
+                            {errors.confSenha && <Text style={styles.errorText}>{errors.confSenha}</Text>}
+
                             <TouchableOpacity style={styles.botao} >
                             <Text style={styles.botaoTexto} onPress={handleSubmit}>Cadastrar</Text>
                         </TouchableOpacity>

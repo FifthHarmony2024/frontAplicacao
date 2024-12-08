@@ -132,7 +132,18 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         fontSize: 15,
     },
-    
+    errorText: {
+        color: '#3A3074',
+        fontSize: 12,
+        marginTop: -2,
+        left:4,
+        bottom:5
+    },
+    errorTextSe: {
+        color: '#3A3074',
+        fontSize: 12,
+        left:4,
+    }  
     
    
 });

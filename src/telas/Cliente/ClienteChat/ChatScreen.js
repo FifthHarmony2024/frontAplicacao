@@ -110,7 +110,7 @@ const ChatScreen = ({ route,navigation }) => {
         );
     };
 
-     return (
+    return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack('DetalhesPrestador')}>

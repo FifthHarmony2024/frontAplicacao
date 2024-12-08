@@ -4,15 +4,15 @@ import { Feather, Ionicons, FontAwesome, FontAwesome5 } from '@expo/vector-icons
 
 export default function PesquisaClie({ navigation }) {
   const categorias = [
-    { label: 'Assistência Técnica', icon: { type: FontAwesome, name: 'gears' } },
-    { label: 'Aulas', icon: { type: FontAwesome5, name: 'book' } },
-    { label: 'Eventos', icon: { type: FontAwesome5, name: 'glass-cheers' } },
-    { label: 'Saúde', icon: { type: FontAwesome5, name: 'heart' } },
-    { label: 'Reformas e Reparos', icon: { type: Ionicons, name: 'construct-outline' } },
-    { label: 'Serviços Gerais', icon: { type: FontAwesome5, name: 'briefcase' } },
-    { label: 'Serviços Domésticos', icon: { type: Ionicons, name: 'home' } },
-    { label: 'Transporte', icon: { type: FontAwesome5, name: 'car' } },
-    { label: 'Moda e Beleza', icon: { type: FontAwesome5, name: 'cut' } },
+    { label: 'Assistência Técnica', icon: { type: FontAwesome, name: 'gears' }, idCategoria: 1 },
+    { label: 'Aulas', icon: { type: FontAwesome5, name: 'book' }, idCategoria: 2 },
+    { label: 'Eventos', icon: { type: FontAwesome5, name: 'glass-cheers' }, idCategoria: 5 },
+    { label: 'Saúde', icon: { type: FontAwesome5, name: 'heart' }, idCategoria: 6 },
+    { label: 'Reformas e Reparos', icon: { type: Ionicons, name: 'construct-outline' }, idCategoria: 3 },
+    { label: 'Serviços Gerais', icon: { type: FontAwesome5, name: 'briefcase' }, idCategoria: 7 },
+    { label: 'Serviços Domésticos', icon: { type: Ionicons, name: 'home' }, idCategoria: 4 },
+    { label: 'Transporte', icon: { type: FontAwesome5, name: 'car' }, idCategoria: 8 },
+    { label: 'Moda e Beleza', icon: { type: FontAwesome5, name: 'cut' }, idCategoria: 9 },
   ];
 
   
@@ -30,7 +30,7 @@ export default function PesquisaClie({ navigation }) {
           style={styles.input}
           placeholder="O que você precisa?"
           placeholderTextColor="#999"
-          editable={false} // Não permite edição
+          editable={false} 
         />
         <Ionicons name="options-outline" size={24} color="black" style={styles.iconRight} />
       </TouchableOpacity>
@@ -40,12 +40,16 @@ export default function PesquisaClie({ navigation }) {
       </View>
 
       <ScrollView contentContainerStyle={styles.categoriasContainer}>
-        {categorias.map((categoria, index) => (
-          <TouchableOpacity key={index} style={styles.categoria}>
-            <categoria.icon.type name={categoria.icon.name} size={24} color="#7B68EE" />
-            <Text style={styles.categoriaTexto}>{categoria.label}</Text>
-          </TouchableOpacity>
-        ))}
+            {categorias.map((categoria, index) => (
+        <TouchableOpacity 
+          key={index} 
+          style={styles.categoria} 
+          onPress={() => navigation.navigate('VerTodos', { idCategoria: categoria.idCategoria })} // Enviando o ID da categoria
+        >
+          <categoria.icon.type name={categoria.icon.name} size={24} color="#7B68EE" />
+          <Text style={styles.categoriaTexto}>{categoria.label}</Text>
+        </TouchableOpacity>
+      ))}
       </ScrollView>
     </View>
   );

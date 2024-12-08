@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, TextInput, ScrollView, Modal,Platform} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, TextInput, ScrollView, Modal,Platform,Alert} from "react-native";
 import Icones from 'react-native-vector-icons/Feather'; 
 import Icons from 'react-native-vector-icons/Ionicons';
 import Icom from 'react-native-vector-icons/AntDesign';
@@ -95,8 +95,49 @@ export default function PerfilPrestador({ navigation }) {
         alert("Erro ao enviar imagem.");
     }
 };
+const handleDeleteImage = async (imageId) => {
+    if (!imageId) {
+        console.error("ID da imagem está indefinido. ImagemId recebido:", imageId);
+        alert("Erro ao deletar a imagem. O ID está indefinido.");
+        return;
+    }
 
-                
+    try {
+        const response = await fetch(`${API_CONFIG_URL}postagens/delete/${imageId}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Erro ao deletar imagem: ${errorText}`);
+        }
+
+        alert('Imagem deletada com sucesso!');
+        
+        setCatalogo((prevCatalogo) => prevCatalogo.filter(imagem => imagem.id !== imageId));
+    } catch (error) {
+        console.error("Erro ao deletar imagem:", error);
+        alert("Erro ao deletar a imagem.");
+    }
+};
+
+
+const handleDeleteConfirmation = (id) => {
+    Alert.alert(
+        'Confirmação de Exclusão',
+        'Tem certeza que deseja deletar esta imagem?',
+        [
+            { text: 'Cancelar', style: 'cancel' },
+            { 
+                text: 'Deletar', 
+                onPress: () => handleDeleteImage(id) // 🟢 Aqui chamamos a função correta e passamos o ID
+            },
+        ],
+        { cancelable: true }
+    );
+};
+
+
     const fetchCatalogo = async () => {
         try {
             const storedUserData = await AsyncStorage.getItem('userData');
@@ -335,37 +376,41 @@ export default function PerfilPrestador({ navigation }) {
                         </View>
 
                         <ScrollView 
-                            horizontal 
-                            showsHorizontalScrollIndicator={false} 
-                            contentContainerStyle={styles.catalogImagesContainer}
-                        >   
+                        horizontal 
+                        showsHorizontalScrollIndicator={false} 
+                        contentContainerStyle={styles.catalogImagesContainer}
+                    >   
                         {catalogo.length > 0 ? (
-                            catalogo.map((imagem, index) => {
-                                const imageUri = imagem.url ? `${API_CONFIG_URL}${imagem.url.replace(/\\/g, '/')}` : null;
-                                console.log("Imagem carregada no catálogo:", imageUri);
+    catalogo.map((imagem, index) => {
+        const imageUri = imagem.url ? `${API_CONFIG_URL}${imagem.url.replace(/\\/g, '/')}` : null;
 
-                                return (
-                                    <TouchableOpacity
-                                        key={index}
-                                        onPress={() => setExpandedImage(imageUri)}
-                                    >
-                                        {imageUri ? (
-                                            <Image
-                                                source={{ uri: imageUri }}
-                                                style={styles.catalogImage}
-                                                onError={(error) => console.log("Erro ao carregar imagem:", error)}
-                                            />
-                                        ) : (
-                                            <Text style={styles.infoTextLarge}>Imagem inválida</Text>
-                                        )}
-                                    </TouchableOpacity>
-                                );
-                            })
-                        ) : (
-                            <Text style={styles.infoTextLarge}>Nenhuma imagem no catálogo</Text>
-                        )}
+        return (
+            <View key={index} style={styles.catalogItem}>
+                {imageUri ? (
+                    <Image
+                        source={{ uri: imageUri }}
+                        style={styles.catalogImage}
+                        onError={(error) => console.log("Erro ao carregar imagem:", error)}
+                    />
+                ) : (
+                    <Text style={styles.infoTextLarge}>Imagem inválida</Text>
+                )}
 
-                        </ScrollView>
+                {/* Ícone de deletar */}
+                <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => handleDeleteConfirmation(imagem.id)} // 🟢 Passando o ID correto da imagem
+                >
+                    <Icones name="trash-2" size={25} color="#FF6347" />
+                </TouchableOpacity>
+            </View>
+        );
+    })
+) : (
+    <Text style={styles.infoTextLarge}>Nenhuma imagem no catálogo</Text>
+)}
+
+                    </ScrollView>
 
 
 

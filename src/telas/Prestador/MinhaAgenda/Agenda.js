@@ -89,8 +89,7 @@ export default function Agenda({ navigation }) {
             }
     
             const idUsuario = userData.id;
-            // Formatar para 'yyyy-MM-dd' sem horas, minutos ou UTC
-            const data = new Date(diaFolga).toISOString().split('T')[0];  // '2024-12-13'
+            const data = new Date(diaFolga).toISOString().split('T')[0];  
     
             const response = await axios.post(
                 `${API_CONFIG_URL}agenda/marcar-folga?idUsuario=${idUsuario}&diaServico=${data}`
