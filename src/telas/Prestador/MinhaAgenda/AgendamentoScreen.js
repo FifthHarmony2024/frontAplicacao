@@ -1,212 +1,181 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Platform } from 'react-native';
-import { Ionicons, FontAwesome } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import axios from 'axios';
 
-export default function AgendamentoScreen({ navigation, route }) {
-  const cliente = route.params?.cliente || {
-    nome: "Nome do Cliente",
-    telefone: "(11) xxx-xxxx",
-    email: "*****@****.com",
-    rating: 4.5,
+const AgendamentosScreen = ({ route, navigation }) => {
+  const { idUsuario } = route.params; // Recebe o ID do usuário passado como parâmetro
+
+  // Estados para armazenar os dados do agendamento
+  const [dtAgendamento, setDtAgendamento] = useState('');
+  const [hrAgendamento, setHrAgendamento] = useState('');
+  const [orcamento, setOrcamento] = useState('');
+  const [endereco, setEndereco] = useState('');
+  const [cidade, setCidade] = useState('');
+  const [bairro, setBairro] = useState('');
+  const [numResidencial, setNumResidencial] = useState('');
+  const [nomeCliente, setNomeCliente] = useState('');
+  const [error, setError] = useState(null);
+
+  // Função para formatar a data para o padrão ISO (YYYY-MM-DD)
+  const formatDate = (date) => {
+    const d = new Date(date);
+    return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
   };
 
-  const [data, setData] = useState(null);
-  const [mostrarDatePicker, setMostrarDatePicker] = useState(false);
-  const [horario, setHorario] = useState(null);
-  const [mostrarTimePicker, setMostrarTimePicker] = useState(false);
-  const [orcamento, setOrcamento] = useState("R$ 0,00");
-
-  const onChangeData = (event, selectedDate) => {
-    setMostrarDatePicker(Platform.OS === 'ios');
-    if (selectedDate) {
-      setData(selectedDate);
-    }
+  // Função para formatar o horário para o padrão HH:MM:SS
+  const formatTime = (time) => {
+    const t = new Date(time);
+    return `${t.getHours().toString().padStart(2, '0')}:${t.getMinutes().toString().padStart(2, '0')}:${t.getSeconds().toString().padStart(2, '0')}`;
   };
 
-  const onChangeHorario = (event, selectedTime) => {
-    setMostrarTimePicker(false);
-    if (selectedTime) {
-      const horas = selectedTime.getHours().toString().padStart(2, '0');
-      const minutos = selectedTime.getMinutes().toString().padStart(2, '0');
-      setHorario(`${horas}:${minutos}`);
+  // Função para fazer o agendamento
+  const handleAgendar = async () => {
+    try {
+      const agendamento = {
+        dtAgendamento: formatDate(dtAgendamento), // Formata a data
+        hrAgendamento: formatTime(hrAgendamento), // Formata o horário
+        valorOrcamento: parseFloat(orcamento), // Converte o orçamento para número
+        endereco,
+        cidade,
+        bairro,
+        numResidencial: parseInt(numResidencial), // Converte número do residencial
+        nomeCliente,
+      };
+
+      // Verifica se todos os campos necessários estão preenchidos
+      if (!dtAgendamento || !hrAgendamento || !orcamento || !endereco || !cidade || !bairro || !numResidencial || !nomeCliente) {
+        setError('Por favor, preencha todos os campos.');
+        return;
+      }
+
+      // Requisição para o backend
+      const response = await axios.post(
+        `http://192.168.0.3/agendas/agendar`, // URL do backend
+        agendamento
+      );
+
+      if (response.status === 201) {
+        alert('Agendamento criado com sucesso!');
+        navigation.goBack(); // Volta para a tela anterior após sucesso
+      } else {
+        setError('Erro ao criar agendamento. Tente novamente.');
+      }
+    } catch (error) {
+      setError('Erro ao criar agendamento. Tente novamente.');
     }
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <TouchableOpacity onPress={() => navigation.goBack('ChatDentro')} style={styles.backButton}>
-        <Ionicons name="chevron-back" size={24} color="white" />
-      </TouchableOpacity>
-
-      <Text style={styles.title}>Agendamento</Text>
-
-      <Text style={styles.label}>Data</Text>
-      <TouchableOpacity onPress={() => setMostrarDatePicker(true)}>
-        <TextInput 
-          style={styles.input} 
-          placeholder="dd/mm/aaaa" 
-          value={data ? data.toLocaleDateString('pt-PT') : ""} 
-          editable={false} 
-        />
-      </TouchableOpacity>
-      {mostrarDatePicker && (
-        <DateTimePicker
-          value={data || new Date()} 
-          mode="date"
-          display="default"
-          onChange={onChangeData}
-        />
-      )}
-
-      <Text style={styles.label}>Horário</Text>
-      <TouchableOpacity onPress={() => setMostrarTimePicker(true)}>
-        <TextInput 
-          style={styles.input} 
-          placeholder="hh:mm" 
-          value={horario || ""} 
-          editable={false} 
-        />
-      </TouchableOpacity>
-      {mostrarTimePicker && (
-        <DateTimePicker
-          value={new Date()} 
-          mode="time"
-          display="default"
-          onChange={onChangeHorario}
-        />
-      )}
-
-      <Text style={styles.label}>Local</Text>
-      <TextInput style={styles.input} placeholder="Endereço" />
-
-      <Text style={styles.label}>Orçamento</Text>
-      <TextInput 
-        style={styles.input} 
-        placeholder="R$ 0,00" 
-        value={orcamento}
-        onChangeText={setOrcamento}
-        keyboardType="numeric" 
+    <View style={styles.container}>
+      <Text style={styles.title}>Agendar Serviço</Text>
+      
+      {/* Campo de Data */}
+      <Text>Data do Agendamento:</Text>
+      <TextInput
+        style={styles.input}
+        value={dtAgendamento}
+        onChangeText={setDtAgendamento}
+        placeholder="Selecione a data"
+        keyboardType="default"
+      />
+      
+      {/* Campo de Horário */}
+      <Text>Horário do Agendamento:</Text>
+      <TextInput
+        style={styles.input}
+        value={hrAgendamento}
+        onChangeText={setHrAgendamento}
+        placeholder="Ex: 14:00"
+        keyboardType="default"
       />
 
-      <View style={styles.clientInfo}>
-        <Text style={styles.clientTitle}>Cliente</Text>
-        <View style={styles.clientRow}>
-          <FontAwesome name="user-circle" size={24} color="grey" />
-          <Text style={styles.clientText}>{cliente.nome}</Text>
-          <View style={styles.rating}>
-            {[...Array(Math.floor(cliente.rating))].map((_, i) => (
-              <FontAwesome key={i} name="star" size={14} color="orange" />
-            ))}
-            {cliente.rating % 1 !== 0 && (
-              <FontAwesome name="star-half" size={14} color="orange" />
-            )}
-          </View>
-        </View>
+      {/* Campo de Orçamento */}
+      <Text>Orçamento:</Text>
+      <TextInput
+        style={styles.input}
+        value={orcamento}
+        onChangeText={setOrcamento}
+        placeholder="Valor do Orçamento"
+        keyboardType="numeric"
+      />
 
-        <View style={styles.clientRow}>
-          <Ionicons name="call-outline" size={24} color="grey" />
-          <Text style={styles.clientText}>{cliente.telefone}</Text>
-        </View>
+      {/* Campo de Endereço */}
+      <Text>Endereço:</Text>
+      <TextInput
+        style={styles.input}
+        value={endereco}
+        onChangeText={setEndereco}
+        placeholder="Endereço"
+      />
 
-        <View style={styles.clientRow}>
-          <Ionicons name="mail-outline" size={24} color="grey" />
-          <Text style={styles.clientText}>{cliente.email}</Text>
-        </View>
-      </View>
+      {/* Campo de Cidade */}
+      <Text>Cidade:</Text>
+      <TextInput
+        style={styles.input}
+        value={cidade}
+        onChangeText={setCidade}
+        placeholder="Cidade"
+      />
 
-      <TouchableOpacity
-  style={styles.button}
-  onPress={() => {
-    const agendamentoInfo = {
-      data: data ? data.toLocaleDateString('pt-PT') : "Não definida",
-      horario: horario || "Não definido",
-      local: "Endereço definido pelo usuário",
-      orcamento,
-    };
-    navigation.navigate('ChatPrestador', { agendamento: agendamentoInfo });
-  }}
->
-  <Text style={styles.buttonText}>Enviar para o Cliente</Text>
-</TouchableOpacity>
+      {/* Campo de Bairro */}
+      <Text>Bairro:</Text>
+      <TextInput
+        style={styles.input}
+        value={bairro}
+        onChangeText={setBairro}
+        placeholder="Bairro"
+      />
 
-    </ScrollView>
+      {/* Número Residencial */}
+      <Text>Número Residencial:</Text>
+      <TextInput
+        style={styles.input}
+        value={numResidencial}
+        onChangeText={setNumResidencial}
+        placeholder="Número"
+        keyboardType="numeric"
+      />
+
+      {/* Nome do Cliente */}
+      <Text>Nome do Cliente:</Text>
+      <TextInput
+        style={styles.input}
+        value={nomeCliente}
+        onChangeText={setNomeCliente}
+        placeholder="Nome do Cliente"
+      />
+      
+      {/* Exibe o erro caso haja */}
+      {error && <Text style={styles.errorText}>{error}</Text>}
+      
+      {/* Botão de Agendamento */}
+      <Button title="Agendar" onPress={handleAgendar} />
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
-    paddingHorizontal: 20,
-    marginTop: 55,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    backgroundColor: '#4a3dab',
-    borderRadius: 50,
-    padding: 5,
-    zIndex: 1,
+    padding: 20,
+    justifyContent: 'center',
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#4a3dab',
     textAlign: 'center',
-    marginVertical: 20,
-  },
-  label: {
-    fontSize: 16,
-    color: '#4a3dab',
-    marginTop: 10,
+    marginBottom: 20,
   },
   input: {
-    height: 40,
-    borderColor: '#cccccc',
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginTop: 5,
-    backgroundColor: '#ffffff',
+    borderColor: '#ccc',
+    padding: 10,
+    marginBottom: 20,
+    borderRadius: 5,
   },
-  clientInfo: {
-    marginTop: 20,
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#cccccc',
-  },
-  clientTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#4a3dab',
-    marginBottom: 10,
-  },
-  clientRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 5,
-  },
-  clientText: {
-    fontSize: 16,
-    color: '#666666',
-    marginLeft: 10,
-  },
-  rating: {
-    flexDirection: 'row',
-    marginLeft: 10,
-  },
-  button: {
-    backgroundColor: '#FF8E4E',
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: 'bold',
+  errorText: {
+    color: 'red',
+    marginBottom: 20,
   },
 });
+
+export default AgendamentosScreen;

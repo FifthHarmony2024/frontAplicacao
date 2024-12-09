@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function PerfilPrestador({ navigation }) {
     const [showNotification, setShowNotification] = useState(true);
-    const [userData, setUserData] = useState(null); // State to store user data
+    const [userData, setUserData] = useState(null); 
 
     useEffect(() => {
         async function fetchUserData() {

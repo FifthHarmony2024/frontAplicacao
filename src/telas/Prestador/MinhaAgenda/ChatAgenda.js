@@ -14,7 +14,7 @@ LocaleConfig.locales['pt'] = {
 };
 LocaleConfig.defaultLocale = 'pt';
 
-export default function Agenda({ navigation }) {
+export default function ChatAgenda({ navigation }) {
     const [selectedDay, setSelectedDay] = useState(null);
     const [markedDays, setMarkedDays] = useState({});
     const [modalVisible, setModalVisible] = useState(false);
