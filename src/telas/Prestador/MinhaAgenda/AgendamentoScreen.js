@@ -1,181 +1,160 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const AgendamentosScreen = ({ route, navigation }) => {
-  const { idUsuario } = route.params; // Recebe o ID do usuário passado como parâmetro
+export default function AgendamentoScreen({ navigation, route }) {
+  const { date, status } = route.params || {};
+  const [formData, setFormData] = useState({
+    hrAgendamento: "",
+    dtAgendamento: date || "",
+    valorOrcamento: "",
+    endereco: "",
+    cidade: "",
+    bairro: "",
+    numResidencial: "",
+    nomeCliente: "",
+  });
 
-  // Estados para armazenar os dados do agendamento
-  const [dtAgendamento, setDtAgendamento] = useState('');
-  const [hrAgendamento, setHrAgendamento] = useState('');
-  const [orcamento, setOrcamento] = useState('');
-  const [endereco, setEndereco] = useState('');
-  const [cidade, setCidade] = useState('');
-  const [bairro, setBairro] = useState('');
-  const [numResidencial, setNumResidencial] = useState('');
-  const [nomeCliente, setNomeCliente] = useState('');
-  const [error, setError] = useState(null);
+  useEffect(() => {
+    if (date || status) {
+      setFormData((prev) => ({
+        ...prev,
+        tipoDia: status || "",
+        dtAgendamento: date || "",
+      }));
+    }
+  }, [date, status]);
 
-  // Função para formatar a data para o padrão ISO (YYYY-MM-DD)
-  const formatDate = (date) => {
-    const d = new Date(date);
-    return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
+  const handleInputChange = (key, value) => {
+    setFormData({ ...formData, [key]: value });
   };
 
-  // Função para formatar o horário para o padrão HH:MM:SS
-  const formatTime = (time) => {
-    const t = new Date(time);
-    return `${t.getHours().toString().padStart(2, '0')}:${t.getMinutes().toString().padStart(2, '0')}:${t.getSeconds().toString().padStart(2, '0')}`;
+  const validateForm = () => {
+    const { hrAgendamento, dtAgendamento, valorOrcamento, endereco, cidade, bairro, numResidencial, nomeCliente } = formData;
+    if (!hrAgendamento || !dtAgendamento || !valorOrcamento || !endereco || !cidade || !bairro || !numResidencial || !nomeCliente) {
+      Alert.alert("Erro", "Por favor, preencha todos os campos.");
+      return false;
+    }
+    return true;
   };
 
-  // Função para fazer o agendamento
-  const handleAgendar = async () => {
+  const saveAgendamento = async () => {
+    if (!validateForm()) return;
+
     try {
-      const agendamento = {
-        dtAgendamento: formatDate(dtAgendamento), // Formata a data
-        hrAgendamento: formatTime(hrAgendamento), // Formata o horário
-        valorOrcamento: parseFloat(orcamento), // Converte o orçamento para número
-        endereco,
-        cidade,
-        bairro,
-        numResidencial: parseInt(numResidencial), // Converte número do residencial
-        nomeCliente,
-      };
+      const storedAgendamentos = await AsyncStorage.getItem("agendamentos");
+      const agendamentos = storedAgendamentos ? JSON.parse(storedAgendamentos) : [];
+      agendamentos.push(formData);
 
-      // Verifica se todos os campos necessários estão preenchidos
-      if (!dtAgendamento || !hrAgendamento || !orcamento || !endereco || !cidade || !bairro || !numResidencial || !nomeCliente) {
-        setError('Por favor, preencha todos os campos.');
-        return;
-      }
-
-      // Requisição para o backend
-      const response = await axios.post(
-        `http://192.168.0.3/agendas/agendar`, // URL do backend
-        agendamento
-      );
-
-      if (response.status === 201) {
-        alert('Agendamento criado com sucesso!');
-        navigation.goBack(); // Volta para a tela anterior após sucesso
-      } else {
-        setError('Erro ao criar agendamento. Tente novamente.');
-      }
+      await AsyncStorage.setItem("agendamentos", JSON.stringify(agendamentos));
+      Alert.alert("Sucesso", "Agendamento salvo com sucesso!");
+      navigation.goBack();
     } catch (error) {
-      setError('Erro ao criar agendamento. Tente novamente.');
+      console.error("Erro ao salvar o agendamento:", error);
+      Alert.alert("Erro", "Não foi possível salvar o agendamento.");
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Agendar Serviço</Text>
-      
-      {/* Campo de Data */}
-      <Text>Data do Agendamento:</Text>
-      <TextInput
-        style={styles.input}
-        value={dtAgendamento}
-        onChangeText={setDtAgendamento}
-        placeholder="Selecione a data"
-        keyboardType="default"
-      />
-      
-      {/* Campo de Horário */}
-      <Text>Horário do Agendamento:</Text>
-      <TextInput
-        style={styles.input}
-        value={hrAgendamento}
-        onChangeText={setHrAgendamento}
-        placeholder="Ex: 14:00"
-        keyboardType="default"
-      />
+      <Text style={styles.title}>Novo Agendamento</Text>
 
-      {/* Campo de Orçamento */}
-      <Text>Orçamento:</Text>
-      <TextInput
-        style={styles.input}
-        value={orcamento}
-        onChangeText={setOrcamento}
-        placeholder="Valor do Orçamento"
-        keyboardType="numeric"
-      />
+      <View style={styles.inputGroup}>
+        <TextInput
+          style={styles.input}
+          placeholder="Hora do Agendamento (HH:mm)"
+          value={formData.hrAgendamento}
+          onChangeText={(value) => handleInputChange("hrAgendamento", value)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Data do Agendamento (AAAA-MM-DD)"
+          value={formData.dtAgendamento}
+          onChangeText={(value) => handleInputChange("dtAgendamento", value)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Valor do Orçamento"
+          keyboardType="numeric"
+          value={formData.valorOrcamento}
+          onChangeText={(value) => handleInputChange("valorOrcamento", value)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Endereço"
+          value={formData.endereco}
+          onChangeText={(value) => handleInputChange("endereco", value)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Cidade"
+          value={formData.cidade}
+          onChangeText={(value) => handleInputChange("cidade", value)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Bairro"
+          value={formData.bairro}
+          onChangeText={(value) => handleInputChange("bairro", value)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Número Residencial"
+          keyboardType="numeric"
+          value={formData.numResidencial}
+          onChangeText={(value) => handleInputChange("numResidencial", value)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Nome do Cliente"
+          value={formData.nomeCliente}
+          onChangeText={(value) => handleInputChange("nomeCliente", value)}
+        />
+      </View>
 
-      {/* Campo de Endereço */}
-      <Text>Endereço:</Text>
-      <TextInput
-        style={styles.input}
-        value={endereco}
-        onChangeText={setEndereco}
-        placeholder="Endereço"
-      />
-
-      {/* Campo de Cidade */}
-      <Text>Cidade:</Text>
-      <TextInput
-        style={styles.input}
-        value={cidade}
-        onChangeText={setCidade}
-        placeholder="Cidade"
-      />
-
-      {/* Campo de Bairro */}
-      <Text>Bairro:</Text>
-      <TextInput
-        style={styles.input}
-        value={bairro}
-        onChangeText={setBairro}
-        placeholder="Bairro"
-      />
-
-      {/* Número Residencial */}
-      <Text>Número Residencial:</Text>
-      <TextInput
-        style={styles.input}
-        value={numResidencial}
-        onChangeText={setNumResidencial}
-        placeholder="Número"
-        keyboardType="numeric"
-      />
-
-      {/* Nome do Cliente */}
-      <Text>Nome do Cliente:</Text>
-      <TextInput
-        style={styles.input}
-        value={nomeCliente}
-        onChangeText={setNomeCliente}
-        placeholder="Nome do Cliente"
-      />
-      
-      {/* Exibe o erro caso haja */}
-      {error && <Text style={styles.errorText}>{error}</Text>}
-      
-      {/* Botão de Agendamento */}
-      <Button title="Agendar" onPress={handleAgendar} />
+      <TouchableOpacity style={styles.button} onPress={saveAgendamento}>
+        <Text style={styles.buttonText}>Salvar Agendamento</Text>
+      </TouchableOpacity>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    justifyContent: 'center',
+    backgroundColor: "#F5F5F5",
+    paddingHorizontal: 25,
+    paddingTop: 40,
   },
   title: {
-    fontSize: 24,
-    textAlign: 'center',
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#4E40A2",
     marginBottom: 20,
+    textAlign: "center",
+  },
+  inputGroup: {
+    marginBottom: 30,
   },
   input: {
+    backgroundColor: "#FFFFFF",
+    padding: 14,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
+    borderColor: "#D1D1D1",
     marginBottom: 20,
-    borderRadius: 5,
+    fontSize: 16,
   },
-  errorText: {
-    color: 'red',
-    marginBottom: 20,
+  button: {
+    backgroundColor: "#4E40A2",
+    paddingVertical: 16,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontSize: 18,
   },
 });
-
-export default AgendamentosScreen;

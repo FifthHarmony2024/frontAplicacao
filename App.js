@@ -36,6 +36,7 @@ import VerTodos from './src/telas/Cliente/TelaServicos/VerTodos';
 import ChatScreen from './src/telas/Cliente/ClienteChat/ChatScreen';
 import ChatPrestador from './src/telas/Prestador/PrestadorChat/ChatPrestador';
 import ListaClientesScreen from './src/telas/Prestador/PrestadorChat/ListaClientesScreen';
+import DetalhesAgendamento from './src/telas/Prestador/MeusPedidos/DetalhesAgendamento';
 
 
 const Stack = createStackNavigator();
@@ -166,6 +167,7 @@ export default function App() {
         <Stack.Screen name="ListaClientes" component={ListaClientesScreen} options={{ headerShown: false}} />
         <Stack.Screen name="ChatPrestador" component={ChatPrestador} options={{ headerShown: false}} />
         <Stack.Screen name="ChatAgenda" component={ChatAgenda} options={{ headerShown: false}} />
+        <Stack.Screen name="DetalhesAgendamento" component={DetalhesAgendamento} options={{ headerShown: false}} />
 
         
       </Stack.Navigator>

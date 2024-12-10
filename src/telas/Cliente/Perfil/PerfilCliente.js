@@ -155,7 +155,7 @@ export default function PerfilCliente({ navigation }) {
           <TouchableOpacity>
             <Text style={styles.link}>Trocar senha</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('EntrarLoginCliente')}>
+          <TouchableOpacity onPress={() => navigation.navigate('Inicio')}>
             <Text style={[styles.link, styles.red]}>Sair</Text>
           </TouchableOpacity>
           <TouchableOpacity>

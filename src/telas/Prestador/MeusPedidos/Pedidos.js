@@ -7,7 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function PerfilPrestador({ navigation }) {
     const [showNotification, setShowNotification] = useState(true);
-    const [userData, setUserData] = useState(null); 
+    const [userData, setUserData] = useState(null);
+    const [agendamentos, setAgendamentos] = useState([]);
 
     useEffect(() => {
         async function fetchUserData() {
@@ -24,7 +25,19 @@ export default function PerfilPrestador({ navigation }) {
             }
         }
 
+        async function fetchAgendamentos() {
+            try {
+                const storedAgendamentos = await AsyncStorage.getItem('agendamentos');
+                if (storedAgendamentos) {
+                    setAgendamentos(JSON.parse(storedAgendamentos));
+                }
+            } catch (error) {
+                console.error('Erro ao recuperar os agendamentos:', error);
+            }
+        }
+
         fetchUserData();
+        fetchAgendamentos();
     }, []);
 
     const handleNavigateToListaClientes = () => {
@@ -72,9 +85,19 @@ export default function PerfilPrestador({ navigation }) {
                     </View>
                 )}
 
-                {/* Conteúdo que será rolado */}
+                {/* Content: Agendamentos List */}
                 <View style={styles.content}>
-                    {/* Para adicionar os pedidos ou outro conteúdo rolável */}
+                    {agendamentos.length > 0 ? (
+                        agendamentos.map((item, index) => (
+                            <TouchableOpacity key={index} style={styles.agendamentoCard} onPress={() => navigation.navigate('Agendamento', { date: item.dtAgendamento })}>
+                                <Text style={styles.agendamentoTitle}>{item.nomeCliente}</Text>
+                                <Text style={styles.agendamentoText}>Hora: {item.hrAgendamento}</Text>
+                                <Text style={styles.agendamentoText}>Endereço: {item.endereco}</Text>
+                            </TouchableOpacity>
+                        ))
+                    ) : (
+                        <Text style={styles.noAgendamentosText}>Nenhum agendamento encontrado.</Text>
+                    )}
                 </View>
             </ScrollView>
 
@@ -153,6 +176,31 @@ const styles = StyleSheet.create({
     },
     content: {
         padding: 20,
+    },
+    agendamentoCard: {
+        backgroundColor: "#fff",
+        padding: 15,
+        marginBottom: 10,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: "#ddd",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+    },
+    agendamentoTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+    },
+    agendamentoText: {
+        fontSize: 14,
+        color: "#555",
+    },
+    noAgendamentosText: {
+        fontSize: 16,
+        textAlign: 'center',
+        color: "#888",
     },
     chatContainer: {
         position: 'absolute', 

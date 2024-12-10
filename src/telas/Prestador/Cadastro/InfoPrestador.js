@@ -68,7 +68,7 @@ export default function InfoPrestador({route, navigation }) {
                 },
             });
             console.log('Cadastro realizado com sucesso:', response.data);
-            navigation.navigate('ConfirPrestador');
+            navigation.navigate('TermoPrestador');
         } catch (error) {
             console.error('Erro ao cadastrar:', error.message);
             alert('Erro ao cadastrar: ' + (error.response?.data?.message || error.message));

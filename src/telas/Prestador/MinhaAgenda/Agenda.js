@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Modal, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from "react-native";
 import Icones from "react-native-vector-icons/Feather";
 import { Calendar, LocaleConfig } from "react-native-calendars";
-import NotIcone from "react-native-vector-icons/MaterialCommunityIcons";
-import Icons from "react-native-vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
-import { format } from "date-fns";
-import API_CONFIG_URL from "../../../Validacoes/ipConfig"; // Ajuste o caminho do seu arquivo de configuração
 
 LocaleConfig.locales["pt"] = {
   monthNames: [
     "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
   ],
   monthNamesShort: [
-    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez",
   ],
   dayNames: [
-    "Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"
+    "Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado",
   ],
   dayNamesShort: ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"],
   today: "Hoje",
@@ -26,107 +27,85 @@ LocaleConfig.locales["pt"] = {
 LocaleConfig.defaultLocale = "pt";
 
 export default function Agenda({ navigation }) {
-  const [selectedDay, setSelectedDay] = useState(null);
   const [markedDays, setMarkedDays] = useState({});
-  const [showNotification, setShowNotification] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [userData, setUserData] = useState(null);
+  const [selectedDay, setSelectedDay] = useState(null);
   const [agendamentos, setAgendamentos] = useState([]);
+  const [showNotification, setShowNotification] = useState(true);
 
   useEffect(() => {
-    async function fetchUserData() {
-        try {
-            const data = await AsyncStorage.getItem('userData');
-            if (data) {
-                setUserData(JSON.parse(data));
-            } else {
-                Alert.alert('Erro', 'Não foi possível carregar os dados do usuário.');
+    const loadData = async () => {
+      try {
+        const storedDays = await AsyncStorage.getItem("markedDays");
+        const storedAgendamentos = await AsyncStorage.getItem("agendamentos");
+
+        if (storedDays) {
+          setMarkedDays(JSON.parse(storedDays));
+        }
+        if (storedAgendamentos) {
+          setAgendamentos(JSON.parse(storedAgendamentos));
+        }
+      } catch (error) {
+        console.error("Erro ao carregar os dados:", error);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const saveMarkedDays = async (newMarkedDays) => {
+    setMarkedDays(newMarkedDays);
+    await AsyncStorage.setItem("markedDays", JSON.stringify(newMarkedDays));
+  };
+
+  const saveAgendamentos = async (newAgendamentos) => {
+    setAgendamentos(newAgendamentos);
+    await AsyncStorage.setItem("agendamentos", JSON.stringify(newAgendamentos));
+  };
+  const handleDayPress = (day) => {
+    const date = day.dateString;
+    setSelectedDay(date);
+  
+    const dayAgendamentos = agendamentos.filter((item) => item.dtAgendamento === date);
+  
+    Alert.alert(
+      "Marcar Dia",
+      `O que deseja marcar para o dia ${date}?`,
+      [
+        {
+          text: "Folga",
+          onPress: () => {
+            if (dayAgendamentos.length > 0) {
+              Alert.alert("Erro", "Não é possível marcar folga em um dia com serviços agendados.");
+              return;
             }
-        } catch (error) {
-            console.error('Erro ao recuperar os dados do usuário:', error);
-            Alert.alert('Erro', 'Ocorreu um erro ao carregar os dados do usuário.');
-        }
-    }
-
-    fetchUserData();
-}, []);
-  // Função para buscar os agendamentos do usuário
-  const fetchAgendamentos = async (idUsuario) => {
-    try {
-      const response = await axios.get(`${API_CONFIG_URL}/agendas/agendamentos/${idUsuario}`);
-      if (response.status === 200) {
-        const agendamentos = response.data;
-        setAgendamentos(agendamentos);
-        
-        const marked = {};
-        agendamentos.forEach(agendamento => {
-          const date = format(new Date(agendamento.data), 'yyyy-MM-dd');
-          marked[date] = { marked: true, dotColor: 'blue' }; 
-        });
-        setMarkedDays(marked);
-      }
-    } catch (error) {
-      console.error("Erro ao carregar agendamentos:", error);
-      Alert.alert("Erro", "Não foi possível carregar os agendamentos.");
-    }
+  
+            const newMarkedDays = {
+              ...markedDays,
+              [date]: { selected: true, marked: true, dotColor: "orange" },
+            };
+            saveMarkedDays(newMarkedDays);
+          },
+        },
+        {
+          text: "Serviço",
+          onPress: () => {
+            navigation.navigate("Agendamento", {
+              date,
+              onSave: (newMarkedDays) => {
+                // Atualiza as marcações no calendário ao salvar o agendamento
+                setMarkedDays(newMarkedDays);
+                saveMarkedDays(newMarkedDays);
+              },
+            });
+          },
+        },
+        { text: "Cancelar", style: "cancel" },
+      ]
+    );
   };
-
-  // Função chamada ao selecionar um dia no calendário
-  const marcarDia = (day) => {
-    setSelectedDay(day); // Salvar o dia selecionado
-    setModalVisible(true); // Abrir o modal com opções
-  };
-
-  // Função para marcar o dia como "Trabalho"
-  const handleMarcarTrabalho = async () => {
-    if (selectedDay) {
-      const agendamento = {
-        usuarioId: userData.id,
-        data: selectedDay.dateString,
-        tipo: 'Trabalho',
-      };
-
-      try {
-        const response = await axios.post(`${API_CONFIG_URL}/agendas/agendar`, agendamento);
-        if (response.status === 201) {
-          Alert.alert("Sucesso", "Agendamento realizado com sucesso.");
-          fetchAgendamentos(userData.id); // Recarregar os agendamentos
-          setModalVisible(false); // Fechar o modal
-        } else {
-          Alert.alert("Erro", "Não foi possível agendar.");
-        }
-      } catch (error) {
-        console.error("Erro ao agendar:", error);
-        Alert.alert("Erro", "Ocorreu um erro ao agendar.");
-      }
-    }
-  };
-
-  // Função para marcar o dia como "Folga"
-  const handleMarcarFolga = async () => {
-    if (selectedDay) {
-      const agendamento = {
-        usuarioId: userData.id,
-        data: selectedDay.dateString,
-        tipo: 'Folga',
-      };
-
-      try {
-        const response = await axios.post(`${API_CONFIG_URL}/agendas/agendar`, agendamento);
-        if (response.status === 201) {
-          Alert.alert("Sucesso", "Folga marcada com sucesso.");
-          fetchAgendamentos(userData.id); // Recarregar os agendamentos
-          setModalVisible(false); // Fechar o modal
-        } else {
-          Alert.alert("Erro", "Não foi possível agendar.");
-        }
-      } catch (error) {
-        console.error("Erro ao agendar:", error);
-        Alert.alert("Erro", "Ocorreu um erro ao marcar folga.");
-      }
-    }
-  };
-
+  
+  
+  
   return (
     <View style={styles.container}>
       <View style={styles.topBar}>
@@ -134,7 +113,7 @@ export default function Agenda({ navigation }) {
           <Icones name="menu" size={30} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("Notificações")}>
-          <Icones style={styles.notificacao} name="bell" size={28} color="#fff" />
+          <Icones name="bell" size={28} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -153,54 +132,51 @@ export default function Agenda({ navigation }) {
 
       {showNotification && (
         <View style={styles.notification}>
-          <NotIcone name="information-outline" size={25} color="black" />
+          <Icones name="info" size={25} color="black" />
           <Text style={styles.notificationText}>
             Abaixo, você encontra a sua agenda com os dias em que terá serviço, além da opção de marcar os seus dias de folga e os dias trabalhados.
           </Text>
           <TouchableOpacity onPress={() => setShowNotification(false)}>
-            <Icons name="close" size={20} color="#000" />
+            <Icones name="x" size={20} color="#000" />
           </TouchableOpacity>
         </View>
       )}
 
       <View style={styles.calendarContainer}>
         <Calendar
-          onDayPress={marcarDia}
+          onDayPress={handleDayPress}
           markedDates={markedDays}
           minDate={new Date().toISOString().split("T")[0]}
           theme={{
-            backgroundColor: "#F5F5F5",
-            calendarBackground: "#F5F5F5",
             todayTextColor: "#FE914E",
             arrowColor: "#4E40A2",
             monthTextColor: "#4E40A2",
             textMonthFontWeight: "bold",
           }}
+          style={styles.calendar}
         />
       </View>
 
-      {/* Modal para opções */}
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Selecione uma opção</Text>
-            <TouchableOpacity onPress={handleMarcarTrabalho}>
-              <Text style={styles.modalOption}>Marcar como Dia de Trabalho</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleMarcarFolga}>
-              <Text style={styles.modalOption}>Marcar como Dia de Folga</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <Text style={styles.modalCancel}>Cancelar</Text>
-            </TouchableOpacity>
-          </View>
+      {selectedDay && (
+        <View style={styles.statusContainer}>
+          <Text style={styles.statusText}>Dia Selecionado: {selectedDay}</Text>
+          {agendamentos
+            .filter((item) => item.dtAgendamento === selectedDay)
+            .map((item, index) => (
+              <View key={index} style={styles.agendamentoContainer}>
+                <Text style={styles.agendamentoText}>
+                  Cliente: {item.nomeCliente}
+                </Text>
+                <Text style={styles.agendamentoText}>
+                  Horário: {item.hrAgendamento}
+                </Text>
+                <Text style={styles.agendamentoText}>
+                  Endereço: {item.endereco}
+                </Text>
+              </View>
+            ))}
         </View>
-      </Modal>
+      )}
     </View>
   );
 }
@@ -218,10 +194,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 15,
     paddingTop: 60,
-  },
-  notificacao: {
-    marginRight: 10,
-    paddingTop: 12,
   },
   navbar: {
     flexDirection: "row",
@@ -254,9 +226,27 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    marginHorizontal: 20, 
+    marginVertical: 10, // Aumentei a margem superior e inferior
+  },
+  statusContainer: {
+    padding: 20,
+    backgroundColor: "#FFF",
+    margin: 20,
+    borderRadius: 10,
+    elevation: 3,
+  },
+  statusText: {
+    fontSize: 16,
     marginBottom: 10,
-    height: 500,
-    marginTop: -20,
+    textAlign: "center",
+  },
+  agendamentoContainer: {
+    marginVertical: 5,
+  },
+  agendamentoText: {
+    fontSize: 14,
+    color: "#333",
   },
   notification: {
     backgroundColor: "#EEEEEE",
@@ -274,32 +264,11 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 10,
   },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalContainer: {
-    backgroundColor: "white",
+  calendar: {
+    width: 380,
+    height: 380, 
     borderRadius: 10,
-    padding: 20,
-    width: "80%",
-    alignItems: "center",
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  modalOption: {
-    fontSize: 18,
-    marginVertical: 10,
-    color: "#4E40A2",
-  },
-  modalCancel: {
-    fontSize: 16,
-    color: "#FE914E",
-    marginTop: 20,
+    overflow: "hidden",
+    elevation: 3,
   },
 });

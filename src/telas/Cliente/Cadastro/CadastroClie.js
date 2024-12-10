@@ -182,7 +182,7 @@ export default function CadastroClie({ navigation }) {
             });
 
             console.log('Cadastro realizado com sucesso:', response.data);
-            navigation.navigate('ConfiClie');
+            navigation.navigate('TermoCliente');
         } catch (error) {
             if (error.response && error.response.status === 409) {
                 alert('Erro de Conflito: ' + error.response.data); 

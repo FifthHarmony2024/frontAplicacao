@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, StyleSheet, View, TouchableOpacity, Switch, Alert } from "react-native";
+import { Text, StyleSheet, View, TouchableOpacity, Switch, Alert, Linking } from "react-native";
 import { AntDesign } from '@expo/vector-icons';
 
 export default function TermoUsoCliente({ navigation }) {
@@ -16,12 +16,19 @@ export default function TermoUsoCliente({ navigation }) {
     if (!isEnabled) {
       setMessageVisible(true);
     } else {
-      Alert.alert("Obrigado", "Você aceitou os termos de uso.");
+      navigation.navigate('EntrarLoginCliente'); 
     }
   };
 
   const handleDecline = () => {
     setMessageVisible(true); 
+  };
+
+  const openTermsLink = () => {
+    const url = "https://docs.google.com/document/d/1ftAaFekaiptRFh6tzaqenGgGqMlQbI5Tynxl8e4fTI0/edit?tab=t.0";
+    Linking.openURL(url).catch(err =>
+      console.error("Não foi possível abrir o link:", err)
+    );
   };
 
   return (
@@ -44,8 +51,11 @@ export default function TermoUsoCliente({ navigation }) {
 
       <View style={styles.fundo}>
         <Text style={styles.textoPrincipal}>
-          Para continuar utilizando o aplicativo é necessário ler e aceitar nossos{' '}
-          <Text style={styles.texto}>termos de uso</Text>.
+          Para continuar utilizando o aplicativo é necessário ler e aceitar nossos termos de uso.
+        </Text>
+
+        <Text style={styles.link} onPress={openTermsLink}>
+          Visualizar Termos de Uso
         </Text>
 
         <View style={styles.switchContainer}>
@@ -91,7 +101,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     color: '#FFFFFF',
     marginBottom: 60,
-    marginTop: 5
+    marginTop: 5,
   },
   fundo: {
     backgroundColor: '#F0EBE0',
@@ -172,12 +182,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#000000',
     marginBottom: 10,
-    textAlign: 'left',
+    textAlign: 'center',
   },
-  texto: {
+  link: {
     fontSize: 16,
     color: '#4E40A2',
     fontWeight: 'bold',
+    textDecorationLine: 'underline',
+    textAlign: 'center',
+    marginVertical: 10,
   },
   switchContainer: {
     flexDirection: 'row',
@@ -192,9 +205,9 @@ const styles = StyleSheet.create({
   },
   errorMessage: {
     color: '#FFFFFF',
-    width:'85%',
+    width: '85%',
     marginTop: 10,
     fontSize: 14,
-    textAlign: 'left',
+    textAlign: 'center',
   },
 });

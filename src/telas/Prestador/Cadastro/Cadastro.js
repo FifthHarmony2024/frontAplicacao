@@ -28,7 +28,8 @@ export default function Cadastro({ navigation }) {
     const [endereco, setEndereco] = useState('');
     const [numResidencial, setNumResidencial] = useState('');
     const [complementoResi, setComplementoResi] = useState('');
-    
+    const [errors, setErrors] = useState({});
+
     const [estados, setEstados] = useState([]);
     const [cidades, setCidades] = useState([]);
     const [estadoValue, setEstadoValue] = useState(null);
@@ -60,8 +61,44 @@ export default function Cadastro({ navigation }) {
         if (event.type === 'set' && selectedDate) {
         const formattedDate = selectedDate.toISOString().split('T')[0];
         setDataDeNascimento(formattedDate);
+        setErrors((prevErrors) => ({ ...prevErrors, dataDeNascimento: undefined }));
+
     }
     };
+    const formatarTelefone = (text) => {
+        const numeroLimpo = text.replace(/\D/g, '');
+    
+        let telefoneFormatado = numeroLimpo;
+    
+        if (numeroLimpo.length > 2) {
+          telefoneFormatado = `(${numeroLimpo.slice(0, 2)}) ${numeroLimpo.slice(2)}`;
+        }
+        if (numeroLimpo.length > 7) {
+          telefoneFormatado = `(${numeroLimpo.slice(0, 2)}) ${numeroLimpo.slice(2, 7)}-${numeroLimpo.slice(7, 11)}`;
+        }
+    
+        if (telefoneFormatado.length > 15) {
+          telefoneFormatado = telefoneFormatado.slice(0, 15);
+        }
+    
+        setTelefone(telefoneFormatado);
+      };
+    
+      const validarTelefone = () => {
+        const regexTelefone = /^\(\d{2}\) \d{5}-\d{4}$/;
+    
+        if (!regexTelefone.test(telefone)) {
+          setErrors((prevErrors) => ({
+            ...prevErrors,
+            telefone: 'O telefone deve estar no formato (DD) 99999-9999',
+          }));
+        } else {
+          setErrors((prevErrors) => ({
+            ...prevErrors,
+            telefone: null, 
+          }));
+        }
+      };
     
     const togglePasswordVisibility = () => {
         setViewPass(!viewPass);
@@ -70,6 +107,38 @@ export default function Cadastro({ navigation }) {
     const toggleConfirmPasswordVisibility = () => {
         setViewConfirmPass(!viewConfirmPass);
     };
+
+    const validateFields = () => {
+        let validationErrors = {};
+        
+        if (!nome.trim()) validationErrors.nome = 'O campo Nome é obrigatório.';
+        if (!sobrenome.trim()) validationErrors.sobrenome = 'O campo Sobrenome é obrigatório.';
+        if (!emailLogin.trim() || !/\S+@\S+\.\S+/.test(emailLogin)) validationErrors.emailLogin = 'E-mail inválido.';
+        if (!telefone.trim()) validationErrors.telefone = 'O campo Telefone é obrigatório.';
+        if (!dataDeNascimento) {
+            validationErrors.dataDeNascimento = 'A data de nascimento é obrigatória.';
+        }        
+        if (!senha.trim()) validationErrors.senha = 'A senha é obrigatória.';
+        if (senha !== confSenha) validationErrors.confSenha = 'As senhas não coincidem.';
+        if (!cep.trim() || cep.length !== 8) validationErrors.cep = 'CEP inválido.';
+        if (!estadoValue) {
+            validationErrors.estado = 'O campo Gênero é obrigatório.';
+        }        
+        if (!cidadeValue) validationErrors.cidade = 'O campo Cidade é obrigatório.';
+        if (!endereco.trim()) validationErrors.endereco = 'O campo Endereço é obrigatório.';
+        if (!bairro.trim()) validationErrors.bairro = 'O campo Bairro é obrigatório.';
+        if (!numResidencial) validationErrors.numResidencial = 'Número residencial é obrigatório.';
+        if (!sexoOpcaoValue) {
+            validationErrors.sexoOpcao = 'O campo Gênero é obrigatório.';
+        }
+      
+        setErrors(validationErrors);
+        return Object.keys(validationErrors).length === 0;
+
+       
+    };
+
+
     const handleSubmit = async () => {
         let userData = {
             nome,
@@ -177,31 +246,43 @@ export default function Cadastro({ navigation }) {
                                 placeholder="Nome"
                                 placeholderTextColor="#282828"
                                 value={nome}
-                                onChangeText={setNome}
-                            />
+                                onChangeText={(text) => {
+                                    setNome(text); 
+                                    setErrors(prevErrors => ({ ...prevErrors, nome: undefined }));
+                                }}                            />
+                            {errors.nome && <Text style={styles.errorText}>{errors.nome}</Text>}
+
                             <TextInput
                                 style={styles.campos}
                                 placeholder="Sobrenome"
                                 placeholderTextColor="#282828"
                                 value={sobrenome}
-                                onChangeText={setSobrenome}
-                            />
+                                onChangeText={(text) => {
+                                    setSobrenome(text);
+                                    setErrors(prevErrors => ({ ...prevErrors, sobrenome: undefined }));
+                                }}                            />
+                            {errors.sobrenome && <Text style={styles.errorText}>{errors.sobrenome}</Text>}
+
                             <TextInput
                                 style={styles.campos}
                                 placeholder="E-mail"
                                 placeholderTextColor="#282828"
                                 value={emailLogin}
-                                onChangeText={setEmailLogin}
-                            />
-                            <TextInput
+                                onChangeText={(text) => {
+                                    setEmailLogin(text); 
+                                    setErrors(prevErrors => ({ ...prevErrors, emailLogin: undefined }));
+                                }}                            />
+                            {errors.emailLogin && <Text style={styles.errorText}>{errors.emailLogin}</Text>}
+
+                            <TextInput 
                                 style={styles.campos}
-                                placeholder="Telefone"
+                                placeholder="(DD) 99999-9999"
                                 placeholderTextColor="#282828"
                                 keyboardType="numeric"
                                 value={telefone}
-                                onChangeText={setTelefone}
+                                onChangeText={formatarTelefone}
+                                onBlur={validarTelefone} 
                             />
-
                             <TouchableOpacity 
                                 style={[styles.campos, styles.dataDeNascimento, !dataDeNascimento && { backgroundColor: '#f0f0f0' }]}  
                                 onPress={() => setShowDatePicker(true)}
